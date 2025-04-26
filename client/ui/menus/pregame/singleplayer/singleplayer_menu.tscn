@@ -1,6 +1,6 @@
 [gd_scene load_steps=9 format=3 uid="uid://dukh8gnwwqll6"]
 
-[ext_resource type="Script" uid="uid://c6ppfw0x1m2y" path="res://client/ui/menus/pregame/SingleplayerMenu.cs" id="1_qkwbe"]
+[ext_resource type="Script" uid="uid://c6ppfw0x1m2y" path="res://client/ui/menus/pregame/singleplayer/SingleplayerMenu.cs" id="1_qkwbe"]
 [ext_resource type="Texture2D" uid="uid://dcaf4ygdvskhv" path="res://client/ui/menus/background.png" id="2_i0kf1"]
 [ext_resource type="Shader" uid="uid://d1hi66rm126v2" path="res://client/ui/common/background_blur_shader.gdshader" id="3_y8wov"]
 [ext_resource type="PackedScene" uid="uid://brewcawnrqh1y" path="res://client/ui/common/list_vbox_container.tscn" id="4_j6k41"]

@@ -6,10 +6,7 @@ uniform vec4 color_over : source_color;
 uniform sampler2D SCREEN_TEXTURE_MIPMAP: hint_screen_texture, filter_linear_mipmap;
 
 void fragment() {
-
-	if (COLOR.a <= 0.01) {
-		vec4 blurred = textureLod(SCREEN_TEXTURE_MIPMAP, SCREEN_UV, blur_amount);
-		vec4 fin = mix(blurred, color_over, mix_amount);
-		COLOR = fin;
-	}
+	vec4 blurred = textureLod(SCREEN_TEXTURE_MIPMAP, SCREEN_UV, blur_amount);
+	vec4 fin = mix(blurred, color_over, mix_amount);
+	COLOR = fin;
 }

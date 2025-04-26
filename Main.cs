@@ -17,11 +17,11 @@ public partial class Main : Node {
 
     // Initialize Steam
     var result = Steam.SteamInitEx(false);
-
     GD.Print($"Steam init result: {result.Verbal}");
   }
   public override void _Process(double delta) {
     DebugUI();
+    Steam.RunCallbacks();
   }
   #endregion
 

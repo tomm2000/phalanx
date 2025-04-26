@@ -8,7 +8,7 @@
 [ext_resource type="FontFile" uid="uid://d2okuqqg1gogx" path="res://client/ui/common/fonts/OpenSans-VariableFont_wdth,wght.ttf" id="4_an7u6"]
 [ext_resource type="Texture2D" uid="uid://u5dg3yxblca5" path="res://client/ui/menus/pregame/Phalanx.png" id="5_y45rc"]
 [ext_resource type="PackedScene" uid="uid://rdhk223fvvon" path="res://client/ui/common/filler.tscn" id="6_tr1vk"]
-[ext_resource type="Theme" uid="uid://guyqcrq35q6u" path="res://client/ui/common/standard_theme.tres" id="7_an7u6"]
+[ext_resource type="PackedScene" uid="uid://bwqtr45lx05f" path="res://client/ui/common/standard_button.tscn" id="9_o23kc"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_7rnj1"]
 shader = ExtResource("2_v8xm2")
@@ -203,6 +203,7 @@ layout_mode = 2
 
 [node name="ListVboxContainer" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer" instance=ExtResource("4_7ylq8")]
 layout_mode = 2
+size_flags_horizontal = 3
 mouse_filter = 1
 
 [node name="VBoxContainer" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer" index="0"]
@@ -211,62 +212,66 @@ theme_override_constants/separation = 15
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="0"]
 custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
-size_flags_horizontal = 0
+theme_override_constants/separation = 20
 
-[node name="SingleplayerButton" type="Button" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/HBoxContainer"]
+[node name="SingleplayerButton" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/HBoxContainer" instance=ExtResource("9_o23kc")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
-mouse_default_cursor_shape = 2
-theme = ExtResource("7_an7u6")
-theme_override_font_sizes/font_size = 25
+size_flags_horizontal = 3
+mouse_default_cursor_shape = 8
+disabled = true
 text = "Singleplayer"
 alignment = 0
+
+[node name="Filler" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/HBoxContainer" instance=ExtResource("6_tr1vk")]
+layout_mode = 2
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="1"]
 custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
-size_flags_horizontal = 0
+theme_override_constants/separation = 20
 
-[node name="MultiplayerButton" type="Button" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/HBoxContainer2"]
+[node name="MultiplayerButton" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/HBoxContainer2" instance=ExtResource("9_o23kc")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
-mouse_default_cursor_shape = 2
-theme = ExtResource("7_an7u6")
-theme_override_font_sizes/font_size = 25
+size_flags_horizontal = 3
 text = "Multiplayer"
 alignment = 0
+
+[node name="Filler" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/HBoxContainer2" instance=ExtResource("6_tr1vk")]
+layout_mode = 2
 
 [node name="HBoxContainer4" type="HBoxContainer" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="2"]
 custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
-size_flags_horizontal = 0
+theme_override_constants/separation = 20
 
-[node name="SettingsButton" type="Button" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/HBoxContainer4"]
+[node name="SettingsButton" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/HBoxContainer4" instance=ExtResource("9_o23kc")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
-mouse_default_cursor_shape = 2
-theme = ExtResource("7_an7u6")
-theme_override_font_sizes/font_size = 25
+size_flags_horizontal = 3
+mouse_default_cursor_shape = 8
+disabled = true
 text = "Settings"
 alignment = 0
+
+[node name="Filler" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/HBoxContainer4" instance=ExtResource("6_tr1vk")]
+layout_mode = 2
 
 [node name="HBoxContainer5" type="HBoxContainer" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="3"]
 custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
-size_flags_horizontal = 0
+theme_override_constants/separation = 20
 
-[node name="QuitButton" type="Button" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/HBoxContainer5"]
+[node name="QuitButton" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/HBoxContainer5" instance=ExtResource("9_o23kc")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
-mouse_default_cursor_shape = 2
-theme = ExtResource("7_an7u6")
-theme_override_font_sizes/font_size = 25
-text = "Quit"
+size_flags_horizontal = 3
+text = "Quit Game"
 alignment = 0
+
+[node name="Filler" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/HBoxContainer5" instance=ExtResource("6_tr1vk")]
+layout_mode = 2
 
 [node name="Filler2" parent="VBoxContainer2/PanelContainer2/VBoxContainer" instance=ExtResource("6_tr1vk")]
 custom_minimum_size = Vector2(0, 30)

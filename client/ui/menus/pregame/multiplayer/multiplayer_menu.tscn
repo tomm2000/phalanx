@@ -1,0 +1,140 @@
+[gd_scene load_steps=10 format=3 uid="uid://c1smqhppasnum"]
+
+[ext_resource type="Script" uid="uid://cnr252ap5lii8" path="res://client/ui/menus/pregame/multiplayer/MultiplayerMenu.cs" id="1_oq5lk"]
+[ext_resource type="Texture2D" uid="uid://dcaf4ygdvskhv" path="res://client/ui/menus/background.png" id="2_qognv"]
+[ext_resource type="Shader" uid="uid://d1hi66rm126v2" path="res://client/ui/common/background_blur_shader.gdshader" id="3_u4gmw"]
+[ext_resource type="PackedScene" uid="uid://brewcawnrqh1y" path="res://client/ui/common/list_vbox_container.tscn" id="4_qvhqo"]
+[ext_resource type="PackedScene" uid="uid://rdhk223fvvon" path="res://client/ui/common/filler.tscn" id="5_3gtyj"]
+[ext_resource type="PackedScene" uid="uid://bwqtr45lx05f" path="res://client/ui/common/standard_button.tscn" id="6_7am2l"]
+[ext_resource type="PackedScene" uid="uid://dovsgcmg1br1o" path="res://client/ui/common/standard_text_input.tscn" id="7_csygq"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_qvhqo"]
+shader = ExtResource("3_u4gmw")
+shader_parameter/blur_amount = 1.712
+shader_parameter/mix_amount = 0.695
+shader_parameter/color_over = Color(0.0941176, 0.117647, 0.14902, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_qvhqo"]
+font_size = 30
+
+[node name="MultiplayerMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_oq5lk")
+metadata/_edit_lock_ = true
+
+[node name="BoxContainer" type="BoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -382.0
+offset_top = -149.0
+offset_right = 383.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+metadata/_edit_lock_ = true
+
+[node name="TextureRect" type="TextureRect" parent="BoxContainer"]
+layout_mode = 2
+texture = ExtResource("2_qognv")
+expand_mode = 3
+metadata/_edit_lock_ = true
+
+[node name="Panel" type="Panel" parent="."]
+material = SubResource("ShaderMaterial_qvhqo")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_lock_ = true
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 40
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Multiplayer"
+label_settings = SubResource("LabelSettings_qvhqo")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ListVboxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer" instance=ExtResource("4_qvhqo")]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+
+[node name="CreateSteamLobbyButton" parent="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="0" instance=ExtResource("6_7am2l")]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Create steam Lobby"
+
+[node name="Filler" parent="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="1" instance=ExtResource("5_3gtyj")]
+layout_mode = 2
+
+[node name="CreateIpLobbyInput" parent="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="2" instance=ExtResource("7_csygq")]
+unique_name_in_owner = true
+layout_mode = 2
+text = "7777"
+placeholder_text = "port"
+alignment = 1
+max_length = 5
+
+[node name="CreateIpLobbyButton" parent="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="3" instance=ExtResource("6_7am2l")]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Create IP lobby"
+
+[node name="Filler2" parent="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="4" instance=ExtResource("5_3gtyj")]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+size_flags_vertical = 1
+size_flags_stretch_ratio = 0.1
+
+[node name="JoinIpLobbyInput" parent="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="5" instance=ExtResource("7_csygq")]
+unique_name_in_owner = true
+layout_mode = 2
+text = "127.0.0.1:7777"
+placeholder_text = "IP address : port"
+alignment = 1
+
+[node name="JoinIpLobbyButton" parent="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="6" instance=ExtResource("6_7am2l")]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Join IP lobby"
+
+[node name="Filler3" parent="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="7" instance=ExtResource("5_3gtyj")]
+layout_mode = 2
+
+[node name="QuitToMainMenuButton" parent="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="8" instance=ExtResource("6_7am2l")]
+layout_mode = 2
+text = "Quit to Main Menu"
+
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/CreateSteamLobbyButton" to="." method="OnCreateSteamLobbyButtonPressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/CreateIpLobbyButton" to="." method="OnCreateIpLobbyButtonPressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/JoinIpLobbyButton" to="." method="OnJoinIpLobbyButtonPressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/QuitToMainMenuButton" to="." method="OnQuitToMainMenuButtonPressed"]
+
+[editable path="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer"]

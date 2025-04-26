@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://joo2g4y1psu7"]
+
+[ext_resource type="Script" uid="uid://8qkumvvefrwn" path="res://common/multiplayer/MultiplayerManager.cs" id="1_lfkw0"]
+[ext_resource type="PackedScene" uid="uid://cpwnc7kw5hw5b" path="res://common/multiplayer/player_manager.tscn" id="2_y6p5c"]
+
+[node name="MultiplayerManager" type="Node"]
+script = ExtResource("1_lfkw0")
+
+[node name="PlayerManager" parent="." instance=ExtResource("2_y6p5c")]

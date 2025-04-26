@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using Tlib;
 using System.Linq;
 
+namespace Client.UI.Menus;
+
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
 public partial class MainMenu : Control {
   public override void _Notification(int what) => this.Notify(what);

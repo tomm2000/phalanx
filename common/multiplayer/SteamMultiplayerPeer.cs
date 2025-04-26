@@ -1,7 +1,6 @@
 using System;
 using Array = Godot.Collections.Array;
-
-namespace Godot;
+using Godot;
 
 public sealed partial class SteamMultiplayerPeer : MultiplayerPeerExtension {
   /// <summary>
@@ -21,8 +20,8 @@ public sealed partial class SteamMultiplayerPeer : MultiplayerPeerExtension {
     _classReference = ClassDB.Instantiate(stringName).AsGodotObject();
   }
 
-  public Error CreateHost(ushort port, Array options) {
-    return _classReference.Call(Methods.CreateHost, port, options).As<Error>();
+  public Error CreateHost(ushort port) {
+    return _classReference.Call(Methods.CreateHost, port).As<Error>();
   }
 
   public Error CreateClient(ulong steamId, ushort port, Array options) {
