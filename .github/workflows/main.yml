@@ -77,19 +77,19 @@ jobs:
               echo "Running on Windows - using PowerShell Compress-Archive"
               
               # Zip release build
-              pwsh -Command "Compress-Archive -Path export/release/Phalanx_${VERSION_TAG}.exe -DestinationPath export/Phalanx_${VERSION_TAG}.zip"
+              pwsh -Command "Compress-Archive -Path export/release/ -DestinationPath export/Phalanx_${VERSION_TAG}.zip"
               
               # Zip debug build
-              pwsh -Command "Compress-Archive -Path export/debug/Phalanx_Debug_${VERSION_TAG}.exe -DestinationPath export/Phalanx_Debug_${VERSION_TAG}.zip"
+              pwsh -Command "Compress-Archive -Path export/debug/ -DestinationPath export/Phalanx_Debug_${VERSION_TAG}.zip"
 
             else
               echo "Running on Linux - using zip"
               
               # Zip release build
-              zip export/Phalanx_${VERSION_TAG}.zip export/release/Phalanx_${VERSION_TAG}.exe
+              zip export/Phalanx_${VERSION_TAG}.zip export/release/
               
               # Zip debug build
-              zip export/Phalanx_Debug_${VERSION_TAG}.zip export/debug/Phalanx_Debug_${VERSION_TAG}.exe
+              zip export/Phalanx_Debug_${VERSION_TAG}.zip export/debug/
             fi
 
             # Cleanup: remove the now-unneeded folders
