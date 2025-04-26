@@ -62,29 +62,38 @@ jobs:
       # 🏗 Export Game
       - name: 🏗 Export Game
         run: |
-          mkdir -p export/release export/debug
+            mkdir -p export/release export/debug
 
-          VERSION_TAG="${GITHUB_REF_NAME}"
+            VERSION_TAG="${GITHUB_REF_NAME}"
 
-          # Export builds
-          godot --export-release "Windows Desktop" export/release/Phalanx_${VERSION_TAG}.exe
-          godot --export-debug "Windows Desktop" export/debug/Phalanx_Debug_${VERSION_TAG}.exe
+            # Export builds
+            godot --export-release "Windows Desktop" export/release/Phalanx_${VERSION_TAG}.exe
+            godot --export-debug "Windows Desktop" export/debug/Phalanx_Debug_${VERSION_TAG}.exe
 
-          # Zip only the debug build
-          cd export/debug
+            # Cross-platform zipping
+            if [[ "$RUNNER_OS" == "Windows" ]]; then
+              echo "Running on Windows - using PowerShell Compress-Archive"
+              
+              # Zip release build
+              pwsh -Command "Compress-Archive -Path export/release/Phalanx_${VERSION_TAG}.exe -DestinationPath export/Phalanx_${VERSION_TAG}.zip"
+              
+              # Zip debug build
+              pwsh -Command "Compress-Archive -Path export/debug/Phalanx_Debug_${VERSION_TAG}.exe -DestinationPath export/Phalanx_Debug_${VERSION_TAG}.zip"
 
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
-            echo "Running on Windows - using PowerShell Compress-Archive"
-            pwsh -Command "Compress-Archive -Path Phalanx_Debug_${VERSION_TAG}.exe -DestinationPath ../Phalanx_Debug_${VERSION_TAG}.zip"
-          else
-            echo "Running on Linux - using zip"
-            zip ../Phalanx_Debug_${VERSION_TAG}.zip Phalanx_Debug_${VERSION_TAG}.exe
-          fi
+            else
+              echo "Running on Linux - using zip"
+              
+              # Zip release build
+              zip export/Phalanx_${VERSION_TAG}.zip export/release/Phalanx_${VERSION_TAG}.exe
+              
+              # Zip debug build
+              zip export/Phalanx_Debug_${VERSION_TAG}.zip export/debug/Phalanx_Debug_${VERSION_TAG}.exe
+            fi
 
-          cd ../../
+            # Cleanup: remove the now-unneeded folders
+            rm -rf export/release
+            rm -rf export/debug
 
-          # Cleanup: remove the now-unneeded debug folder
-          rm -rf export/debug
 
       # 📦 Upload export artifacts
       - name: 📦 Upload Exported Builds
