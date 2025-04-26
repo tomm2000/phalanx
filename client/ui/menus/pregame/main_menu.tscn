@@ -1,7 +1,8 @@
-[gd_scene load_steps=20 format=3 uid="uid://dwjcl253px63k"]
+[gd_scene load_steps=21 format=3 uid="uid://dwjcl253px63k"]
 
 [ext_resource type="Texture2D" uid="uid://dcaf4ygdvskhv" path="res://client/ui/menus/background.png" id="1_bix3n"]
 [ext_resource type="Script" uid="uid://dqwu5r8fo333o" path="res://client/ui/menus/pregame/MainMenu.cs" id="1_p56k4"]
+[ext_resource type="PackedScene" uid="uid://dq3f6m2ju3ihr" path="res://client/ui/menus/pregame/common/user_tag.tscn" id="2_o23kc"]
 [ext_resource type="Shader" uid="uid://d1hi66rm126v2" path="res://client/ui/common/background_blur_shader.gdshader" id="2_v8xm2"]
 [ext_resource type="Script" uid="uid://c5vr6he08sidh" path="res://client/ui/menus/pregame/RotatedPanel.cs" id="3_an7u6"]
 [ext_resource type="PackedScene" uid="uid://brewcawnrqh1y" path="res://client/ui/common/list_vbox_container.tscn" id="4_7ylq8"]
@@ -279,6 +280,18 @@ layout_mode = 2
 
 [node name="Filler2" parent="VBoxContainer2" instance=ExtResource("6_tr1vk")]
 layout_mode = 2
+
+[node name="UserTag" parent="." instance=ExtResource("2_o23kc")]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_bottom = 0.0
+offset_left = -248.0
+offset_top = 11.0
+offset_right = -11.0
+offset_bottom = 62.0
+grow_horizontal = 0
+grow_vertical = 1
 
 [connection signal="pressed" from="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/HBoxContainer/SingleplayerButton" to="." method="OnSingleplayerButtonPressed"]
 [connection signal="pressed" from="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/HBoxContainer2/MultiplayerButton" to="." method="OnMultiplayerButtonPressed"]

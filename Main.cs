@@ -11,13 +11,14 @@ public partial class Main : Node {
 
   public override void _Notification(int what) => this.Notify(what);
 
+  public Main() {
+    var result = Steam.SteamInitEx(false);
+    GD.Print($"Steam init result: {result.Verbal}");
+  }
+
   #region Lifecycle
   public override void _Ready() {
     Instance = this;
-
-    // Initialize Steam
-    var result = Steam.SteamInitEx(false);
-    GD.Print($"Steam init result: {result.Verbal}");
   }
   public override void _Process(double delta) {
     DebugUI();

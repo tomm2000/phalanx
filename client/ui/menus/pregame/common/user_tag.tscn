@@ -1,0 +1,66 @@
+[gd_scene load_steps=6 format=3 uid="uid://dq3f6m2ju3ihr"]
+
+[ext_resource type="Script" uid="uid://dtics47ok0ppu" path="res://client/ui/menus/pregame/common/UserTag.cs" id="1_o3q4q"]
+[ext_resource type="Texture2D" uid="uid://c4c4lecquaupy" path="res://client/ui/common/assets/User.svg" id="2_fk0be"]
+[ext_resource type="Texture2D" uid="uid://beo0l578et3ar" path="res://client/ui/common/assets/Steam.png" id="3_hiblw"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_o3q4q"]
+content_margin_right = 10.0
+bg_color = Color(0.0941176, 0.117647, 0.14902, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.964706, 0.823529, 0.564706, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="LabelSettings" id="LabelSettings_o3q4q"]
+font_size = 20
+
+[node name="UserTag" type="PanelContainer"]
+custom_minimum_size = Vector2(50, 50)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_default_cursor_shape = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_o3q4q")
+script = ExtResource("1_o3q4q")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="AvatarTexture" type="TextureRect" parent="HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("2_fk0be")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="UsernameLabel" type="Label" parent="HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Tomm2000"
+label_settings = SubResource("LabelSettings_o3q4q")
+
+[node name="Control" type="Control" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SteamIcon" type="TextureRect" parent="HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(20, 30)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("3_hiblw")
+expand_mode = 1
+stretch_mode = 4
+
+[connection signal="gui_input" from="." to="." method="OnGuiInput"]

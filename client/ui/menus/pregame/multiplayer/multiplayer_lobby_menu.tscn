@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://dr1b75c32sida"]
+[gd_scene load_steps=14 format=3 uid="uid://dr1b75c32sida"]
 
 [ext_resource type="Script" uid="uid://bov7qcdg8a6nj" path="res://client/ui/menus/pregame/multiplayer/MultiplayerLobbyMenu.cs" id="1_0b2yv"]
 [ext_resource type="Texture2D" uid="uid://dcaf4ygdvskhv" path="res://client/ui/menus/background.png" id="2_t4306"]
@@ -9,6 +9,7 @@
 [ext_resource type="FontFile" uid="uid://d2okuqqg1gogx" path="res://client/ui/common/fonts/OpenSans-VariableFont_wdth,wght.ttf" id="7_22bp7"]
 [ext_resource type="PackedScene" uid="uid://c68j3jaf4ip0k" path="res://client/ui/menus/pregame/common/player_list_item.tscn" id="7_npv11"]
 [ext_resource type="Theme" uid="uid://guyqcrq35q6u" path="res://client/ui/common/standard_theme.tres" id="8_yiw7l"]
+[ext_resource type="PackedScene" uid="uid://dq3f6m2ju3ihr" path="res://client/ui/menus/pregame/common/user_tag.tscn" id="10_orrdb"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_3dws0"]
 shader = ExtResource("3_i10d0")
@@ -199,6 +200,18 @@ size_flags_stretch_ratio = 0.3
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="UserTag" parent="." instance=ExtResource("10_orrdb")]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_bottom = 0.0
+offset_left = -248.0
+offset_top = 11.0
+offset_right = -11.0
+offset_bottom = 62.0
+grow_horizontal = 0
+grow_vertical = 1
 
 [connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/ExitLobbyButton" to="." method="OnExitLobbyButtonPressed"]
 

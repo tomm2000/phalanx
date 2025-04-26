@@ -25,5 +25,6 @@
   <ItemGroup>
     <Compile Remove="script_templates\**" />
     <Content Include="script_templates\**" />
+    <Content Include="steam_appid.txt" />
   </ItemGroup>
 </Project>

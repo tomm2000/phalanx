@@ -12,6 +12,7 @@ public static class ClientData {
       return;
     } else {
       Username = Steam.GetPersonaName();
+      SteamId = Steam.GetSteamID();
     }
   }
 }
