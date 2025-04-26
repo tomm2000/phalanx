@@ -1,6 +1,9 @@
 name: 🚥 Status Checks
 on: push
 
+permissions:
+  contents: write
+
 jobs:
   tests:
     name: 👀 Evaluate on ${{ matrix.os }}
