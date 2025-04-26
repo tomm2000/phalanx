@@ -53,4 +53,35 @@ jobs:
       - name: 🦺 Build Projects
         run: dotnet build
 
-      # Do whatever you want!
+
+      # 🏗 Export Game
+      - name: 🏗 Export Game
+        run: |
+          mkdir -p export
+          godot --export-release --export-pack "Windows Desktop" export/Phalanx.exe
+
+      # 📦 Upload export artifacts
+      - name: 📦 Upload Exported Builds
+        uses: actions/upload-artifact@v4
+        with:
+          name: game-exports-${{ matrix.os }}
+          path: export/
+
+  release:
+    name: 🚀 Release
+    needs: tests
+    runs-on: ubuntu-latest
+    if: github.ref_type == 'tag' # Only release when pushing a tag
+    steps:
+      - uses: actions/checkout@v3
+        name: 🧾 Checkout
+
+      - name: 📥 Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: releases
+
+      - name: 📦 Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: releases/**/*
