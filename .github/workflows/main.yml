@@ -62,16 +62,25 @@ jobs:
       # 🏗 Export Game
       - name: 🏗 Export Game
         run: |
-          # Create folders properly
           mkdir -p export/release export/debug
 
+          VERSION_TAG="${GITHUB_REF_NAME}"
+
           # Export builds
-          godot --export-release "Windows Desktop" export/release/Phalanx.exe
-          godot --export-debug "Windows Desktop" export/debug/Phalanx-Debug.exe
+          godot --export-release "Windows Desktop" export/release/Phalanx_${VERSION_TAG}.exe
+          godot --export-debug "Windows Desktop" export/debug/Phalanx_Debug_${VERSION_TAG}.exe
 
           # Zip only the debug build
           cd export/debug
-          zip ../Phalanx_Debug.zip Phalanx-Debug.exe
+
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            echo "Running on Windows - using PowerShell Compress-Archive"
+            pwsh -Command "Compress-Archive -Path Phalanx_Debug_${VERSION_TAG}.exe -DestinationPath ../Phalanx_Debug_${VERSION_TAG}.zip"
+          else
+            echo "Running on Linux - using zip"
+            zip ../Phalanx_Debug_${VERSION_TAG}.zip Phalanx_Debug_${VERSION_TAG}.exe
+          fi
+
           cd ../../
 
           # Cleanup: remove the now-unneeded debug folder
