@@ -1,4 +1,4 @@
-name: 🚥 Status Checks
+name: 🚥 CI/CD Pipeline
 on: push
 
 permissions:
