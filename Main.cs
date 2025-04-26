@@ -49,21 +49,22 @@ public partial class Main : Node {
   private int frameTimeIndex = 0;
 
   private void DebugUI() {
+#if DEBUG
     ImGui.Begin("Performance");
 
     ImGui.Text($"FPS: {Performance.GetMonitor(Performance.Monitor.TimeFps)}");
 
     var timeProcess = Performance.GetMonitor(Performance.Monitor.TimeProcess);
-    ImGui.Text($"Frame time: {Mathf.Round(timeProcess*1000)}ms");
+    ImGui.Text($"Frame time: {Mathf.Round(timeProcess * 1000)}ms");
 
     frameTimeIndex = (frameTimeIndex + 1) % frameTimeSize;
-    frameTimes[frameTimeIndex] = (float) timeProcess * 1000;
+    frameTimes[frameTimeIndex] = (float)timeProcess * 1000;
 
     ImGui.PlotLines("Frame time", ref frameTimes[0], frameTimeSize, frameTimeIndex, "ms", 0, 100, new(300, 100));
 
     var memoryStatic = Performance.GetMonitor(Performance.Monitor.MemoryStatic);
     // display with . separators
-    ImGui.Text($"Static memory: {(memoryStatic / 1_000_000).ToString("N0") } MB");
+    ImGui.Text($"Static memory: {(memoryStatic / 1_000_000).ToString("N0")} MB");
 
     var objectCount = Performance.GetMonitor(Performance.Monitor.ObjectCount);
     ImGui.Text($"Object count: {objectCount}");
@@ -85,6 +86,7 @@ public partial class Main : Node {
 
 
     ImGui.End();
+#endif
   }
   #endregion
 }

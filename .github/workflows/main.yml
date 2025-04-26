@@ -62,8 +62,20 @@ jobs:
       # 🏗 Export Game
       - name: 🏗 Export Game
         run: |
-          mkdir -p export
-          godot --export-release "Windows Desktop" export/Phalanx.exe
+          # Create folders properly
+          mkdir -p export/release export/debug
+
+          # Export builds
+          godot --export-release "Windows Desktop" export/release/Phalanx.exe
+          godot --export-debug "Windows Desktop" export/debug/Phalanx-Debug.exe
+
+          # Zip only the debug build
+          cd export/debug
+          zip ../Phalanx_Debug.zip Phalanx-Debug.exe
+          cd ../../
+
+          # Cleanup: remove the now-unneeded debug folder
+          rm -rf export/debug
 
       # 📦 Upload export artifacts
       - name: 📦 Upload Exported Builds
