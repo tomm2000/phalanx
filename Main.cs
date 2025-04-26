@@ -3,6 +3,7 @@ using System;
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
 using ImGuiNET;
+using GodotSteam;
 
 [Meta(typeof(IAutoConnect))]
 public partial class Main : Node {
@@ -13,6 +14,11 @@ public partial class Main : Node {
   #region Lifecycle
   public override void _Ready() {
     Instance = this;
+
+    // Initialize Steam
+    var result = Steam.SteamInitEx(false);
+
+    GD.Print($"Steam init result: {result.Verbal}");
   }
   public override void _Process(double delta) {
     DebugUI();

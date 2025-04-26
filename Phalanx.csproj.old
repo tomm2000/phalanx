@@ -1,11 +1,12 @@
-<Project Sdk="Godot.NET.Sdk/4.4.1">
+<!-- NOTE: for CI/CD this below should be only "Godot.NET.Sdk" not "Godot.NET.Sdk/...", godot adds it back and has to be removed -->
+<Project Sdk="Godot.NET.Sdk">
   <PropertyGroup>
-    <!--Force nullable warnings, you can disable if you want-->
+    <TargetFramework>net8.0</TargetFramework>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>enable</Nullable>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <!-- Catch compiler-mismatch issues with the Introspection generator -->
     <WarningsAsErrors>CS9057</WarningsAsErrors>
-    <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Chickensoft.AutoInject" Version="2.6.0" />

@@ -14,7 +14,6 @@
     ".mono": true,
     ".godot": true,
     ".gitattributes": true,
-    "exports": true,
     "export_presets.cfg": true,
     "WarGame": true,
     "WarGame.sln": true,

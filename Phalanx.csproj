@@ -1,5 +1,5 @@
 <!-- NOTE: for CI/CD this below should be only "Godot.NET.Sdk" not "Godot.NET.Sdk/...", godot adds it back and has to be removed -->
-<Project Sdk="Godot.NET.Sdk">
+<Project Sdk="Godot.NET.Sdk/4.4.1">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
