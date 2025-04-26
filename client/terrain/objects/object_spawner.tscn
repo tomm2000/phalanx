@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://bvprojavtbhpx"]
+
+[ext_resource type="Script" uid="uid://dyt7u55wf12s1" path="res://client/terrain/objects/ObjectSpawner.cs" id="1_brqvr"]
+
+[node name="ObjectSpawner" type="Node3D"]
+script = ExtResource("1_brqvr")
+
+[node name="MultiMeshContainer" type="Node3D" parent="."]
+unique_name_in_owner = true

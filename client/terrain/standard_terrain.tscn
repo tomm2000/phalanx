@@ -1,0 +1,33 @@
+[gd_scene load_steps=6 format=3 uid="uid://bgu2ycrayqu6s"]
+
+[ext_resource type="Script" uid="uid://c4f1f41yascj5" path="res://client/terrain/StandardTerrain.cs" id="1_emmf8"]
+[ext_resource type="PackedScene" uid="uid://bsrixdt0qos6l" path="res://client/terrain/overlays/selection/tile_selector.tscn" id="2_ioyjb"]
+[ext_resource type="PackedScene" uid="uid://clkgqxom5swiy" path="res://client/terrain/standard_tile.tscn" id="2_qyloc"]
+[ext_resource type="Script" uid="uid://b1wyeulf3ivgu" path="res://free_look_camera.gd" id="4_hpsse"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_emmf8"]
+
+[node name="StandardTerrain" type="Node3D"]
+script = ExtResource("1_emmf8")
+
+[node name="TileContainer" type="Node3D" parent="."]
+unique_name_in_owner = true
+
+[node name="StandardTile" parent="TileContainer" instance=ExtResource("2_qyloc")]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+visible = false
+mesh = SubResource("SphereMesh_emmf8")
+
+[node name="TileSelector" parent="." instance=ExtResource("2_ioyjb")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.960035, 0.279879, 0, -0.279879, 0.960035, 0, 0.523813, 1.17742)
+script = ExtResource("4_hpsse")
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.04531, 7.87071)
+shadow_enabled = true
+omni_range = 4096.0
+omni_attenuation = 0.0

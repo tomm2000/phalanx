@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://8mukkjig8pes"]
+
+[ext_resource type="Script" uid="uid://cm1ss8wpmv6cs" path="res://client/terrain/objects/DynamicMultiMesh.cs" id="1_57rqa"]
+
+[node name="DynamicMultiMesh" type="MultiMeshInstance3D"]
+script = ExtResource("1_57rqa")

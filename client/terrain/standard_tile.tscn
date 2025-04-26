@@ -1,0 +1,40 @@
+[gd_scene load_steps=9 format=3 uid="uid://clkgqxom5swiy"]
+
+[ext_resource type="Script" uid="uid://dklhh2tjx2wdo" path="res://client/terrain/StandardTile.cs" id="1_fihpe"]
+[ext_resource type="Shader" uid="uid://dw8sfu5i5p4as" path="res://client/terrain/shaders/terrain_standard.gdshader" id="2_oogjt"]
+[ext_resource type="PackedScene" uid="uid://dlrmpm0ngdfs0" path="res://client/terrain/objects/vegetation/tree_spawner.tscn" id="3_yl6lh"]
+[ext_resource type="PackedScene" uid="uid://yu0am88i7uy8" path="res://client/terrain/objects/vegetation/rock_spawner.tscn" id="4_aj3nk"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_oogjt"]
+frequency = 0.0162
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_yl6lh"]
+noise = SubResource("FastNoiseLite_oogjt")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_yl6lh"]
+render_priority = 0
+shader = ExtResource("2_oogjt")
+shader_parameter/edge_color = Color(0.0588235, 0.203922, 0.176471, 0.670588)
+
+[sub_resource type="SphereMesh" id="SphereMesh_oogjt"]
+
+[node name="StandardTile" type="Node3D"]
+script = ExtResource("1_fihpe")
+TerrainNoise = SubResource("NoiseTexture2D_yl6lh")
+
+[node name="MeshInstance" type="MeshInstance3D" parent="."]
+unique_name_in_owner = true
+material_override = SubResource("ShaderMaterial_yl6lh")
+mesh = SubResource("SphereMesh_oogjt")
+
+[node name="TreeSpawner" parent="." instance=ExtResource("3_yl6lh")]
+
+[node name="RockSpawner" parent="." instance=ExtResource("4_aj3nk")]
+maxRocks = 2
+
+[node name="CollisionArea" type="Area3D" parent="."]
+unique_name_in_owner = true
+collision_mask = 0
+
+[node name="CollisionShape" type="CollisionShape3D" parent="CollisionArea"]
+unique_name_in_owner = true

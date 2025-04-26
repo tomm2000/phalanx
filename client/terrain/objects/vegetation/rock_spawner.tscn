@@ -1,0 +1,14 @@
+[gd_scene load_steps=5 format=3 uid="uid://yu0am88i7uy8"]
+
+[ext_resource type="PackedScene" uid="uid://bvprojavtbhpx" path="res://client/terrain/objects/object_spawner.tscn" id="1_w5chh"]
+[ext_resource type="Script" uid="uid://b2yfybjcil006" path="res://client/terrain/objects/vegetation/RockSpawner.cs" id="2_ad1om"]
+[ext_resource type="PackedScene" uid="uid://8mukkjig8pes" path="res://client/terrain/objects/dynamic_multi_mesh.tscn" id="3_hr81d"]
+[ext_resource type="ArrayMesh" uid="uid://dcwibjrary64f" path="res://client/terrain/objects/vegetation/rock/rock.obj" id="4_1j5in"]
+
+[node name="RockSpawner" instance=ExtResource("1_w5chh")]
+script = ExtResource("2_ad1om")
+maxRocks = 10
+
+[node name="NormalRockMultimesh" parent="MultiMeshContainer" index="0" instance=ExtResource("3_hr81d")]
+unique_name_in_owner = true
+mesh = ExtResource("4_1j5in")

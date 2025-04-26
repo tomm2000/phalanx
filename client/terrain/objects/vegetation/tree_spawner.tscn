@@ -1,0 +1,20 @@
+[gd_scene load_steps=6 format=3 uid="uid://dlrmpm0ngdfs0"]
+
+[ext_resource type="PackedScene" uid="uid://bvprojavtbhpx" path="res://client/terrain/objects/object_spawner.tscn" id="1_m3ni5"]
+[ext_resource type="Script" uid="uid://c26w65jufrvjt" path="res://client/terrain/objects/vegetation/TreeSpawner.cs" id="2_pm325"]
+[ext_resource type="PackedScene" uid="uid://8mukkjig8pes" path="res://client/terrain/objects/dynamic_multi_mesh.tscn" id="3_5b332"]
+[ext_resource type="ArrayMesh" uid="uid://cmgu1paxemlv2" path="res://client/terrain/objects/vegetation/tree_pine/tree_pine.obj" id="3_fmmni"]
+[ext_resource type="ArrayMesh" uid="uid://dp1mm8golrdpl" path="res://client/terrain/objects/vegetation/tree_oak/tree_oak.obj" id="4_w7hvj"]
+
+[node name="TreeSpawner" instance=ExtResource("1_m3ni5")]
+script = ExtResource("2_pm325")
+maxPineTrees = 100
+maxOakTrees = 3
+
+[node name="OakTreeMultimesh" parent="MultiMeshContainer" index="0" instance=ExtResource("3_5b332")]
+unique_name_in_owner = true
+mesh = ExtResource("4_w7hvj")
+
+[node name="PineTreeMultimesh" parent="MultiMeshContainer" index="1" instance=ExtResource("3_5b332")]
+unique_name_in_owner = true
+mesh = ExtResource("3_fmmni")

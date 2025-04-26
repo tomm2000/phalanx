@@ -1,0 +1,31 @@
+{
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "**/.class": true,
+    "**/.classpath": true,
+    "**/.project": true,
+    "**/.settings": true,
+    "**/.factorypath": true,
+    "**/*.uid": true,
+    ".mono": true,
+    ".godot": true,
+    ".gitattributes": true,
+    "exports": true,
+    "export_presets.cfg": true,
+    "WarGame": true,
+    "WarGame.sln": true,
+    "**/*.import": true,
+    "**/*.tres": true,
+    "**/*.bin": true,
+    "**/*.tscn": true,
+    "**/*.gltf": true,
+    "addons": true,
+    "script_templates": true,
+    ".VSCodeCounter": true
+  },
+  "explorerExclude.backup": {}
+}
