@@ -23,7 +23,7 @@ mesh = SubResource("SphereMesh_emmf8")
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.960035, 0.279879, 0, -0.279879, 0.960035, 0, 0.523813, 1.17742)
+transform = Transform3D(1, 0, 0, 0, 0.704349, 0.709853, 0, -0.709853, 0.704349, 5.24227, 4.85037, 10.714)
 script = ExtResource("4_hpsse")
 
 [node name="OmniLight3D" type="OmniLight3D" parent="."]

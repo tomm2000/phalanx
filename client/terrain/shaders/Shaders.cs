@@ -7,6 +7,8 @@ public enum TerrainShader {
   DebugUVs,
   DebugEdgeDistances,
   Wireframe,
+  DebugRiver,
+  DebugFlow
 }
 
 public static class TerrainShaders {
@@ -17,6 +19,8 @@ public static class TerrainShaders {
       TerrainShader.DebugNormals => GD.Load<Shader>("uid://csxmk8i5rjf68"),
       TerrainShader.DebugUVs => GD.Load<Shader>("uid://c3pqpsf46oydf"),
       TerrainShader.DebugEdgeDistances => GD.Load<Shader>("uid://cmav5wqkg5jct"),
+      TerrainShader.DebugRiver => GD.Load<Shader>("uid://dfa0jc6jte3js"),
+      TerrainShader.DebugFlow => GD.Load<Shader>("uid://bpk8pperag7dl"),
       _ => throw new ArgumentOutOfRangeException(nameof(shader), shader, null),
     };
   }

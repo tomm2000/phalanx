@@ -19,9 +19,8 @@ public partial class RockSpawner : ObjectSpawner {
 
     for (int i = 0; i < maxRocks; i++) {
       var vertex = vertices.Random();
+      if (vertex.riverness > 0.3f) { continue; }
       var position = vertex.position;
-
-      // if (vertex.steepness * 2 < GD.Randf()) { continue; }
 
       spawnedPositions.Add(position);
     }

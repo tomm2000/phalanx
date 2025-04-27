@@ -4,6 +4,7 @@ using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
 using ImGuiNET;
 using GodotSteam;
+using System.IO;
 
 [Meta(typeof(IAutoConnect))]
 public partial class Main : Node {
@@ -12,6 +13,11 @@ public partial class Main : Node {
   public override void _Notification(int what) => this.Notify(what);
 
   public Main() {
+    if (Directory.Exists("./debug")) {
+      Directory.Delete("./debug", true);
+    }
+    Directory.CreateDirectory("./debug");
+
     var result = Steam.SteamInitEx(false);
     GD.Print($"Steam init result: {result.Verbal}");
   }
@@ -19,6 +25,7 @@ public partial class Main : Node {
   #region Lifecycle
   public override void _Ready() {
     Instance = this;
+
   }
   public override void _Process(double delta) {
     DebugUI();

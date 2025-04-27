@@ -5,6 +5,7 @@ using MessagePack.Resolvers;
 
 using System.Collections.Generic;
 
+#region Hex Direction
 //           / \
 //          2   1
 //        |       |
@@ -18,6 +19,36 @@ using System.Collections.Generic;
 /// </summary>
 public enum HexDirection { East, NorthEast, NorthWest, West, SouthWest, SouthEast }
 
+public static class HexDirectionExtensions {
+  /// <summary>
+  /// Returns the opposite direction (rotated 180 degrees).
+  /// </summary>
+  public static HexDirection OppositeDirection(this HexDirection direction) {
+    return (HexDirection)(((int)direction + 3) % 6);
+  }
+
+  public static uint StepAngle(this HexDirection direction, HexDirection other) {
+    var step = (uint)Math.Abs((int)other - (int)direction);
+    if (step > 3) {
+      step = 6 - step;
+    }
+    return step;
+  }
+
+  public static string ToString(this HexDirection[] directions) {
+    var result = "[";
+    for (int i = 0; i < directions.Length; i++) {
+      result += directions[i].ToString();
+      if (i < directions.Length - 1) {
+        result += ", ";
+      }
+    }
+    result += "]";
+    return result;
+  }
+}
+#endregion
+
 [MessagePackObject(AllowPrivate = true)]
 public partial struct HexCoords {
   [Key(0)] private readonly int q;
@@ -25,7 +56,7 @@ public partial struct HexCoords {
 
   #region Creation
   // for MessagePack
-  public HexCoords() {}
+  public HexCoords() { }
 
   private HexCoords(int q, int r) {
     this.q = q;
@@ -102,7 +133,7 @@ public partial struct HexCoords {
   public static HexCoords operator -(HexCoords a, HexCoords b) {
     return new HexCoords(a.q - b.q, a.r - b.r);
   }
-  
+
   public static int Distance(HexCoords a, HexCoords b) {
     return (Math.Abs(a.q - b.q) + Math.Abs(a.q + a.r - b.q - b.r) + Math.Abs(a.r - b.r)) / 2;
   }
@@ -122,13 +153,13 @@ public partial struct HexCoords {
   ];
 
   public readonly HexCoords Neighbor(HexDirection direction) {
-    return this + directions[(int) direction];
+    return this + directions[(int)direction];
   }
 
   public readonly HexCoords[] Neighbors() {
     var neighbors = new HexCoords[6];
     for (int i = 0; i < 6; i++) {
-      neighbors[i] = Neighbor((HexDirection) i);
+      neighbors[i] = Neighbor((HexDirection)i);
     }
     return neighbors;
   }
@@ -136,7 +167,7 @@ public partial struct HexCoords {
   public readonly (HexDirection, HexCoords)[] NeighborsWithDirections() {
     var neighbors = new (HexDirection, HexCoords)[6];
     for (int i = 0; i < 6; i++) {
-      neighbors[i] = ((HexDirection) i, Neighbor((HexDirection) i));
+      neighbors[i] = ((HexDirection)i, Neighbor((HexDirection)i));
     }
     return neighbors;
   }
@@ -198,7 +229,7 @@ public readonly struct AxialCoords(int q, int r) : IntoHexCoords {
   internal void Deconstruct(out int q, out int r) {
     (q, r) = (this.q, this.r);
   }
-  
+
   public override string ToString() { return $"[{q}, {r}]"; }
 }
 

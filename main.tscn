@@ -2,12 +2,12 @@
 
 [ext_resource type="Script" uid="uid://crh2mjyyjhbbd" path="res://Main.cs" id="1_ig7tw"]
 [ext_resource type="PackedScene" uid="uid://joo2g4y1psu7" path="res://common/multiplayer/multiplayer_manager.tscn" id="2_h2yge"]
-[ext_resource type="PackedScene" uid="uid://dwjcl253px63k" path="res://client/ui/menus/pregame/main_menu.tscn" id="3_h2yge"]
+[ext_resource type="PackedScene" uid="uid://bgu2ycrayqu6s" path="res://client/terrain/standard_terrain.tscn" id="3_h2yge"]
 
 [node name="Main" type="Node" node_paths=PackedStringArray("CurrentScene")]
 script = ExtResource("1_ig7tw")
-CurrentScene = NodePath("MainMenu")
+CurrentScene = NodePath("StandardTerrain")
 
 [node name="MultiplayerManager" parent="." instance=ExtResource("2_h2yge")]
 
-[node name="MainMenu" parent="." instance=ExtResource("3_h2yge")]
+[node name="StandardTerrain" parent="." instance=ExtResource("3_h2yge")]
