@@ -2,44 +2,44 @@ namespace GodotSteam;
 
 public static partial class Steam
 {
-    public static int AcceptConnection(long connection)
+    public static int AcceptConnection(uint connection)
     {
-        return GetInstance().Call(Methods.AcceptConnection, connection).AsInt32();
+        return GetInstance().Call(Methods.AcceptConnection, connection).As<int>();
     }
     
     public static bool BeginAsyncRequestFakeIP(long numPorts)
     {
-        return GetInstance().Call(Methods.BeginAsyncRequestFakeIP, numPorts).AsBool();
+        return GetInstance().Call(Methods.BeginAsyncRequestFakeIP, numPorts).As<bool>();
     }
     
     public static bool CloseConnection(uint peer, int reason, string debugMessage, bool linger)
     {
-        return GetInstance().Call(Methods.CloseConnection, peer, reason, debugMessage, linger).AsBool();
+        return GetInstance().Call(Methods.CloseConnection, peer, reason, debugMessage, linger).As<bool>();
     }
     
     public static bool CloseListenSocket(long socket)
     {
-        return GetInstance().Call(Methods.CloseListenSocket, socket).AsBool();
+        return GetInstance().Call(Methods.CloseListenSocket, socket).As<bool>();
     }
     
     public static int ConfigureConnectionLanes(uint connection, int lanes, Godot.Collections.Array priorities, Godot.Collections.Array weights)
     {
-        return GetInstance().Call(Methods.ConfigureConnectionLanes, connection, lanes, priorities, weights).AsInt32();
+        return GetInstance().Call(Methods.ConfigureConnectionLanes, connection, lanes, priorities, weights).As<int>();
     }
     
-    public static uint ConnectP2P(string identityReference, int virtualPort, Godot.Collections.Array options)
+    public static uint ConnectP2P(ulong identity, int virtualPort, Godot.Collections.Dictionary<Steam.NetworkingConfigValue, Godot.Variant> options)
     {
-        return GetInstance().Call(Methods.ConnectP2P, identityReference, virtualPort, options).AsUInt32();
+        return GetInstance().Call(Methods.ConnectP2P, identity, virtualPort, options).As<uint>();
     }
     
-    public static uint ConnectByIPAddress(string iPAddressWithPort, Godot.Collections.Array options)
+    public static uint ConnectByIPAddress(string iPAddressWithPort, Godot.Collections.Dictionary<Steam.NetworkingConfigValue, Godot.Variant> options)
     {
-        return GetInstance().Call(Methods.ConnectByIPAddress, iPAddressWithPort, options).AsUInt32();
+        return GetInstance().Call(Methods.ConnectByIPAddress, iPAddressWithPort, options).As<uint>();
     }
     
-    public static uint ConnectToHostedDedicatedServer(string identityReference, int virtualPort, Godot.Collections.Array options)
+    public static uint ConnectToHostedDedicatedServer(string identityReference, int virtualPort, Godot.Collections.Dictionary<Steam.NetworkingConfigValue, Godot.Variant> options)
     {
-        return GetInstance().Call(Methods.ConnectToHostedDedicatedServer, identityReference, virtualPort, options).AsUInt32();
+        return GetInstance().Call(Methods.ConnectToHostedDedicatedServer, identityReference, virtualPort, options).As<uint>();
     }
     
     public static void CreateFakeUDPPort(long fakeServerPort)
@@ -47,24 +47,24 @@ public static partial class Steam
         GetInstance().Call(Methods.CreateFakeUDPPort, fakeServerPort);
     }
     
-    public static uint CreateHostedDedicatedServerListenSocket(int virtualPort, Godot.Collections.Array options)
+    public static uint CreateHostedDedicatedServerListenSocket(int virtualPort, Godot.Collections.Dictionary<Steam.NetworkingConfigValue, Godot.Variant> options)
     {
-        return GetInstance().Call(Methods.CreateHostedDedicatedServerListenSocket, virtualPort, options).AsUInt32();
+        return GetInstance().Call(Methods.CreateHostedDedicatedServerListenSocket, virtualPort, options).As<uint>();
     }
     
-    public static uint CreateListenSocketIP(string iPReference, Godot.Collections.Array options)
+    public static uint CreateListenSocketIP(string iPReference, Godot.Collections.Dictionary<Steam.NetworkingConfigValue, Godot.Variant> options)
     {
-        return GetInstance().Call(Methods.CreateListenSocketIP, iPReference, options).AsUInt32();
+        return GetInstance().Call(Methods.CreateListenSocketIP, iPReference, options).As<uint>();
     }
     
-    public static uint CreateListenSocketP2P(int virtualPort, Godot.Collections.Array options)
+    public static uint CreateListenSocketP2P(int virtualPort, Godot.Collections.Dictionary<Steam.NetworkingConfigValue, Godot.Variant> options)
     {
-        return GetInstance().Call(Methods.CreateListenSocketP2P, virtualPort, options).AsUInt32();
+        return GetInstance().Call(Methods.CreateListenSocketP2P, virtualPort, options).As<uint>();
     }
     
-    public static uint CreateListenSocketP2PFakeIP(int fakePort, Godot.Collections.Array options)
+    public static uint CreateListenSocketP2PFakeIP(int fakePort, Godot.Collections.Dictionary<Steam.NetworkingConfigValue, Godot.Variant> options)
     {
-        return GetInstance().Call(Methods.CreateListenSocketP2PFakeIP, fakePort, options).AsUInt32();
+        return GetInstance().Call(Methods.CreateListenSocketP2PFakeIP, fakePort, options).As<uint>();
     }
     
     public static long CreatePollGroup()
@@ -79,12 +79,12 @@ public static partial class Steam
     
     public static bool DestroyPollGroup(long pollGroup)
     {
-        return GetInstance().Call(Methods.DestroyPollGroup, pollGroup).AsBool();
+        return GetInstance().Call(Methods.DestroyPollGroup, pollGroup).As<bool>();
     }
     
-    public static int FlushMessagesOnConnection(long connectionHandle)
+    public static int FlushMessagesOnConnection(uint connectionHandle)
     {
-        return GetInstance().Call(Methods.FlushMessagesOnConnection, connectionHandle).AsInt32();
+        return GetInstance().Call(Methods.FlushMessagesOnConnection, connectionHandle).As<int>();
     }
     
     public static NetworkingAvailability GetAuthenticationStatus()
@@ -97,14 +97,14 @@ public static partial class Steam
         return GetInstance().Call(Methods.GetCertificateRequest).AsGodotDictionary();
     }
     
-    public static Godot.Collections.Dictionary GetConnectionInfo(long connectionHandle)
+    public static Godot.Collections.Dictionary GetConnectionInfo(uint connectionHandle)
     {
         return GetInstance().Call(Methods.GetConnectionInfo, connectionHandle).AsGodotDictionary();
     }
     
     public static string GetConnectionName(long peer)
     {
-        return GetInstance().Call(Methods.GetConnectionName, peer).AsString();
+        return GetInstance().Call(Methods.GetConnectionName, peer).As<string>();
     }
     
     public static Godot.Collections.Dictionary GetConnectionRealTimeStatus(uint connectionHandle, int lanes, bool getStatus = true)
@@ -114,10 +114,10 @@ public static partial class Steam
     
     public static ulong GetConnectionUserData(long peer)
     {
-        return GetInstance().Call(Methods.GetConnectionUserData, peer).AsUInt64();
+        return GetInstance().Call(Methods.GetConnectionUserData, peer).As<ulong>();
     }
     
-    public static Godot.Collections.Dictionary GetDetailedConnectionStatus(long connectionHandle)
+    public static Godot.Collections.Dictionary GetDetailedConnectionStatus(uint connectionHandle)
     {
         return GetInstance().Call(Methods.GetDetailedConnectionStatus, connectionHandle).AsGodotDictionary();
     }
@@ -139,15 +139,15 @@ public static partial class Steam
     
     public static string GetListenSocketAddress(uint socket, bool withPort = true)
     {
-        return GetInstance().Call(Methods.GetListenSocketAddress, socket, withPort).AsString();
+        return GetInstance().Call(Methods.GetListenSocketAddress, socket, withPort).As<string>();
     }
     
     public static string GetIdentity()
     {
-        return GetInstance().Call(Methods.GetIdentity).AsString();
+        return GetInstance().Call(Methods.GetIdentity).As<string>();
     }
     
-    public static Godot.Collections.Dictionary GetRemoteFakeIPForConnection(long connection)
+    public static Godot.Collections.Dictionary GetRemoteFakeIPForConnection(uint connection)
     {
         return GetInstance().Call(Methods.GetRemoteFakeIPForConnection, connection).AsGodotDictionary();
     }
@@ -194,7 +194,7 @@ public static partial class Steam
     
     public static bool SetConnectionPollGroup(uint connectionHandle, long pollGroup)
     {
-        return GetInstance().Call(Methods.SetConnectionPollGroup, connectionHandle, pollGroup).AsBool();
+        return GetInstance().Call(Methods.SetConnectionPollGroup, connectionHandle, pollGroup).As<bool>();
     }
     
     public static void SetConnectionName(uint peer, string name)

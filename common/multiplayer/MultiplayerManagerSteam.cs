@@ -21,13 +21,12 @@ public partial class MultiplayerManager : Node {
 
       Steam.SetLobbyData(lobbyId, "hostname", ClientData.Username);
       Steam.SetLobbyData(lobbyId, "game", "phalanx");
-      Steam.AllowP2PPacketRelay(true);
 
       ActiveSteamLobbyId = lobbyId;
 
       var peer = new SteamMultiplayerPeer();
 
-      var error = peer.CreateHost(0);
+      var error = peer.CreateServer(0);
 
       if (error != Error.Ok) {
         GD.PushError($"<steam> Failed to create host: {error}");
