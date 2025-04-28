@@ -1,12 +1,4 @@
 using Godot;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Chickensoft.GodotNodeInterfaces;
-using Chickensoft.AutoInject;
-using Chickensoft.Introspection;
-using RandomNameGeneratorLibrary;
-using MessagePack.Resolvers;
 
 public partial class MultiplayerManager : Node {
   /// <summary>
@@ -45,20 +37,5 @@ public partial class MultiplayerManager : Node {
     }
   }
   
-  /// <summary>
-  /// Called by the client to notify the server of a new connection.
-  /// </summary>
-  [Rpc(
-    mode: MultiplayerApi.RpcMode.AnyPeer,
-    CallLocal = true,
-    TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
-  )]
-  private void SERVER_EnetClientConnected(string name) {
-    if (!IsHost) return;
 
-    var peerId = Multiplayer.GetRemoteSenderId();
-    var result = PlayerManager.SERVER_EnetPlayerConnected(name, peerId);
-    
-    SERVER_ClientConnected(result, peerId);
-  }
 }

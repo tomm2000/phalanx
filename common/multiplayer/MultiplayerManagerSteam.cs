@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using Godot;
 using Steam;
@@ -10,7 +9,7 @@ public partial class MultiplayerManager : Node {
 
 
   #region Lobby Creation
-  public static async Task HostSteamLobby() {
+  public static async Task HostSteam() {
     // TODO: add settings for lobby type and max players, ...
     var newLobby = await SteamMatchmaking.CreateLobbyAsync(10);
 
@@ -27,17 +26,15 @@ public partial class MultiplayerManager : Node {
     GD.Print("<steam> Created lobby: " + newLobby);
   }
 
-  private static void OnLobbyCreated(Result result, Lobby lobby) { }
+  private static void OnSteamLobbyCreated(Result result, Lobby lobby) { }
   #endregion
 
   #region Lobby Joining
-  public static void JoinSteamLobby(Lobby lobby) {
-    
-    // SteamMatchmaking.OnLobbyEntered += OnLobbyEntered;
+  public static void ConnectSteam(Lobby lobby) {
     lobby.Join();
   }
 
-  private static void OnLobbyEntered(Lobby lobby) {
+  private static void OnSteamLobbyEntered(Lobby lobby) {
     GD.Print("<steam> Entered lobby: " + lobby);
     ActiveSteamLobby = lobby;
 
@@ -64,26 +61,9 @@ public partial class MultiplayerManager : Node {
   }
   #endregion
 
-
-  /// <summary>
-  /// Called by the client to notify the server of a new connection.
-  /// </summary>
-  [Rpc(
-    mode: MultiplayerApi.RpcMode.AnyPeer,
-    CallLocal = true,
-    TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
-  )]
-  private void SERVER_SteamClientConnected(ulong steamId, string name) {
-    if (!IsHost) return;
-
-    var peerId = Multiplayer.GetRemoteSenderId();
-    var result = PlayerManager.SERVER_SteamPlayerConnected(steamId, peerId, name);
-
-    SERVER_ClientConnected(result, peerId);
-  }
-
   private static void LeaveSteamLobby() {
     GD.Print("<steam> Leaving lobby...");
+    
     if (ActiveSteamLobby is Lobby lobby) {
       lobby.Leave();
       ActiveSteamLobby = null;

@@ -43,6 +43,6 @@ public partial class LobbyListItem : Control {
   }
 
   private void OnJoinButtonPressed() {
-    MultiplayerManager.JoinSteamLobby(lobby);
+    MultiplayerManager.ConnectSteam(lobby);
   }
 }

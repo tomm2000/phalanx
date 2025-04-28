@@ -30,12 +30,12 @@ public partial class MultiplayerManager : Node {
   public override void _Ready() {
     Instance = this;
 
-    Instance.Multiplayer.PeerDisconnected += Instance.OnPeerDisconnected;
-    Instance.Multiplayer.ConnectedToServer += Instance.OnConnectedToServer;
-    Instance.Multiplayer.ServerDisconnected += Instance.OnDisconnectedFromServer;
-    
-    SteamMatchmaking.OnLobbyEntered += OnLobbyEntered;
-    SteamMatchmaking.OnLobbyCreated += OnLobbyCreated;
+    Instance.Multiplayer.PeerDisconnected += Instance.SERVER_OnPeerDisconnected;
+    Instance.Multiplayer.ConnectedToServer += Instance.CLIENT_OnConnectedToServer;
+    Instance.Multiplayer.ServerDisconnected += Instance.CLIENT_OnDisconnectedFromServer;
+
+    SteamMatchmaking.OnLobbyEntered += OnSteamLobbyEntered;
+    SteamMatchmaking.OnLobbyCreated += OnSteamLobbyCreated;
   }
 
   #region Initialization
@@ -43,8 +43,6 @@ public partial class MultiplayerManager : Node {
   /// Initializes the multiplayer service.
   /// </summary>
   private static void Initialize(MultiplayerPeer peer) {
-    GD.Print($"Status: {MultiplayerStatus}");
-
     if (MultiplayerStatus != MultiplayerStatus.Disconnected) {
       Disconnect();
     }
@@ -62,7 +60,9 @@ public partial class MultiplayerManager : Node {
     // NOTE: this function will only run on a server
     Instance.SERVER_ServerCreated();
   }
+  #endregion
 
+  #region Disconnect
   /// <summary>
   /// Disconnects from the current server. <br/>
   /// Resets the player manager and closes the peer.
@@ -70,7 +70,7 @@ public partial class MultiplayerManager : Node {
   public static void Disconnect() {
     PlayerManager.Reset();
 
-    Peer?.Close();
+    Peer.DisconnectPeer(1);
     Instance.Multiplayer.MultiplayerPeer = null;
 
     MultiplayerStatus = MultiplayerStatus.Disconnected;
@@ -82,33 +82,48 @@ public partial class MultiplayerManager : Node {
   }
 
   public static Action? Disconnected;
-  #endregion
 
-  #region Server
-  private void SERVER_ClientConnected(ConnectionResult result, long peerId) {
-    RpcId(peerId, nameof(CLIENT_ConnectionResult), result.pack());
+  /// <summary>
+  /// SERVER: Called by the godot multiplayer api when a client disconnects from the server.
+  /// </summary>
+  private void SERVER_OnPeerDisconnected(long id) {
+    GD.PushWarning($"<multiplayer> Peer disconnected with id: {id}");
+    if (!IsHost) return;
 
-    if (result.Result == ConnectionResultType.Failure) {
-      // disconnect the peer
-      Peer.DisconnectPeer((int) peerId);
-    } else {
-      // syncronize the client with the server
-      PlayerManager.SERVER_SynchronizeClient(peerId);
-    }
+    PlayerManager.SERVER_PlayerDisconnected(id);
   }
 
-  public static Action? SERVER_ServerReady;
   /// <summary>
-  /// Called by the godot multiplayer api when the server is created.
+  /// SERVER: Disconnects a peer from the server.
+  /// </summary>
+  public static void SERVER_DisconnectPeer(long id) {
+    if (!IsHost) return;
+
+    Peer.DisconnectPeer((int)id);
+  }
+
+  /// <summary>
+  /// CLIENT: Called by the godot multiplayer api when the client disconnects from the server.
+  /// </summary>
+  private void CLIENT_OnDisconnectedFromServer() {
+    GD.PushWarning($"<multiplayer> Client disconnected from server with id: {PeerId}");
+
+    if (IsHost) return;
+
+    Disconnect();
+  }
+  #endregion
+
+  /// <summary>
+  /// Called by the mpAPI when the server is created.
   /// </summary>
   private void SERVER_ServerCreated() {
     if (!IsHost) return;
-    
+
     if (SteamClient.IsValid) {
       var steamId = SteamClient.SteamId;
-      GD.PushWarning($"<multiplayer> Client connected with steamId: {steamId}");
-
-      PlayerManager.SERVER_SteamPlayerConnected(steamId, 1);
+      var name = ClientData.Username;
+      PlayerManager.SERVER_SteamPlayerConnected(steamId, 1, name);
     } else {
       var name = ClientData.Username;
       PlayerManager.SERVER_EnetPlayerConnected(name, 1);
@@ -116,58 +131,92 @@ public partial class MultiplayerManager : Node {
 
     SERVER_ServerReady?.Invoke();
   }
+  public static Action? SERVER_ServerReady;
+
+  #region Client Connection
+  // --------------------------------------------------------------------------
+  // Client Connection
+  // 1. The client connects to the server, and the mpAPI calls CLIENT_OnConnectedToServer.
+  // 2. The client sends data about iself to the server via RPCs.
+  // --------------------------------------------------------------------------
+
 
   /// <summary>
-  /// Called by the godot multiplayer api when a client disconnects from the server.
+  /// Called by the mpAPI when the client connects to the server.
   /// </summary>
-  private void OnPeerDisconnected(long id) {
-    if (!IsHost) return;
-
-    PlayerManager.SERVER_PlayerDisconnected(id);
-  }
-
-  public static void SERVER_DisconnectPeer(long id) {
-    if (!IsHost) return;
-
-    Peer.DisconnectPeer((int) id);
-  }
-  #endregion
-
-  #region Client
-  /// <summary>
-  /// Called by the godot multiplayer api when the client disconnects from the server.
-  /// </summary>
-  private void OnDisconnectedFromServer() {
-    GD.PushWarning($"<multiplayer> Client disconnected from server with id: {PeerId}");
-    
-    if (IsHost) return;
-
-    Disconnect();
-  }
-
-  /// <summary>
-  /// Called by the godot multiplayer api when the client connects to the server.
-  /// </summary>
-  private void OnConnectedToServer() {
+  private void CLIENT_OnConnectedToServer() {
     if (IsHost) return;
 
     if (SteamClient.IsValid) {
-      var steamId = ClientData.SteamId!.Value.AccountId;
+      var steamId = ClientData.SteamId!.Value;
       var name = ClientData.Username;
-
-      // TODO: Proper steam joining system
-      GD.PushWarning($"<multiplayer> Client connected with steamId: {steamId} and name: {name}");
-
-      RpcId(1, nameof(SERVER_SteamClientConnected), steamId, name);
+      RpcId(1, nameof(SERVER_SteamClientConnected), (ulong)steamId, name);
     } else {
-
       var name = ClientData.Username;
-      GD.PushWarning($"<multiplayer> Client connected with name: {name}");
       RpcId(1, nameof(SERVER_EnetClientConnected), name);
     }
   }
 
-  public static Action<ConnectionResult>? CLIENT_OnConnectionResult;
+  // --------------------------------------------------------------------------
+  // 3. The server receives the RPC based on the connection type.
+  // 4. The player manager handles the new player and returns a connection result.
+  // ---------------------------------------------------------------------------
+  /// <summary>
+  /// Called by the client to notify the server of a new connection.
+  /// </summary>
+  [Rpc(
+    mode: MultiplayerApi.RpcMode.AnyPeer,
+    CallLocal = true,
+    TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
+  )]
+  private void SERVER_SteamClientConnected(ulong steamId, string name) {
+    if (!IsHost) return;
+
+    var peerId = Multiplayer.GetRemoteSenderId();
+    var result = PlayerManager.SERVER_SteamPlayerConnected(steamId, peerId, name);
+
+    SERVER_ClientConnected(result, peerId);
+  }
+
+  /// <summary>
+  /// Called by the client to notify the server of a new connection.
+  /// </summary>
+  [Rpc(
+    mode: MultiplayerApi.RpcMode.AnyPeer,
+    CallLocal = true,
+    TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
+  )]
+  private void SERVER_EnetClientConnected(string name) {
+    if (!IsHost) return;
+
+    var peerId = Multiplayer.GetRemoteSenderId();
+    var result = PlayerManager.SERVER_EnetPlayerConnected(name, peerId);
+
+    SERVER_ClientConnected(result, peerId);
+  }
+
+  // --------------------------------------------------------------------------
+  // 5. The server notifies the client of the connection result, if the result is failure the peer is disconnected.
+  // ---------------------------------------------------------------------------
+  /// <summary>
+  /// SERVER: Called by mpAPI SERVER_SteamClientConnected and SERVER_EnetClientConnected.
+  /// Notifies the client of the connection result.
+  /// </summary>
+  private void SERVER_ClientConnected(ConnectionResult result, long peerId) {
+    RpcId(peerId, nameof(CLIENT_ConnectionResult), result.Serialize());
+
+    if (result.Result == ConnectionResultType.Failure) {
+      // disconnect the peer
+      Peer.DisconnectPeer((int)peerId);
+    } else {
+      // syncronize the client with the server
+      PlayerManager.SERVER_SynchronizeClient(peerId);
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // 6. The client receives the connection result and handles it.
+  // ---------------------------------------------------------------------------
   /// <summary>
   /// Called via RPC by the server to notify the client of the connection result.
   /// </summary>
@@ -179,10 +228,10 @@ public partial class MultiplayerManager : Node {
   private void CLIENT_ConnectionResult(byte[] result) {
     if (IsHost) return;
 
-    var connectionResult = ConnectionResult.unpack(result);
+    var connectionResult = result.Deserialize<ConnectionResult>();
 
     CLIENT_OnConnectionResult?.Invoke(connectionResult);
   }
-  //============================================================================
+  public static Action<ConnectionResult>? CLIENT_OnConnectionResult;
   #endregion
 }

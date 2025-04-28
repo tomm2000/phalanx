@@ -23,6 +23,9 @@ public partial class MultiplayerMenu : Control {
   [Node] private Control LobbyList { get; set; } = default!;
 
   public override void _Ready() {
+    MultiplayerManager.CLIENT_OnConnectionResult += OnClientConnectionResult;
+    MultiplayerManager.SERVER_ServerReady += OnServerReady;
+
     if (!SteamClient.IsValid) {
       CreateSteamLobbyButton.Disabled = true;
       CreateSteamLobbyButton.MouseDefaultCursorShape = CursorShape.Forbidden;
@@ -35,12 +38,10 @@ public partial class MultiplayerMenu : Control {
   public override void _ExitTree() {
     MultiplayerManager.SERVER_ServerReady -= OnServerReady;
     MultiplayerManager.CLIENT_OnConnectionResult -= OnClientConnectionResult;
-    // Steam.LobbyMatchList -= OnLobbyMatchList;
   }
 
   private void OnCreateSteamLobbyButtonPressed() {
-    MultiplayerManager.SERVER_ServerReady += OnServerReady;
-    MultiplayerManager.HostSteamLobby();
+    _ = MultiplayerManager.HostSteam();
   }
 
   private void OnCreateIpLobbyButtonPressed() {
@@ -76,7 +77,6 @@ public partial class MultiplayerMenu : Control {
     var ip = addressParts[0];
     var port = addressParts.Length > 1 ? int.Parse(addressParts[1]) : 7777;
 
-    MultiplayerManager.CLIENT_OnConnectionResult += OnClientConnectionResult;
     MultiplayerManager.ConnectEnet(ip, port);
   }
 

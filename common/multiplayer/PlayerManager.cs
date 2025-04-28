@@ -52,20 +52,13 @@ public partial class PlayerManager : Node {
   #endregion
 
   #region connect Logic
-  public static ConnectionResult SERVER_SteamPlayerConnected(ulong steamId, long peerId, string nameFallback = "Unknown Player") {
-    // find player by steamId
+  public static ConnectionResult SERVER_SteamPlayerConnected(ulong steamId, long peerId, string name) {
     var existingPlayer = Players.FindBySteamID(steamId);
-
-    var name = ""; // FIXME: Steam.GetFriendPersonaName(steamId);
-
-    if (name == "" || name == null) { name = nameFallback; }
-
     return SERVER_PlayerConnected(existingPlayer, name, peerId, steamId);
   }
 
   public static ConnectionResult SERVER_EnetPlayerConnected(string name, long peerId) {
     var existingPlayer = Players.FindByName(name);
-
     return SERVER_PlayerConnected(existingPlayer, name, peerId);
   }
   

@@ -39,7 +39,7 @@ public partial class PlayerListItem : Control {
       var avatar = await TlibSteam.GetAvatarTextureAsync(player.SteamId!.Value, AvatarSize.Medium);
       
       if (avatar.IsFailed) {
-        GD.PrintErr(avatar.Errors);
+        GD.Print(avatar);
         return;
       }
       AvatarTexture.Texture = avatar.Value;
