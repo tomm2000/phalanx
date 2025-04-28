@@ -17,13 +17,24 @@ public partial class MultiplayerLobbyMenu : Control {
 
   [Node] private Label LobbyNameLabel { get; set; } = default!;
   [Node] private Control PlayerList { get; set; } = default!;
+  [Node] private Button ReadyButton { get; set; } = default!;
+  [Node] private Button StartButton { get; set; } = default!;
+
+  public Dictionary<string, bool> PlayerReadyStatus { get; set; } = [];
 
   public override void _Ready() {
     PlayerManager.PlayerListUpdated += OnPlayerListUpdated;
     MultiplayerManager.Disconnected += ReturnToMultiplayerMenu;
 
     OnPlayerListUpdated();
+
+    if (MultiplayerManager.IsHost) {
+      UpdateStartButton();
+    } else {
+      StartButton.Visible = false;
+    }
   }
+
   public override void _ExitTree() {
     PlayerManager.PlayerListUpdated -= OnPlayerListUpdated;
     MultiplayerManager.Disconnected -= ReturnToMultiplayerMenu;
@@ -38,15 +49,81 @@ public partial class MultiplayerLobbyMenu : Control {
       var playerListItem = PlayerListItem.Instantiate(player);
       PlayerList.AddChild(playerListItem);
     }
+
+    UpdateStartButton();
   }
 
   private void OnExitLobbyButtonPressed() {
     MultiplayerManager.Disconnect();
-    
+
     ReturnToMultiplayerMenu();
   }
 
   private void ReturnToMultiplayerMenu() {
     Main.Instance.SwitchScene(MultiplayerMenu.ScenePath);
   }
+
+  #region Start/Ready
+  private void OnReadyButtonPressed() {
+    RpcId(1, nameof(SERVER_ClientReadyUp));
+  }
+
+  private void OnStartGameButtonPressed() {
+    if (!MultiplayerManager.IsHost) { throw new Exception("Only the host can start the game."); }
+
+    var allReady = PlayerManager.Players.All(p => PlayerReadyStatus.GetValueOrDefault(p.UID, false));
+    if (!allReady) { return; }
+
+    var map = DevMap.GenerateMap(19, 19, seed: 1234);
+
+    Rpc(nameof(CLIENT_StartGame), map.Serialize());
+  }
+
+  [Rpc(
+    mode: MultiplayerApi.RpcMode.AnyPeer,
+    CallLocal = true,
+    TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
+  )]
+  private void SERVER_ClientReadyUp() {
+    var peerId = MultiplayerManager.RpcSenderId();
+    var playerResult = PlayerManager.Players.FindByPeerID(peerId);
+
+    if (playerResult.IsFailed) {
+      throw new Exception($"Player with peer ID {peerId} not found.");
+    }
+
+    var player = playerResult.Value;
+    var newStatus = !PlayerReadyStatus.GetValueOrDefault(player.UID, false);
+
+    Rpc(nameof(CLIENT_PlayerStatusUpdate), player.UID, newStatus);
+  }
+
+  [Rpc(
+    mode: MultiplayerApi.RpcMode.Authority,
+    CallLocal = true,
+    TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
+  )]
+  private void CLIENT_PlayerStatusUpdate(string playerUID, bool isReady) {
+    PlayerReadyStatus[playerUID] = isReady;
+
+    UpdateStartButton();
+  }
+
+  [Rpc(
+    mode: MultiplayerApi.RpcMode.Authority,
+    CallLocal = true,
+    TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
+  )]
+  private void CLIENT_StartGame(byte[] mapData) {
+    var map = mapData.Deserialize<MapData>();
+
+    var clientGameManager = GameClientManager.Instantiate(map);
+    Main.Instance.SwitchScene(clientGameManager);
+  }
+
+  private void UpdateStartButton() {
+    bool allReady = PlayerManager.Players.All(p => PlayerReadyStatus.GetValueOrDefault(p.UID, false));
+    StartButton.Disabled = !allReady;
+  }
+  #endregion
 }

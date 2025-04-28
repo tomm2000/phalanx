@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dklhh2tjx2wdo" path="res://client/terrain/StandardTile.cs" id="1_fihpe"]
 [ext_resource type="Shader" uid="uid://dw8sfu5i5p4as" path="res://client/terrain/shaders/terrain_standard.gdshader" id="2_oogjt"]
+[ext_resource type="ArrayMesh" uid="uid://cwalql85a2lf" path="res://client/terrain/tile/empty_tile.obj" id="3_htqwh"]
 [ext_resource type="PackedScene" uid="uid://dlrmpm0ngdfs0" path="res://client/terrain/objects/vegetation/tree_spawner.tscn" id="3_yl6lh"]
 [ext_resource type="PackedScene" uid="uid://yu0am88i7uy8" path="res://client/terrain/objects/vegetation/rock_spawner.tscn" id="4_aj3nk"]
 
@@ -32,8 +33,6 @@ shader_parameter/noise_texture = SubResource("NoiseTexture2D_htqwh")
 shader_parameter/time_scale = 0.2
 shader_parameter/flow_strength = 0.5
 
-[sub_resource type="SphereMesh" id="SphereMesh_oogjt"]
-
 [node name="StandardTile" type="Node3D"]
 script = ExtResource("1_fihpe")
 TerrainColorNoise = SubResource("NoiseTexture2D_g6bl3")
@@ -42,7 +41,7 @@ RiverShapeNoise = SubResource("NoiseTexture2D_rlft4")
 [node name="MeshInstance" type="MeshInstance3D" parent="."]
 unique_name_in_owner = true
 material_override = SubResource("ShaderMaterial_yl6lh")
-mesh = SubResource("SphereMesh_oogjt")
+mesh = ExtResource("3_htqwh")
 
 [node name="TreeSpawner" parent="." instance=ExtResource("3_yl6lh")]
 

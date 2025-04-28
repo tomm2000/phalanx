@@ -14,6 +14,13 @@ public partial class StandardTerrain : Node3D {
   public override void _Notification(int what) => this.Notify(what);
   public static readonly string ScenePath = "uid://bgu2ycrayqu6s";
 
+  public static StandardTerrain Instantiate() {
+    var scene = ResourceLoader.Load<PackedScene>(ScenePath);
+    var instance = scene.Instantiate<StandardTerrain>();
+
+    return instance;
+  }
+
   [Node] private Node3D TileContainer { get; set; } = default!;
   public IEnumerable<StandardTile> Tiles => TileContainer.GetChildrenOfType<StandardTile>();
 
@@ -35,8 +42,6 @@ public partial class StandardTerrain : Node3D {
   }
 
   public override void _Ready() {
-    GenerateTerrain();
-
     ClientEventBus.OnTileLeftClicked += (tile) => { SelectedTile = tile; };
     ClientEventBus.OnTileHovered += (tile) => { HoveredTile = tile; };
   }
@@ -45,10 +50,8 @@ public partial class StandardTerrain : Node3D {
     DebugUI();
   }
 
-  public void GenerateTerrain() {
+  public Task GenerateTerrain(MapData map) {
     TileContainer.QueueFreeChildren();
-
-    var map = DevMap.GenerateMap(width: 9, height: 9, seed: 3);
     var tiles = new List<StandardTile>();
 
     foreach (var tile in map.Tiles) {
@@ -57,17 +60,15 @@ public partial class StandardTerrain : Node3D {
       tiles.Add(tileInstance);
     }
 
-    Parallel.ForEach(tiles, tileInstance => {
-      var neighbors = map.NeighborsWithDirections(tileInstance.TileData.coords);
+    var task = Task.Run(() => {
+      Parallel.ForEach(tiles, tileInstance => {
+        var neighbors = map.NeighborsWithDirections(tileInstance.TileData.coords);
 
-      tileInstance.GenerateSurface(neighbors);
+        tileInstance.GenerateSurface(neighbors);
+      });
     });
 
-    return;
-  }
-
-  public Task GenerateTerrain(MapTileData[] tiles) {
-    throw new NotImplementedException();
+    return task;
   }
 
   public HexCoords GetCoords(Vector3 position) {

@@ -36,6 +36,10 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_0b2yv")
 
+[node name="RefreshLobbiesTimer" type="Timer" parent="."]
+wait_time = 5.0
+autostart = true
+
 [node name="BoxContainer" type="BoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
@@ -102,10 +106,21 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.5
 
-[node name="Filler" parent="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="0" instance=ExtResource("5_i1g48")]
+[node name="ReadyButton" parent="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="0" instance=ExtResource("6_3dws0")]
+unique_name_in_owner = true
+layout_mode = 2
+toggle_mode = true
+text = "Ready Up"
+
+[node name="StartButton" parent="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="1" instance=ExtResource("6_3dws0")]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Start game"
+
+[node name="Filler" parent="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="2" instance=ExtResource("5_i1g48")]
 layout_mode = 2
 
-[node name="ExitLobbyButton" parent="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="1" instance=ExtResource("6_3dws0")]
+[node name="ExitLobbyButton" parent="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="3" instance=ExtResource("6_3dws0")]
 layout_mode = 2
 text = "Exit Lobby
 "
@@ -213,6 +228,8 @@ offset_bottom = 62.0
 grow_horizontal = 0
 grow_vertical = 1
 
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/ReadyButton" to="." method="OnReadyButtonPressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/StartButton" to="." method="OnStartGameButtonPressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/ExitLobbyButton" to="." method="OnExitLobbyButtonPressed"]
 
 [editable path="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer"]

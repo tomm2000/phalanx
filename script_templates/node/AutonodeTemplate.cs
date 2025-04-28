@@ -13,11 +13,18 @@ using Godot;
 public partial class _CLASS_ : _BASE_ {
   public override void _Notification(int what) => this.Notify(what);
   public static readonly string ScenePath = "uid://_UID_";
+  
+  public static _CLASS_ Instantiate() {
+    var scene = ResourceLoader.Load<PackedScene>(ScenePath);
+    var instance = scene.Instantiate<_CLASS_>();
+    return instance;
+  }
 
   #region Nodes
   #endregion
 
-  public void OnResolved() {
+  public void OnResolved()
+  {
   }
 
   public override void _Ready() {

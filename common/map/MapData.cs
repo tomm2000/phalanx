@@ -1,9 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MessagePack;
 
-public class MapData {
-  private Dictionary<HexCoords, MapTileData> tileDict = [];
+[MessagePackObject(AllowPrivate = true)]
+public partial class MapData {
+  [Key(0)] private Dictionary<HexCoords, MapTileData> tileDict = [];
 
   public MapData(IEnumerable<MapTileData> tiles) {
     foreach (var tile in tiles) {
@@ -11,7 +13,9 @@ public class MapData {
     }
   }
 
-  public IEnumerable<MapTileData> Tiles => tileDict.Values;
+  private MapData() { }
+
+  [IgnoreMember] public IEnumerable<MapTileData> Tiles => tileDict.Values;
 
   /// <summary>
   /// Get the tile at the given coordinates.

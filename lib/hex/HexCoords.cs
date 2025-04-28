@@ -51,8 +51,8 @@ public static class HexDirectionExtensions {
 
 [MessagePackObject(AllowPrivate = true)]
 public partial struct HexCoords {
-  [Key(0)] private readonly int q;
-  [Key(1)] private readonly int r;
+  [Key(0)] private int q;
+  [Key(1)] private int r;
 
   #region Creation
   // for MessagePack

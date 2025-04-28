@@ -19,18 +19,24 @@ public partial class MultiplayerMenu : Control {
   [Node] private Button CreateSteamLobbyButton { get; set; } = default!;
   [Node] private LineEdit CreateIpLobbyInput { get; set; } = default!;
   [Node] private LineEdit JoinIpLobbyInput { get; set; } = default!;
+  [Node] private Control LobbyList { get; set; } = default!;
 
   public override void _Ready() {
+    Steam.LobbyMatchList += OnLobbyMatchList;
+
     if (!Steam.IsSteamRunning()) {
       CreateSteamLobbyButton.Disabled = true;
       CreateSteamLobbyButton.MouseDefaultCursorShape = CursorShape.Forbidden;
       CreateSteamLobbyButton.TooltipText = "Steam is not running";
+    } else {
+      UpdateLobbyList();
     }
   }
 
   public override void _ExitTree() {
     MultiplayerManager.SERVER_ServerReady -= OnServerReady;
     MultiplayerManager.CLIENT_OnConnectionResult -= OnClientConnectionResult;
+    Steam.LobbyMatchList -= OnLobbyMatchList;
   }
 
   private void OnCreateSteamLobbyButtonPressed() {
@@ -83,8 +89,38 @@ public partial class MultiplayerMenu : Control {
     }
   }
 
-
   private void OnQuitToMainMenuButtonPressed() {
     Main.Instance.SwitchScene(MainMenu.ScenePath);
+  }
+
+  private void UpdateLobbyList() {
+    foreach (var child in LobbyList.GetChildrenOfType<LobbyListItem>()) {
+      child.QueueFree();
+    }
+
+    Steam.AddRequestLobbyListStringFilter("game", "phalanx", Steam.LobbyComparison.LobbyComparisonEqual);
+    Steam.AddRequestLobbyListResultCountFilter(10);
+
+    Steam.RequestLobbyList();
+  }
+  private void OnLobbyMatchList(Godot.Collections.Array lobbies) {
+    var lobbyCount = lobbies.Count;
+
+    if (lobbyCount == 0) {
+      GD.Print("No lobbies found");
+      return;
+    }
+
+    var newLobbyList = new List<LobbyListItem>();
+
+    foreach (var lobbyId in lobbies) {
+      var lobbyListItem = LobbyListItem.Instantiate((ulong)lobbyId);
+      newLobbyList.Add(lobbyListItem);
+    }
+
+    LobbyList.QueueFreeChildren();
+    foreach (var lobbyListItem in newLobbyList) {
+      LobbyList.AddChild(lobbyListItem);
+    }
   }
 }

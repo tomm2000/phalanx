@@ -57,7 +57,7 @@ public partial class MultiplayerManager : Node {
     TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
   )]
   private void SERVER_EnetClientConnected(string name) {
-    if (!IsServer) return;
+    if (!IsHost) return;
 
     var peerId = Multiplayer.GetRemoteSenderId();
     var result = PlayerManager.SERVER_EnetPlayerConnected(name, peerId);

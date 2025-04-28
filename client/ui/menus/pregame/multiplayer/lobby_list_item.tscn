@@ -1,0 +1,61 @@
+[gd_scene load_steps=5 format=3 uid="uid://dcigsxlge8ir0"]
+
+[ext_resource type="Script" uid="uid://bktq6u7v40pf1" path="res://client/ui/menus/pregame/multiplayer/LobbyListItem.cs" id="1_c2xfn"]
+[ext_resource type="PackedScene" uid="uid://rdhk223fvvon" path="res://client/ui/common/filler.tscn" id="2_27wpr"]
+[ext_resource type="PackedScene" uid="uid://bwqtr45lx05f" path="res://client/ui/common/standard_button.tscn" id="3_l04nm"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_27wpr"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.0941176, 0.117647, 0.14902, 1)
+
+[node name="LobbyListItem" type="Control"]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_c2xfn")
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_27wpr")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer"]
+layout_mode = 2
+
+[node name="LobbyNameLabel" type="Label" parent="PanelContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Tomm2000"
+
+[node name="Filler" parent="PanelContainer/HBoxContainer" instance=ExtResource("2_27wpr")]
+layout_mode = 2
+
+[node name="PlayerCountLabel" type="Label" parent="PanelContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "1/4 players"
+
+[node name="Filler2" parent="PanelContainer/HBoxContainer" instance=ExtResource("2_27wpr")]
+layout_mode = 2
+
+[node name="JoinButton" parent="PanelContainer/HBoxContainer" instance=ExtResource("3_l04nm")]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+text = "Join"
+
+[node name="RefreshLobbiestimer" type="Timer" parent="."]
+autostart = true
+
+[connection signal="timeout" from="RefreshLobbiestimer" to="." method="UpdateLobbyInfo"]

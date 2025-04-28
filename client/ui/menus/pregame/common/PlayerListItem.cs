@@ -28,7 +28,7 @@ public partial class PlayerListItem : Control {
   public override void _Ready() {
     PlayerNameLabel.Text = player.Username;
 
-    if (MultiplayerManager.IsServer) {
+    if (MultiplayerManager.IsHost) {
       KickButton.Visible = true;
       KickButton.Pressed += OnKickButtonPressed;
     } else {

@@ -75,7 +75,7 @@ public partial class PlayerManager : Node {
   /// Handles player connection logic.
   /// </summary>
   private static ConnectionResult SERVER_PlayerConnected(Result<Player> player, string name, long peerId, ulong? steamId = null) {
-    if (!MultiplayerManager.IsServer) { return ConnectionResult.Failure("Only the host can connect players"); }
+    if (!MultiplayerManager.IsHost) { return ConnectionResult.Failure("Only the host can connect players"); }
 
     if (player.IsFailed) {
       //------------------- if the player does not exist, create a new player
@@ -159,7 +159,7 @@ public partial class PlayerManager : Node {
   /// Handles player disconnection logic.
   /// </summary>
   public static void SERVER_PlayerDisconnected(long peerId) {
-    if (!MultiplayerManager.IsServer) { return; }
+    if (!MultiplayerManager.IsHost) { return; }
     
     var player = Players.FindByPeerID(peerId);
 
@@ -207,7 +207,7 @@ public partial class PlayerManager : Node {
 
   #region Synchronization
   public static void SERVER_SynchronizeClient(long peerId) {
-    if (!MultiplayerManager.IsServer) { return; }
+    if (!MultiplayerManager.IsHost) { return; }
 
     foreach (var player in Players) {
       Instance.RpcId(peerId, nameof(CLIENT_PlayerListSync), player.Serialize());

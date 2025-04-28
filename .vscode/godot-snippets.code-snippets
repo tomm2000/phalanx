@@ -1,0 +1,24 @@
+{
+	"Server RPC Snippet": {
+    "prefix": "rpcserver",
+    "body": [
+      "[Rpc(",
+      "  mode: MultiplayerApi.RpcMode.AnyPeer,",
+      "  CallLocal = false,",
+      "  TransferMode = MultiplayerPeer.TransferModeEnum.Reliable",
+      ")]",
+    ],
+    "description": "A rpc called on the server from any peer."
+  },
+  "Client RPC Snippet": {
+    "prefix": "rpcclient",
+    "body": [
+      "[Rpc(",
+      "  mode: MultiplayerApi.RpcMode.Authority,",
+      "  CallLocal = true,",
+      "  TransferMode = MultiplayerPeer.TransferModeEnum.Reliable",
+      ")]",
+    ],
+    "description": "A rpc called on the client from the server."
+  }
+}

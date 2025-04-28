@@ -1,14 +1,6 @@
 using Godot;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using Chickensoft.GodotNodeInterfaces;
-using Chickensoft.AutoInject;
-using Chickensoft.Introspection;
-using RandomNameGeneratorLibrary;
-using MessagePack.Resolvers;
 using GodotSteam;
-
 
 public enum MultiplayerStatus {
   Disconnected,
@@ -29,7 +21,7 @@ public partial class MultiplayerManager : Node {
 
   #region Accessors
   public static int PeerId => Instance.Multiplayer.GetUniqueId();
-  public static bool IsServer => PeerId == 1;
+  public static bool IsHost => PeerId == 1;
   public static Func<int> RpcSenderId => Instance.Multiplayer.GetRemoteSenderId;
   public static MultiplayerPeer Peer => Instance.Multiplayer.MultiplayerPeer;
   public static MultiplayerApi MultiplayerApi => Instance.Multiplayer;
@@ -79,6 +71,8 @@ public partial class MultiplayerManager : Node {
 
     MultiplayerStatus = MultiplayerStatus.Disconnected;
 
+    LeaveSteamLobby();
+
     GD.PushWarning($"----------- <multiplayer disconnected> -----------");
     Disconnected?.Invoke();
   }
@@ -104,7 +98,7 @@ public partial class MultiplayerManager : Node {
   /// Called by the godot multiplayer api when the server is created.
   /// </summary>
   private void SERVER_ServerCreated() {
-    if (!IsServer) return;
+    if (!IsHost) return;
     
     if (Steam.IsSteamRunning()) {
       var steamId = Steam.GetSteamID();
@@ -123,13 +117,13 @@ public partial class MultiplayerManager : Node {
   /// Called by the godot multiplayer api when a client disconnects from the server.
   /// </summary>
   private void SERVER_PeerDisconnected(long id) {
-    if (!IsServer) return;
+    if (!IsHost) return;
 
     PlayerManager.SERVER_PlayerDisconnected(id);
   }
 
   public static void SERVER_DisconnectPeer(long id) {
-    if (!IsServer) return;
+    if (!IsHost) return;
 
     Peer.DisconnectPeer((int) id);
   }
@@ -140,7 +134,7 @@ public partial class MultiplayerManager : Node {
   /// Called by the godot multiplayer api when the client disconnects from the server.
   /// </summary>
   private void CLIENT_DisconnectedFromServer() {
-    if (IsServer) return;
+    if (IsHost) return;
 
     Disconnect();
   }
@@ -149,7 +143,7 @@ public partial class MultiplayerManager : Node {
   /// Called by the godot multiplayer api when the client connects to the server.
   /// </summary>
   private void CLIENT_ConnectedToServer() {
-    if (IsServer) return;
+    if (IsHost) return;
 
     if (Steam.IsSteamRunning()) {
       var steamId = ClientData.SteamId!.Value;
@@ -176,7 +170,7 @@ public partial class MultiplayerManager : Node {
     TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
   )]
   private void CLIENT_ConnectionResult(byte[] result) {
-    if (IsServer) return;
+    if (IsHost) return;
 
     var connectionResult = ConnectionResult.unpack(result);
 
