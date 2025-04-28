@@ -3,23 +3,16 @@ using System;
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
 using ImGuiNET;
-using GodotSteam;
 using System.IO;
+using Steamworks;
 
 [Meta(typeof(IAutoConnect))]
 public partial class Main : Node {
   public static Main Instance { get; set; } = default!;
-
   public override void _Notification(int what) => this.Notify(what);
-
+  
   public Main() {
-    if (Directory.Exists("./debug")) {
-      Directory.Delete("./debug", true);
-    }
-    Directory.CreateDirectory("./debug");
-
-    var result = Steam.SteamInitEx(false);
-    GD.Print($"Steam init result: {result.Verbal}");
+    InitSteam();
   }
 
   #region Lifecycle
@@ -29,9 +22,16 @@ public partial class Main : Node {
   }
   public override void _Process(double delta) {
     DebugUI();
-    Steam.RunCallbacks();
   }
   #endregion
+
+  public void InitSteam() {
+    try {
+      SteamClient.Init(480, asyncCallbacks: true);
+    } catch (System.Exception e) {
+      GD.PrintErr($"Steam failed to initialize: {e.Message}");
+    }
+  }
 
   #region Scene Management
   [Export] private Node? CurrentScene { get; set; }

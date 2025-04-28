@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
 using Godot;
-using GodotSteam;
+using Steamworks.Data;
 
 
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
@@ -11,10 +11,10 @@ public partial class LobbyListItem : Control {
   public override void _Notification(int what) => this.Notify(what);
   public static readonly string ScenePath = "uid://dcigsxlge8ir0";
 
-  public static LobbyListItem Instantiate(ulong lobbyId) {
+  public static LobbyListItem Instantiate(Lobby lobby) {
     var scene = ResourceLoader.Load<PackedScene>(ScenePath);
     var instance = scene.Instantiate<LobbyListItem>();
-    instance.lobbyId = lobbyId;
+    instance.lobby = lobby;
     return instance;
   }
 
@@ -24,32 +24,25 @@ public partial class LobbyListItem : Control {
   [Node] private Button JoinButton { get; set; } = default!;
   #endregion
 
-  private ulong lobbyId;
+  private Lobby lobby;
 
   public override void _Ready() {
     UpdateLobbyInfo();
   }
 
   public void UpdateLobbyInfo() {
-    var data = Steam.GetAllLobbyData(lobbyId);
-
-    if (data.Count == 0) {
-      this.QueueFree();
-      return;
-    }
-
-    var name = Steam.GetLobbyData(lobbyId, "hostname");
+    var name = lobby.GetData("hostname");
     if (string.IsNullOrEmpty(name)) {
       name = $"Unknown";
     }
-    var playerLimit = Steam.GetLobbyMemberLimit(lobbyId);
-    var playerCount = Steam.GetNumLobbyMembers(lobbyId);
+    var playerLimit = lobby.MaxMembers;
+    var playerCount = lobby.MemberCount;
 
     LobbyNameLabel.Text = name;
     PlayerCountLabel.Text = $"{playerCount}/{playerLimit}";
   }
 
   private void OnJoinButtonPressed() {
-    MultiplayerManager.JoinSteamLobby(lobbyId);
+    MultiplayerManager.JoinSteamLobby(lobby);
   }
 }

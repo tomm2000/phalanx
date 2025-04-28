@@ -7,7 +7,8 @@ using Tlib.Nodes;
 using System.Collections.Generic;
 using Tlib;
 using System.Linq;
-using GodotSteam;
+using Steamworks;
+using Steamworks.Data;
 
 namespace Client.UI.Menus;
 
@@ -22,9 +23,7 @@ public partial class MultiplayerMenu : Control {
   [Node] private Control LobbyList { get; set; } = default!;
 
   public override void _Ready() {
-    Steam.LobbyMatchList += OnLobbyMatchList;
-
-    if (!Steam.IsSteamRunning()) {
+    if (!SteamClient.IsValid) {
       CreateSteamLobbyButton.Disabled = true;
       CreateSteamLobbyButton.MouseDefaultCursorShape = CursorShape.Forbidden;
       CreateSteamLobbyButton.TooltipText = "Steam is not running";
@@ -36,7 +35,7 @@ public partial class MultiplayerMenu : Control {
   public override void _ExitTree() {
     MultiplayerManager.SERVER_ServerReady -= OnServerReady;
     MultiplayerManager.CLIENT_OnConnectionResult -= OnClientConnectionResult;
-    Steam.LobbyMatchList -= OnLobbyMatchList;
+    // Steam.LobbyMatchList -= OnLobbyMatchList;
   }
 
   private void OnCreateSteamLobbyButtonPressed() {
@@ -93,28 +92,26 @@ public partial class MultiplayerMenu : Control {
     Main.Instance.SwitchScene(MainMenu.ScenePath);
   }
 
-  private void UpdateLobbyList() {
+  private async void UpdateLobbyList() {
     foreach (var child in LobbyList.GetChildrenOfType<LobbyListItem>()) {
       child.QueueFree();
     }
 
-    Steam.AddRequestLobbyListStringFilter("game", "phalanx", Steam.LobbyComparison.LobbyComparisonEqual);
-    Steam.AddRequestLobbyListResultCountFilter(10);
+    LobbyQuery query = new();
+    // query.WithKeyValue("game", "phalanx");
+    query.WithMaxResults(10);
 
-    Steam.RequestLobbyList();
-  }
-  private void OnLobbyMatchList(Godot.Collections.Array lobbies) {
-    var lobbyCount = lobbies.Count;
+    var lobbies = await query.RequestAsync();
 
-    if (lobbyCount == 0) {
-      GD.Print("No lobbies found");
+    if(lobbies == null) {
+      GD.Print("<steam> No lobbies found");
       return;
     }
 
     var newLobbyList = new List<LobbyListItem>();
 
-    foreach (var lobbyId in lobbies) {
-      var lobbyListItem = LobbyListItem.Instantiate((ulong)lobbyId);
+    foreach (var lobby in lobbies) {
+      var lobbyListItem = LobbyListItem.Instantiate(lobby);
       newLobbyList.Add(lobbyListItem);
     }
 

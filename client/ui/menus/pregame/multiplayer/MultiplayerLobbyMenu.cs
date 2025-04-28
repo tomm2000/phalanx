@@ -53,11 +53,7 @@ public partial class MultiplayerLobbyMenu : Control {
     UpdateStartButton();
   }
 
-  private void OnExitLobbyButtonPressed() {
-    MultiplayerManager.Disconnect();
-
-    ReturnToMultiplayerMenu();
-  }
+  private void OnExitLobbyButtonPressed() => MultiplayerManager.Disconnect();
 
   private void ReturnToMultiplayerMenu() {
     Main.Instance.SwitchScene(MultiplayerMenu.ScenePath);

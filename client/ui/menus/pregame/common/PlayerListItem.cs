@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
 using Godot;
-using GodotSteam;
+using Steamworks;
 
 
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
@@ -25,7 +25,7 @@ public partial class PlayerListItem : Control {
 
   private Player player;
 
-  public override void _Ready() {
+  public override async void _Ready() {
     PlayerNameLabel.Text = player.Username;
 
     if (MultiplayerManager.IsHost) {
@@ -35,24 +35,19 @@ public partial class PlayerListItem : Control {
       KickButton.Visible = false;
     }
 
-    if (Steam.IsSteamRunning() && player.SteamId != null) {
-      GD.Print($"Loading avatar for {player.Username} ({player.SteamId})");
-
-      Steam.GetPlayerAvatar(AvatarSize.Medium, player.SteamId.Value);
-
-      Steam.AvatarLoaded += OnAvatarLoaded;
+    if (SteamClient.IsValid && ClientData.SteamId != null && player.SteamId != null) {
+      var avatar = await TlibSteam.GetAvatarTextureAsync(player.SteamId!.Value, AvatarSize.Medium);
+      
+      if (avatar.IsFailed) {
+        GD.PrintErr(avatar.Errors);
+        return;
+      }
+      AvatarTexture.Texture = avatar.Value;
     }
+      
   }
 
   private void OnKickButtonPressed() {
     MultiplayerManager.SERVER_DisconnectPeer(player.PeerId);
-  }
-
-  private void OnAvatarLoaded(ulong avatarId, int width, byte[] data) {
-    Steam.AvatarLoaded -= OnAvatarLoaded;
-
-    var avatarImage = Image.CreateFromData(width, width, false, Image.Format.Rgba8, data);
-
-    AvatarTexture.Texture = ImageTexture.CreateFromImage(avatarImage);
   }
 }

@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
 using Godot;
-using GodotSteam;
+using Steamworks;
 
 
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
@@ -17,34 +18,33 @@ public partial class UserTag : Control {
   [Node] private TextureRect SteamIcon { get; set; } = default!;
   #endregion
 
-  public override void _Ready() {
-    if (Steam.IsSteamRunning() && ClientData.SteamId != null) {
-      Steam.GetPlayerAvatar(AvatarSize.Medium, ClientData.SteamId.Value);
-
-      Steam.AvatarLoaded += OnAvatarLoaded;
+  public override async void _Ready() {
+    if (SteamClient.IsValid && ClientData.SteamId != null) {
+      var avatar = await TlibSteam.GetAvatarTextureAsync(ClientData.SteamId.Value, AvatarSize.Medium);
+      if (avatar.IsFailed) {
+        GD.PrintErr(avatar.Errors);
+        return;
+      }
+      
+      AvatarTexture.Texture = avatar.Value;
+      AvatarTexture.Visible = true;
+      SteamIcon.Visible = true;
     } else {
       SteamIcon.Visible = false;
-      this.MouseDefaultCursorShape = CursorShape.Arrow;
+      MouseDefaultCursorShape = CursorShape.Arrow;
     }
 
     UsernameLabel.Text = ClientData.Username;
   }
 
-  private void OnAvatarLoaded(ulong avatarId, int width, byte[] data) {
-    Steam.AvatarLoaded -= OnAvatarLoaded;
-
-    var avatarImage = Image.CreateFromData(width, width, false, Image.Format.Rgba8, data);
-    AvatarTexture.Texture = ImageTexture.CreateFromImage(avatarImage);
-  }
-
   private void OnGuiInput(InputEvent @event) {
-    if (
-      @event is InputEventMouseButton mouseButton &&
-      mouseButton.IsPressed() &&
-      mouseButton.ButtonIndex == MouseButton.Left &&
-      Steam.IsSteamRunning()
-    ) {
-      Steam.ActivateGameOverlay(GameOverlayType.Friends);
-    }
+    // if (
+    //   @event is InputEventMouseButton mouseButton &&
+    //   mouseButton.IsPressed() &&
+    //   mouseButton.ButtonIndex == MouseButton.Left &&
+    //   Steam.IsSteamRunning()
+    // ) {
+    //   Steam.ActivateGameOverlay(GameOverlayType.Friends);
+    // }
   }
 }

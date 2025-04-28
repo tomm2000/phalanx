@@ -1,6 +1,6 @@
 using Godot;
+using Steamworks;
 using System;
-using GodotSteam;
 
 public enum MultiplayerStatus {
   Disconnected,
@@ -31,9 +31,11 @@ public partial class MultiplayerManager : Node {
     Instance = this;
 
     Instance.Multiplayer.PeerDisconnected += Instance.OnPeerDisconnected;
-
     Instance.Multiplayer.ConnectedToServer += Instance.OnConnectedToServer;
     Instance.Multiplayer.ServerDisconnected += Instance.OnDisconnectedFromServer;
+    
+    SteamMatchmaking.OnLobbyEntered += OnLobbyEntered;
+    SteamMatchmaking.OnLobbyCreated += OnLobbyCreated;
   }
 
   #region Initialization
@@ -100,8 +102,8 @@ public partial class MultiplayerManager : Node {
   private void SERVER_ServerCreated() {
     if (!IsHost) return;
     
-    if (Steam.IsSteamRunning()) {
-      var steamId = Steam.GetSteamID();
+    if (SteamClient.IsValid) {
+      var steamId = SteamClient.SteamId;
       GD.PushWarning($"<multiplayer> Client connected with steamId: {steamId}");
 
       PlayerManager.SERVER_SteamPlayerConnected(steamId, 1);
@@ -149,19 +151,19 @@ public partial class MultiplayerManager : Node {
 
     if (IsHost) return;
 
-    if (Steam.IsSteamRunning()) {
-      var steamId = ClientData.SteamId!.Value;
-      var name = ClientData.Username;
+    // if (Steam.IsSteamRunning()) {
+    //   var steamId = ClientData.SteamId!.Value;
+    //   var name = ClientData.Username;
 
-      // TODO: Proper steam joining system
-      GD.PushWarning($"<multiplayer> Client connected with steamId: {steamId} and name: {name}");
+    //   // TODO: Proper steam joining system
+    //   GD.PushWarning($"<multiplayer> Client connected with steamId: {steamId} and name: {name}");
 
-      RpcId(1, nameof(SERVER_SteamClientConnected), steamId, name);
-    } else {
+    //   RpcId(1, nameof(SERVER_SteamClientConnected), steamId, name);
+    // } else {
       var name = ClientData.Username;
       GD.PushWarning($"<multiplayer> Client connected with name: {name}");
       RpcId(1, nameof(SERVER_EnetClientConnected), name);
-    }
+    // }
   }
 
   public static Action<ConnectionResult>? CLIENT_OnConnectionResult;

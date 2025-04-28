@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentResults;
 using Godot;
-using GodotSteam;
 
 public partial class PlayerManager : Node {
   #region Properties
@@ -56,7 +55,8 @@ public partial class PlayerManager : Node {
     // find player by steamId
     var existingPlayer = Players.FindBySteamID(steamId);
 
-    var name = Steam.GetFriendPersonaName(steamId);
+    // var name = Steam.GetFriendPersonaName(steamId);
+    var name = "Unknown Player"; // FIXME: Steam.GetFriendPersonaName(steamId);
 
     if (name == "" || name == null) { name = nameFallback; }
 
