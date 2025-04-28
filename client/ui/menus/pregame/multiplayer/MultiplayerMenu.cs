@@ -98,7 +98,7 @@ public partial class MultiplayerMenu : Control {
     }
 
     LobbyQuery query = new();
-    // query.WithKeyValue("game", "phalanx");
+    query.WithKeyValue("game", "phalanx");
     query.WithMaxResults(10);
 
     var lobbies = await query.RequestAsync();

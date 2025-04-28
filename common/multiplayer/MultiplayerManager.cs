@@ -43,6 +43,8 @@ public partial class MultiplayerManager : Node {
   /// Initializes the multiplayer service.
   /// </summary>
   private static void Initialize(MultiplayerPeer peer) {
+    GD.Print($"Status: {MultiplayerStatus}");
+
     if (MultiplayerStatus != MultiplayerStatus.Disconnected) {
       Disconnect();
     }
@@ -147,23 +149,22 @@ public partial class MultiplayerManager : Node {
   /// Called by the godot multiplayer api when the client connects to the server.
   /// </summary>
   private void OnConnectedToServer() {
-    GD.PushWarning($"<multiplayer> Client connected to server with id: {PeerId}");
-
     if (IsHost) return;
 
-    // if (Steam.IsSteamRunning()) {
-    //   var steamId = ClientData.SteamId!.Value;
-    //   var name = ClientData.Username;
+    if (SteamClient.IsValid) {
+      var steamId = ClientData.SteamId!.Value.AccountId;
+      var name = ClientData.Username;
 
-    //   // TODO: Proper steam joining system
-    //   GD.PushWarning($"<multiplayer> Client connected with steamId: {steamId} and name: {name}");
+      // TODO: Proper steam joining system
+      GD.PushWarning($"<multiplayer> Client connected with steamId: {steamId} and name: {name}");
 
-    //   RpcId(1, nameof(SERVER_SteamClientConnected), steamId, name);
-    // } else {
+      RpcId(1, nameof(SERVER_SteamClientConnected), steamId, name);
+    } else {
+
       var name = ClientData.Username;
       GD.PushWarning($"<multiplayer> Client connected with name: {name}");
       RpcId(1, nameof(SERVER_EnetClientConnected), name);
-    // }
+    }
   }
 
   public static Action<ConnectionResult>? CLIENT_OnConnectionResult;
@@ -179,8 +180,6 @@ public partial class MultiplayerManager : Node {
     if (IsHost) return;
 
     var connectionResult = ConnectionResult.unpack(result);
-
-    // Logging.MultiplayerLog($"Connection result: {connectionResult.Result}");
 
     CLIENT_OnConnectionResult?.Invoke(connectionResult);
   }

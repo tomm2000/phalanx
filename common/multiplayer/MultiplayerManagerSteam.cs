@@ -32,11 +32,13 @@ public partial class MultiplayerManager : Node {
 
   #region Lobby Joining
   public static void JoinSteamLobby(Lobby lobby) {
-    SteamMatchmaking.OnLobbyEntered += OnLobbyEntered;
+    
+    // SteamMatchmaking.OnLobbyEntered += OnLobbyEntered;
     lobby.Join();
   }
 
   private static void OnLobbyEntered(Lobby lobby) {
+    GD.Print("<steam> Entered lobby: " + lobby);
     ActiveSteamLobby = lobby;
 
     var peer = new SteamMultiplayerPeer();
@@ -50,7 +52,7 @@ public partial class MultiplayerManager : Node {
       error = peer.CreateHost(ClientData.SteamId!.Value);
     } else {
       GD.Print("<steam> Creating client...");
-      error = peer.CreateClient(lobby.Owner.Id, ClientData.SteamId!.Value);
+      error = peer.CreateClient(ClientData.SteamId!.Value, lobby.Owner.Id);
     }
 
     if (error != Error.Ok) {
@@ -71,11 +73,11 @@ public partial class MultiplayerManager : Node {
     CallLocal = true,
     TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
   )]
-  private void SERVER_SteamClientConnected(ulong steamId) {
+  private void SERVER_SteamClientConnected(ulong steamId, string name) {
     if (!IsHost) return;
 
     var peerId = Multiplayer.GetRemoteSenderId();
-    var result = PlayerManager.SERVER_SteamPlayerConnected(steamId, peerId);
+    var result = PlayerManager.SERVER_SteamPlayerConnected(steamId, peerId, name);
 
     SERVER_ClientConnected(result, peerId);
   }
