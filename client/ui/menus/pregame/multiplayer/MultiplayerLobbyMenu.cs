@@ -53,10 +53,32 @@ public partial class MultiplayerLobbyMenu : Control {
     UpdateStartButton();
   }
 
-  private void OnExitLobbyButtonPressed() => MultiplayerManager.Disconnect();
+  private void OnExitLobbyButtonPressed() => MultiplayerManager.Reset(MultiplayerResetReason.Disconnect);
 
-  private void ReturnToMultiplayerMenu() {
-    Main.Instance.SwitchScene(MultiplayerMenu.ScenePath);
+  private void ReturnToMultiplayerMenu(MultiplayerResetReason reason) {
+    // Main.SwitchScene(MultiplayerMenu.ScenePath);
+    if (reason == MultiplayerResetReason.Disconnect || reason == MultiplayerResetReason.None) {
+      Main.SwitchScene(MultiplayerMenu.ScenePath);
+
+    } else if (reason == MultiplayerResetReason.ServerDisconnected) {
+      var loadingScreen = MenuLoadingScreen.Instantiate(
+      text: "Disconnected from server.",
+      buttonText: "Return to multiplayer menu",
+      timeout: 0,
+      nextScene: MultiplayerMenu.ScenePath
+      );
+      Main.SwitchScene(loadingScreen);
+    } else if (reason == MultiplayerResetReason.Error) {
+      var loadingScreen = MenuLoadingScreen.Instantiate(
+      text: "An error occurred.",
+      buttonText: "Return to multiplayer menu",
+      timeout: 0,
+      nextScene: MultiplayerMenu.ScenePath
+      );
+      Main.SwitchScene(loadingScreen);
+    } else {
+      throw new ArgumentOutOfRangeException(nameof(reason), reason, null);
+    }
   }
 
   #region Start/Ready
@@ -114,7 +136,7 @@ public partial class MultiplayerLobbyMenu : Control {
     var map = mapData.Deserialize<MapData>();
 
     var clientGameManager = GameClientManager.Instantiate(map);
-    Main.Instance.SwitchScene(clientGameManager);
+    Main.SwitchScene(clientGameManager);
   }
 
   private void UpdateStartButton() {

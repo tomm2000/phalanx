@@ -2,6 +2,7 @@
 <Project Sdk="Godot.NET.Sdk/4.4.1">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
+    <CodeAnalysisRuleSet>c:\Users\tomma\Documents\phalanx\.vscode\ruleset.xml</CodeAnalysisRuleSet>
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>enable</Nullable>
@@ -56,6 +57,5 @@
   <ItemGroup>
     <Compile Remove="script_templates\**" />
     <Content Include="script_templates\**" />
-    <Content Include="steam_appid.txt" />
   </ItemGroup>
 </Project>

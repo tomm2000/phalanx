@@ -16,6 +16,6 @@ public partial class SingleplayerMenu : Control {
   public static readonly string ScenePath = "uid://dukh8gnwwqll6";
 
   private void OnQuitToMainMenuButtonPressed() {
-    Main.Instance.SwitchScene(MainMenu.ScenePath);
+    Main.SwitchScene(MainMenu.ScenePath);
   }
 }

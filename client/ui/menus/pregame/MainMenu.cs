@@ -16,10 +16,10 @@ public partial class MainMenu : Control {
   public static readonly string ScenePath = "uid://dwjcl253px63k";
 
   private void OnSingleplayerButtonPressed() {
-    Main.Instance.SwitchScene(SingleplayerMenu.ScenePath);
+    Main.SwitchScene(SingleplayerMenu.ScenePath);
   }
   private void OnMultiplayerButtonPressed() {
-    Main.Instance.SwitchScene(MultiplayerMenu.ScenePath);
+    Main.SwitchScene(MultiplayerMenu.ScenePath);
   }
   private void OnSettingsButtonPressed() { }
   private void OnQuitButtonPressed() {

@@ -1,11 +1,19 @@
 using Godot;
 using Steamworks;
+using Steamworks.Data;
 using System;
 
 public enum MultiplayerStatus {
   Disconnected,
   SinglePlayer,
   Multiplayer,
+}
+
+public enum MultiplayerResetReason {
+  None,
+  Disconnect,
+  ServerDisconnected,
+  Error,
 }
 
 public partial class MultiplayerManager : Node {
@@ -36,6 +44,16 @@ public partial class MultiplayerManager : Node {
 
     SteamMatchmaking.OnLobbyEntered += OnSteamLobbyEntered;
     SteamMatchmaking.OnLobbyCreated += OnSteamLobbyCreated;
+
+    SteamFriends.OnGameLobbyJoinRequested += OnGameLobbyJoinRequested;
+  }
+
+  /// <summary>
+  /// Called when the user tries to join a lobby from their friends list or from an invite.
+  /// https://partner.steamgames.com/doc/api/ISteamFriends#GameLobbyJoinRequested_t
+  /// </summary>
+  private void OnGameLobbyJoinRequested(Lobby lobby, SteamId id) {
+    ConnectSteam(lobby);
   }
 
   #region Initialization
@@ -44,7 +62,7 @@ public partial class MultiplayerManager : Node {
   /// </summary>
   private static void Initialize(MultiplayerPeer peer) {
     if (MultiplayerStatus != MultiplayerStatus.Disconnected) {
-      Disconnect();
+      Reset(MultiplayerResetReason.Error);
     }
 
     if (peer is OfflineMultiplayerPeer) {
@@ -67,7 +85,9 @@ public partial class MultiplayerManager : Node {
   /// Disconnects from the current server. <br/>
   /// Resets the player manager and closes the peer.
   /// </summary>
-  public static void Disconnect() {
+  public static void Reset(
+    MultiplayerResetReason reason
+  ) {
     PlayerManager.Reset();
 
     Peer.DisconnectPeer(1);
@@ -77,17 +97,26 @@ public partial class MultiplayerManager : Node {
 
     LeaveSteamLobby();
 
-    GD.PushWarning($"----------- <multiplayer disconnected> -----------");
-    Disconnected?.Invoke();
+    // FIXME: this is jank
+    Main.RestartSteam();
+
+    Disconnected?.Invoke(reason);
   }
 
-  public static Action? Disconnected;
+  public static Action<MultiplayerResetReason>? Disconnected;
 
   /// <summary>
   /// SERVER: Called by the godot multiplayer api when a client disconnects from the server.
   /// </summary>
   private void SERVER_OnPeerDisconnected(long id) {
     GD.PushWarning($"<multiplayer> Peer disconnected with id: {id}");
+
+    if (id == 1) {
+      GD.PushWarning("<multiplayer> Server disconnected from client.");
+      Reset(MultiplayerResetReason.ServerDisconnected);
+      return;
+    }
+
     if (!IsHost) return;
 
     PlayerManager.SERVER_PlayerDisconnected(id);
@@ -110,7 +139,7 @@ public partial class MultiplayerManager : Node {
 
     if (IsHost) return;
 
-    Disconnect();
+    Reset(MultiplayerResetReason.Disconnect);
   }
   #endregion
 
@@ -139,8 +168,6 @@ public partial class MultiplayerManager : Node {
   // 1. The client connects to the server, and the mpAPI calls CLIENT_OnConnectedToServer.
   // 2. The client sends data about iself to the server via RPCs.
   // --------------------------------------------------------------------------
-
-
   /// <summary>
   /// Called by the mpAPI when the client connects to the server.
   /// </summary>
@@ -227,6 +254,8 @@ public partial class MultiplayerManager : Node {
   )]
   private void CLIENT_ConnectionResult(byte[] result) {
     if (IsHost) return;
+
+    GD.PushWarning($"<multiplayer> Client connection result: {result}");
 
     var connectionResult = result.Deserialize<ConnectionResult>();
 

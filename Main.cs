@@ -5,6 +5,7 @@ using Chickensoft.Introspection;
 using ImGuiNET;
 using System.IO;
 using Steamworks;
+using Client.UI.Menus;
 
 [Meta(typeof(IAutoConnect))]
 public partial class Main : Node {
@@ -18,14 +19,34 @@ public partial class Main : Node {
   #region Lifecycle
   public override void _Ready() {
     Instance = this;
-
+    MultiplayerManager.CLIENT_OnConnectionResult += OnClientConnectionResult;
   }
+
   public override void _Process(double delta) {
     DebugUI();
   }
+
+  public static void Reset() {
+    MultiplayerManager.Reset(MultiplayerResetReason.None);
+  }
   #endregion
 
-  public void InitSteam() {
+  #region Steam
+  public static void InitSteam() {
+    try {
+      SteamClient.Init(480, asyncCallbacks: true);
+    } catch (System.Exception e) {
+      GD.PrintErr($"Steam failed to initialize: {e.Message}");
+    }
+  }
+  
+  public static void RestartSteam() {
+    try {
+      SteamClient.Shutdown();
+    } catch (System.Exception e) {
+      GD.PrintErr($"Steam failed to shutdown: {e.Message}");
+    }
+
     try {
       SteamClient.Init(480, asyncCallbacks: true);
     } catch (System.Exception e) {
@@ -33,27 +54,39 @@ public partial class Main : Node {
     }
   }
 
+  /// <summary>
+  /// Called when the user tries to join a lobby from their friends list or from an invite.
+  /// </summary>
+  private void OnClientConnectionResult(ConnectionResult result) {
+    if (result.Result == ConnectionResultType.Success) {
+      Main.SwitchScene(MultiplayerLobbyMenu.ScenePath);
+    } else {
+      GD.PrintErr($"Failed to connect to server: {result.Message}");
+    }
+  }
+  #endregion
+
   #region Scene Management
   [Export] private Node? CurrentScene { get; set; }
 
-    public void SwitchScene(string path) {
+  public static void SwitchScene(string path) {
     SwitchScene((PackedScene) ResourceLoader.Load(path));
   }
 
-  public void SwitchScene(PackedScene scene) {
-    CurrentScene?.QueueFree();
+  public static void SwitchScene(PackedScene scene) {
+    Instance.CurrentScene?.QueueFree();
 
-    CurrentScene = scene.Instantiate();
+    Instance.CurrentScene = scene.Instantiate();
 
-    AddChild(CurrentScene);
+    Instance.AddChild(Instance.CurrentScene);
   }
 
-  public void SwitchScene(Node scene) {
-    CurrentScene?.QueueFree();
+  public static void SwitchScene(Node scene) {
+    Instance.CurrentScene?.QueueFree();
 
-    CurrentScene = scene;
+    Instance.CurrentScene = scene;
 
-    AddChild(CurrentScene);
+    Instance.AddChild(Instance.CurrentScene);
   }
   #endregion
 

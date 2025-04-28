@@ -17,6 +17,9 @@ public partial class MultiplayerManager : Node {
       GD.PushError("<steam> Failed to create lobby");
       return;
     }
+    
+    var loadingMenu = MenuLoadingScreen.Instantiate("Connecting to lobby...");
+    Main.SwitchScene(loadingMenu);
 
     lobby.SetData("hostname", ClientData.Username);
     lobby.SetData("game", "phalanx");
@@ -31,6 +34,9 @@ public partial class MultiplayerManager : Node {
 
   #region Lobby Joining
   public static void ConnectSteam(Lobby lobby) {
+    var loadingMenu = MenuLoadingScreen.Instantiate("Connecting to lobby...");
+    Main.SwitchScene(loadingMenu);
+
     lobby.Join();
   }
 
@@ -51,6 +57,8 @@ public partial class MultiplayerManager : Node {
       GD.Print("<steam> Creating client...");
       error = peer.CreateClient(ClientData.SteamId!.Value, lobby.Owner.Id);
     }
+
+    GD.Print("<steam> Peer created: " + error);
 
     if (error != Error.Ok) {
       GD.Print("<steam> Failed to create peer: " + error);

@@ -23,7 +23,6 @@ public partial class MultiplayerMenu : Control {
   [Node] private Control LobbyList { get; set; } = default!;
 
   public override void _Ready() {
-    MultiplayerManager.CLIENT_OnConnectionResult += OnClientConnectionResult;
     MultiplayerManager.SERVER_ServerReady += OnServerReady;
 
     if (!SteamClient.IsValid) {
@@ -37,7 +36,6 @@ public partial class MultiplayerMenu : Control {
 
   public override void _ExitTree() {
     MultiplayerManager.SERVER_ServerReady -= OnServerReady;
-    MultiplayerManager.CLIENT_OnConnectionResult -= OnClientConnectionResult;
   }
 
   private void OnCreateSteamLobbyButtonPressed() {
@@ -62,7 +60,7 @@ public partial class MultiplayerMenu : Control {
   }
 
   private void OnServerReady() {
-    Main.Instance.SwitchScene(MultiplayerLobbyMenu.ScenePath);
+    Main.SwitchScene(MultiplayerLobbyMenu.ScenePath);
   }
 
   private void OnJoinIpLobbyButtonPressed() {
@@ -80,16 +78,9 @@ public partial class MultiplayerMenu : Control {
     MultiplayerManager.ConnectEnet(ip, port);
   }
 
-  private void OnClientConnectionResult(ConnectionResult result) {
-    if (result.Result == ConnectionResultType.Success) {
-      Main.Instance.SwitchScene(MultiplayerLobbyMenu.ScenePath);
-    } else {
-      GD.PrintErr($"Failed to connect to server: {result.Message}");
-    }
-  }
 
   private void OnQuitToMainMenuButtonPressed() {
-    Main.Instance.SwitchScene(MainMenu.ScenePath);
+    Main.SwitchScene(MainMenu.ScenePath);
   }
 
   private async void UpdateLobbyList() {
