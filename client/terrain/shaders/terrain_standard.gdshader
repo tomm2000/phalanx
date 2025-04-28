@@ -26,17 +26,17 @@ void fragment() {
 	float distance = hex_distance(UV);
 
 	ALBEDO = srgb_to_linear(COLOR.rgb);
-	
+
 	if (riverness >= 0.50) {
 		ROUGHNESS = 0.6;
 		METALLIC = 0.3;
-		
+
 		// Compute moving UVs based on flow
 		//vec2 flow_uv = UV + flow * (TIME * time_scale) * flow_strength;
-	
+
 		//vec4 normalBump = texture(noise_texture, flow_uv);
 		//NORMAL += normalBump.rgb; // Scale the bump strength if needed
-		
+
 		//vec4 noiseValue = texture(noise_texture, flow_uv);
 		//ALBEDO = noiseValue.rgb;
 	} else {

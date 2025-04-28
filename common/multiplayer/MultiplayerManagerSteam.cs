@@ -43,6 +43,7 @@ public partial class MultiplayerManager : Node {
 
   #region Lobby Joining
   public static void JoinSteamLobby(ulong lobbyId) {
+    GD.Print("Joining lobby: " + lobbyId);
     if (lobbyId == 0) return;
 
     Steam.LobbyJoined += OnLobbyJoined;
@@ -60,7 +61,7 @@ public partial class MultiplayerManager : Node {
       var peer = new SteamMultiplayerPeer();
       var hostId = Steam.GetLobbyOwner(lobby);
 
-      var error = peer.CreateClient(hostId, 0, []);
+      var error = peer.CreateClient(hostId, 0);
 
       if (error != Error.Ok) {
         GD.PushError($"<steam> Failed to create client: {error}");

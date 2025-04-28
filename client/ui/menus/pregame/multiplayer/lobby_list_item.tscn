@@ -58,4 +58,5 @@ text = "Join"
 [node name="RefreshLobbiestimer" type="Timer" parent="."]
 autostart = true
 
+[connection signal="pressed" from="PanelContainer/HBoxContainer/JoinButton" to="." method="OnJoinButtonPressed"]
 [connection signal="timeout" from="RefreshLobbiestimer" to="." method="UpdateLobbyInfo"]

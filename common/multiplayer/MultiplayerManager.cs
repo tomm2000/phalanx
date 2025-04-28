@@ -30,10 +30,10 @@ public partial class MultiplayerManager : Node {
   public override void _Ready() {
     Instance = this;
 
-    Instance.Multiplayer.PeerDisconnected += Instance.SERVER_PeerDisconnected;
+    Instance.Multiplayer.PeerDisconnected += Instance.OnPeerDisconnected;
 
-    Instance.Multiplayer.ConnectedToServer += Instance.CLIENT_ConnectedToServer;
-    Instance.Multiplayer.ServerDisconnected += Instance.CLIENT_DisconnectedFromServer;
+    Instance.Multiplayer.ConnectedToServer += Instance.OnConnectedToServer;
+    Instance.Multiplayer.ServerDisconnected += Instance.OnDisconnectedFromServer;
   }
 
   #region Initialization
@@ -116,7 +116,7 @@ public partial class MultiplayerManager : Node {
   /// <summary>
   /// Called by the godot multiplayer api when a client disconnects from the server.
   /// </summary>
-  private void SERVER_PeerDisconnected(long id) {
+  private void OnPeerDisconnected(long id) {
     if (!IsHost) return;
 
     PlayerManager.SERVER_PlayerDisconnected(id);
@@ -133,7 +133,9 @@ public partial class MultiplayerManager : Node {
   /// <summary>
   /// Called by the godot multiplayer api when the client disconnects from the server.
   /// </summary>
-  private void CLIENT_DisconnectedFromServer() {
+  private void OnDisconnectedFromServer() {
+    GD.PushWarning($"<multiplayer> Client disconnected from server with id: {PeerId}");
+    
     if (IsHost) return;
 
     Disconnect();
@@ -142,7 +144,9 @@ public partial class MultiplayerManager : Node {
   /// <summary>
   /// Called by the godot multiplayer api when the client connects to the server.
   /// </summary>
-  private void CLIENT_ConnectedToServer() {
+  private void OnConnectedToServer() {
+    GD.PushWarning($"<multiplayer> Client connected to server with id: {PeerId}");
+
     if (IsHost) return;
 
     if (Steam.IsSteamRunning()) {

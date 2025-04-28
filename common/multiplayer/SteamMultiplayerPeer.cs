@@ -24,8 +24,8 @@ public sealed partial class SteamMultiplayerPeer : MultiplayerPeerExtension {
     return _classReference.Call(Methods.CreateHost, port).As<Error>();
   }
 
-  public Error CreateClient(ulong steamId, ushort port, Array options) {
-    return _classReference.Call(Methods.CreateClient, steamId, port, options).As<Error>();
+  public Error CreateClient(ulong steamId, ushort port) {
+    return _classReference.Call(Methods.CreateClient, steamId, port).As<Error>();
   }
 
   public override ConnectionStatus _GetConnectionStatus() {
