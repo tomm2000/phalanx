@@ -71,9 +71,6 @@ jobs:
             # Export builds
             godot --export-release "Windows Desktop" export/release/Phalanx_${VERSION_TAG}.exe
             godot --export-debug "Windows Desktop" export/debug/Phalanx_Debug_${VERSION_TAG}.exe
-            
-            cp steam_appid.txt export/release/
-            cp steam_appid.txt export/debug/
 
             # Cross-platform zipping
             if [[ "$RUNNER_OS" == "Windows" ]]; then
