@@ -100,7 +100,6 @@ size_flags_vertical = 3
 [node name="ListVboxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer" instance=ExtResource("4_qvhqo")]
 custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
-size_flags_horizontal = 3
 
 [node name="CreateSteamLobbyButton" parent="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="0" instance=ExtResource("6_7am2l")]
 unique_name_in_owner = true

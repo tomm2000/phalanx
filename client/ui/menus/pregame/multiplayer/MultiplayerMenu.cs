@@ -23,8 +23,6 @@ public partial class MultiplayerMenu : Control {
   [Node] private Control LobbyList { get; set; } = default!;
 
   public override void _Ready() {
-    MultiplayerManager.RegistrationResult += OnRegistrationResult;
-
     if (!SteamClient.IsValid) {
       CreateSteamLobbyButton.Disabled = true;
       CreateSteamLobbyButton.MouseDefaultCursorShape = CursorShape.Forbidden;
@@ -34,17 +32,7 @@ public partial class MultiplayerMenu : Control {
     }
   }
 
-  public override void _ExitTree() {
-    MultiplayerManager.RegistrationResult -= OnRegistrationResult;
-  }
-
-  private void OnRegistrationResult(RegistrationResult result) {
-    if (result.IsSuccess) {
-      Main.SwitchScene(MultiplayerLobbyMenu.ScenePath);
-    } else {
-      GD.PrintErr($"[{nameof(MultiplayerMenu)}] Registration failed: {result}");
-    }
-  }
+  public override void _ExitTree() { }
 
   private void OnCreateSteamLobbyButtonPressed() {
     MultiplayerManager.HostSteam();

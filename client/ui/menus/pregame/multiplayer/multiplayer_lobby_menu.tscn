@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://dr1b75c32sida"]
+[gd_scene load_steps=15 format=3 uid="uid://dr1b75c32sida"]
 
 [ext_resource type="Script" uid="uid://bov7qcdg8a6nj" path="res://client/ui/menus/pregame/multiplayer/MultiplayerLobbyMenu.cs" id="1_0b2yv"]
 [ext_resource type="Texture2D" uid="uid://dcaf4ygdvskhv" path="res://client/ui/menus/background.png" id="2_t4306"]
@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://c68j3jaf4ip0k" path="res://client/ui/menus/pregame/common/player_list_item.tscn" id="7_npv11"]
 [ext_resource type="Theme" uid="uid://guyqcrq35q6u" path="res://client/ui/common/standard_theme.tres" id="8_yiw7l"]
 [ext_resource type="PackedScene" uid="uid://dq3f6m2ju3ihr" path="res://client/ui/menus/pregame/common/user_tag.tscn" id="10_orrdb"]
+[ext_resource type="PackedScene" uid="uid://wq18lv7molho" path="res://common/game_data_interface.tscn" id="11_3krhc"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_3dws0"]
 shader = ExtResource("3_i10d0")
@@ -35,6 +36,8 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_0b2yv")
+
+[node name="GameDataInterface" parent="." instance=ExtResource("11_3krhc")]
 
 [node name="RefreshLobbiesTimer" type="Timer" parent="."]
 wait_time = 5.0
@@ -71,7 +74,6 @@ grow_vertical = 2
 metadata/_edit_lock_ = true
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
-clip_contents = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -84,7 +86,6 @@ theme_override_constants/margin_right = 40
 theme_override_constants/margin_bottom = 40
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
-clip_contents = true
 layout_mode = 2
 theme_override_constants/separation = 40
 
@@ -95,15 +96,13 @@ text = "Multiplayer"
 label_settings = SubResource("LabelSettings_uyk1y")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
-clip_contents = true
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 60
 
 [node name="ListVboxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer" instance=ExtResource("4_i1g48")]
-custom_minimum_size = Vector2(250, 0)
+custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
-size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.5
 
 [node name="ReadyButton" parent="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="0" instance=ExtResource("6_3dws0")]
