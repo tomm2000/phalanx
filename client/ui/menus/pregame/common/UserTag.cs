@@ -6,6 +6,7 @@ using Chickensoft.Introspection;
 using Godot;
 using Steamworks;
 
+namespace Client.UI;
 
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
 public partial class UserTag : Control {

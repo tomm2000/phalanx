@@ -10,7 +10,7 @@ using System.Linq;
 using Steamworks;
 using Steamworks.Data;
 
-namespace Client.UI.Menus;
+namespace Client.UI;
 
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
 public partial class MultiplayerMenu : Control {
@@ -23,7 +23,7 @@ public partial class MultiplayerMenu : Control {
   [Node] private Control LobbyList { get; set; } = default!;
 
   public override void _Ready() {
-    MultiplayerManager.SERVER_ServerReady += OnServerReady;
+    MultiplayerManager.RegistrationResult += OnRegistrationResult;
 
     if (!SteamClient.IsValid) {
       CreateSteamLobbyButton.Disabled = true;
@@ -35,11 +35,19 @@ public partial class MultiplayerMenu : Control {
   }
 
   public override void _ExitTree() {
-    MultiplayerManager.SERVER_ServerReady -= OnServerReady;
+    MultiplayerManager.RegistrationResult -= OnRegistrationResult;
+  }
+
+  private void OnRegistrationResult(RegistrationResult result) {
+    if (result.IsSuccess) {
+      Main.SwitchScene(MultiplayerLobbyMenu.ScenePath);
+    } else {
+      GD.PrintErr($"[{nameof(MultiplayerMenu)}] Registration failed: {result}");
+    }
   }
 
   private void OnCreateSteamLobbyButtonPressed() {
-    _ = MultiplayerManager.HostSteam();
+    MultiplayerManager.HostSteam();
   }
 
   private void OnCreateIpLobbyButtonPressed() {
@@ -55,12 +63,7 @@ public partial class MultiplayerMenu : Control {
       return;
     }
 
-    MultiplayerManager.SERVER_ServerReady += OnServerReady;
     MultiplayerManager.HostEnet(portInt);
-  }
-
-  private void OnServerReady() {
-    Main.SwitchScene(MultiplayerLobbyMenu.ScenePath);
   }
 
   private void OnJoinIpLobbyButtonPressed() {
@@ -75,7 +78,7 @@ public partial class MultiplayerMenu : Control {
     var ip = addressParts[0];
     var port = addressParts.Length > 1 ? int.Parse(addressParts[1]) : 7777;
 
-    MultiplayerManager.ConnectEnet(ip, port);
+    MultiplayerManager.JoinEnet(ip, port);
   }
 
 
@@ -84,6 +87,8 @@ public partial class MultiplayerMenu : Control {
   }
 
   private async void UpdateLobbyList() {
+    if (!SteamClient.IsValid) { return; }
+
     foreach (var child in LobbyList.GetChildrenOfType<LobbyListItem>()) {
       child.QueueFree();
     }

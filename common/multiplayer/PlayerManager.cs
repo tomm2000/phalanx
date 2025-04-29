@@ -1,200 +1,230 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentResults;
 using Godot;
+using MessagePack;
 using Steamworks;
 
-public partial class PlayerManager : Node {
-  #region Properties
-  private static PlayerManager? _instance;
-  public static PlayerManager Instance {
-    get => _instance ?? throw new Exception("PlayerService instance not found");
-    private set => _instance = value;
+[MessagePackObject]
+public struct RegistrationResult {
+  [Key(0)] public bool IsSuccess { get; set; }
+  [Key(1)] public string Message { get; set; }
+
+  [IgnoreMember] public readonly bool IsFailure => !IsSuccess;
+
+  public static RegistrationResult Ok(string message = "") {
+    return new RegistrationResult { IsSuccess = true, Message = message };
   }
-  #endregion
 
-  #region Events
-  public static Action? PlayerListUpdated;
+  public static RegistrationResult Error(string message) {
+    return new RegistrationResult { IsSuccess = false, Message = message };
+  }
 
-  // ================== Player Connection Events
-  public static Action<Player>? PlayerFirstConnected;
-  public static Action<string>? PlayerReconnected;
-  public static Action<Player>? PlayerConnected;
-  public static Action<string>? PlayerFailedToConnect;
+  public override string ToString() {
+    return IsSuccess ? $"Success: {Message}" : $"Error: {Message}";
+  }
+}
 
-  // ================== Player Disconnection Events
-  public static Action<string>? PlayerDisconnected;
-  public static Action<Player>? PlayerExited;
-  #endregion
+public partial class PlayerManager : Node {
+  private static PlayerManager Instance = default!;
 
-  #region Properties
-  private static Dictionary<string, Player> players = new Dictionary<string, Player>();
-  #endregion
-
-  #region Accessors
-  public static IEnumerable<Player> Players => players.Values;
-  public static Player CurrentPlayer => Players.FindByPeerID(MultiplayerManager.PeerId).Value;
-  public static Player RpcSenderPlayer() => Players.FindByPeerID(MultiplayerManager.RpcSenderId()).Value;
-  public static Player GetPlayer(string uid) => Players.FindByUID(uid).Value;
-  #endregion
-
-  #region Initialization
   public override void _Ready() {
     Instance = this;
   }
 
-  public static void Reset() {
-    players.Clear();
+  private Dictionary<string, Player> registeredPlayers = [];
 
-    PlayerListUpdated?.Invoke();
-  }
-  #endregion
+  #region public interface
+  public static event Action? PlayerListUpdated;
 
-  #region connect Logic
-  public static ConnectionResult SERVER_SteamPlayerConnected(ulong steamId, long peerId, string name) {
-    var existingPlayer = Players.FindBySteamID(steamId);
-    return SERVER_PlayerConnected(existingPlayer, name, peerId, steamId);
-  }
+  // ================== Player Connection Events
+  public static event Action<Player>? PlayerFirstConnected;
+  public static event Action<Player>? PlayerReconnected;
+  public static event Action<Player>? PlayerConnected;
+  public static event Action<string>? PlayerFailedToConnect;
 
-  public static ConnectionResult SERVER_EnetPlayerConnected(string name, long peerId) {
-    var existingPlayer = Players.FindByName(name);
-    return SERVER_PlayerConnected(existingPlayer, name, peerId);
-  }
-  
+  // ================== Player Disconnection Events
+  public static event Action<Player>? PlayerDisconnected;
+  public static event Action<string>? PlayerExited;
 
-  /// <summary>
-  /// Call when a player connects to the server. <br/>
-  /// Handles player connection logic.
-  /// </summary>
-  private static ConnectionResult SERVER_PlayerConnected(Result<Player> player, string name, long peerId, ulong? steamId = null) {
-    if (!MultiplayerManager.IsHost) { return ConnectionResult.Failure("Only the host can connect players"); }
+  public static IEnumerable<Player> Players => Instance.registeredPlayers.Values;
 
-    if (player.IsFailed) {
+  public static RegistrationResult SERVER_RegisterPlayer(
+    string name,
+    long peerId,
+    ulong? steamId = null,
+    PlayerType playerType = PlayerType.Human
+  ) {
+    if (!MultiplayerManager.IsHost) throw new Exception($"[{nameof(SERVER_RegisterPlayer)}] can only be called by the host");
+
+    // check if player already exists
+    Result<Player> existingPlayer;
+    if (steamId != null) {
+      existingPlayer = Players.FindBySteamID(steamId.Value);
+    } else {
+      existingPlayer = Players.FindByName(name);
+    }
+
+    if (existingPlayer.IsFailed) {
       //------------------- if the player does not exist, create a new player
+      // TODO: check if the game stage is lobby
 
       string uuid = Guid.NewGuid().ToString();
       var time = DateTime.Now.Ticks;
 
-      var newPlayer = new Player(uuid, name, peerId, ConnectionStatus.Connected, time, steamId);
+      var newPlayer = new Player(
+        uid: uuid,
+        username: name,
+        peerId: peerId,
+        connectionStatus: ConnectionStatus.Connected,
+        joinTime: time,
+        playerType: playerType,
+        steamId: steamId
+      );
+      Instance.Rpc(nameof(OnPlayerConnected), newPlayer.Serialize());
 
-      Instance.Rpc(nameof(CLIENT_PlayerConnected), newPlayer.Serialize());
+      return RegistrationResult.Ok($"Player \"{name}\" connected");
 
-      return ConnectionResult.Success($"Player \"{name}\" connected");
+    } else if (existingPlayer.Value.ConnectionStatus == ConnectionStatus.Disconnected) {
+      //------------------- if player already exists and is not connected, reconnect
 
-    } else if (player.Value.ConnectionStatus == ConnectionStatus.Disconnected) {
-      //------------------- if player already exists but is disconnected, reconnect
+      var newPlayer = existingPlayer.Value.With(
+        username: name,
+        peerId: peerId,
+        connectionStatus: ConnectionStatus.Connected,
+        playerType: playerType,
+        steamId: steamId
+      );
 
-      Instance.Rpc(nameof(CLIENT_PlayerReconnected), player.Value.UID, peerId);
+      Instance.Rpc(nameof(OnPlayerReconnected), newPlayer.Serialize());
 
-      return ConnectionResult.Success($"Player \"{name}\" reconnected");
+      return RegistrationResult.Ok($"Player \"{name}\" reconnected");
+    } else if (existingPlayer.Value.PlayerType == PlayerType.Bot) {
+      //------------------- if player already exists and is a bot, reconnect
+
+      // TODO: handle player replacing bot
+      throw new NotImplementedException("Player replacing bot is not implemented yet");
+
     } else {
-      //------------------- error, return
+      //------------------- error, return (player already exists and is connected)
+      GD.PushWarning($"<multiplayer> Player \"{name}\" already connected with id: {existingPlayer.Value.PeerId}");
 
-      Instance.Rpc(nameof(CLIENT_PlayerFailedToConnect), name);
+      Instance.Rpc(nameof(OnPlayerFailedToConnect), name);
 
-      return ConnectionResult.Failure($"Player \"{name}\" already connected");
+      return RegistrationResult.Error($"Player \"{name}\" already connected");
     }
   }
 
   /// <summary>
-  /// Called when a NEW player connects to the server. <br/>
+  /// Unregisters a player from the server. This is called when a player leaves the game.
   /// </summary>
-  [Rpc(
-    mode: MultiplayerApi.RpcMode.Authority,
-    CallLocal = true,
-    TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
-  )]
-  private void CLIENT_PlayerConnected(byte[] playerData) {
-    // Logging.MultiplayerLog($"Player \"{player.Username}\" {player.PeerId} connected", "CLIENT_PlayerConnected");
+  public static void PlayerQuit(long peerId) {
+    var player = Players.FindByPeerID(peerId);
+    if (player.IsFailed) return;
 
-    var player = playerData.Deserialize<Player>();
-
-    players.Add(player.UID, player);
-
-    PlayerListUpdated?.Invoke();
-    PlayerFirstConnected?.Invoke(player);
-    PlayerConnected?.Invoke(player);
+    PlayerQuit(player.Value.UID);
   }
 
   /// <summary>
-  /// Called when a player reconnects to the server after being disconnected. <br/>
+  /// Unregisters a player from the server. This is called when a player leaves the game.
   /// </summary>
-  [Rpc(
-    mode: MultiplayerApi.RpcMode.Authority,
-    CallLocal = true,
-    TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
-  )]
-  private void CLIENT_PlayerReconnected(string uid, long peerId) {
-    // Logging.MultiplayerLog($"Player \"{player.Username}\" {player.PeerId} reconnected", "CLIENT_PlayerReconnected");
+  public static void PlayerQuit(string uid) {
+    if (!MultiplayerManager.IsHost) throw new Exception($"[{nameof(PlayerQuit)}] can only be called by the host");
 
-    var oldPlayer = players[uid];
-    players[uid] = oldPlayer.With(peerId: peerId, connectionStatus: ConnectionStatus.Connected);
-    
-    PlayerListUpdated?.Invoke();
-    PlayerReconnected?.Invoke(players[uid].Username);
-    PlayerConnected?.Invoke(players[uid]);
+    var playerExists = Instance.registeredPlayers.TryGetValue(uid, out var player);
+
+    if (playerExists) {
+      Instance.Rpc(nameof(OnPlayerExited), player.UID);
+    }
   }
 
-  [Rpc(
-    mode: MultiplayerApi.RpcMode.Authority,
-    CallLocal = true,
-    TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
-  )]
-  private void CLIENT_PlayerFailedToConnect(string name) {
-    PlayerFailedToConnect?.Invoke(name);
+  /// <summary>
+  /// Unregisters a player from the server. This is called when a client disconnects.
+  /// </summary>
+  public static void PeerDisconnected(long peerId) {
+    if (!MultiplayerManager.IsHost) throw new Exception($"[{nameof(PeerDisconnected)}] can only be called by the host");
+
+    var player = Players.FindByPeerID(peerId);
+    if (player.IsFailed) return;
+
+    var newPlayer = player.Value.With(
+      connectionStatus: ConnectionStatus.Disconnected,
+      peerId: -1
+    );
+    Instance.Rpc(nameof(OnPlayerDisconnected), newPlayer.Serialize());
+  }
+
+  public static void Reset() {
+    Instance.registeredPlayers.Clear();
   }
   #endregion
 
-  #region disconnect Logic
-  /// <summary>
-  /// Call when a player disconnects from the server. <br/>
-  /// Handles player disconnection logic.
-  /// </summary>
-  public static void SERVER_PlayerDisconnected(long peerId) {
-    if (!MultiplayerManager.IsHost) { return; }
-    
-    var player = Players.FindByPeerID(peerId);
-
-    if (player.IsFailed) {
-      throw new Exception($"<peer {MultiplayerManager.PeerId}> [SERVER_PeerDisconnected] Player not found");
-    } else {
-      // Logging.MultiplayerLog($"Player \"{player.Value.Username}\" {player.Value.PeerId} disconnected", "SERVER_PeerDisconnected");
-
-      Instance.Rpc(nameof(CLIENT_PlayerExit), player.Value.UID);
-    }
-  }
-
-  /// <summary>
-  /// Called when a player exits the game. <br/>
-  /// </summary>
+  #region Client Callbacks
   [Rpc(
     mode: MultiplayerApi.RpcMode.Authority,
     CallLocal = true,
     TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
   )]
-  private void CLIENT_PlayerExit(string uid) {
-    // Logging.MultiplayerLog($"Player \"{player.Username}\" {player.PeerId} exited", "CLIENT_PlayerExit");
+  private void OnPlayerConnected(byte[] playerData) {
+    var player = playerData.Deserialize<Player>();
 
-    var player = players[uid];
-
-    players.Remove(uid);
+    registeredPlayers.Remove(player.UID);
+    registeredPlayers.Add(player.UID, player);
 
     PlayerListUpdated?.Invoke();
-    PlayerExited?.Invoke(player);
+    PlayerFirstConnected?.Invoke(player);
   }
 
-  /// <summary>
-  /// Called when a player disconnects from the server. <br/>
-  /// </summary>
   [Rpc(
     mode: MultiplayerApi.RpcMode.Authority,
     CallLocal = true,
     TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
   )]
-  private void CLIENT_PlayerDisconnected(string uid) {
-    // FIXME: Implement CLIENT_PlayerDisconnected
-    throw new NotImplementedException();
+  private void OnPlayerReconnected(byte[] playerData) {
+    var player = playerData.Deserialize<Player>();
+
+    registeredPlayers.Remove(player.UID);
+    registeredPlayers.Add(player.UID, player);
+
+    PlayerListUpdated?.Invoke();
+    PlayerReconnected?.Invoke(player);
+  }
+
+  [Rpc(
+    mode: MultiplayerApi.RpcMode.Authority,
+    CallLocal = true,
+    TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
+  )]
+  private void OnPlayerFailedToConnect(string name) {
+    PlayerFailedToConnect?.Invoke(name);
+  }
+
+  [Rpc(
+    mode: MultiplayerApi.RpcMode.Authority,
+    CallLocal = true,
+    TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
+  )]
+  private void OnPlayerExited(string uid) {
+    registeredPlayers.Remove(uid);
+
+    PlayerListUpdated?.Invoke();
+    PlayerExited?.Invoke(uid);
+  }
+
+  [Rpc(
+    mode: MultiplayerApi.RpcMode.Authority,
+    CallLocal = true,
+    TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
+  )]
+  private void OnPlayerDisconnected(byte[] playerData) {
+    var player = playerData.Deserialize<Player>();
+    registeredPlayers.Remove(player.UID);
+    registeredPlayers.Add(player.UID, player);
+
+    PlayerListUpdated?.Invoke();
+    PlayerDisconnected?.Invoke(player);
   }
   #endregion
 
@@ -202,9 +232,8 @@ public partial class PlayerManager : Node {
   public static void SERVER_SynchronizeClient(long peerId) {
     if (!MultiplayerManager.IsHost) { return; }
 
-    foreach (var player in Players) {
-      Instance.RpcId(peerId, nameof(CLIENT_PlayerListSync), player.Serialize());
-    }
+    var playerList = Players.ToArray();
+    Instance.RpcId(peerId, nameof(CLIENT_PlayerListSync), playerList.Serialize());
   }
 
   [Rpc(
@@ -213,9 +242,13 @@ public partial class PlayerManager : Node {
     TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
   )]
   private void CLIENT_PlayerListSync(byte[] playerData) {
-    var player = playerData.Deserialize<Player>();
+    var player = playerData.Deserialize<Player[]>();
 
-    players[player.UID] = player;
+    registeredPlayers.Clear();
+
+    foreach (var p in player) {
+      registeredPlayers.Add(p.UID, p);
+    }
 
     PlayerListUpdated?.Invoke();
   }

@@ -5,7 +5,7 @@ using Chickensoft.Introspection;
 using ImGuiNET;
 using System.IO;
 using Steamworks;
-using Client.UI.Menus;
+using Client.UI;
 
 [Meta(typeof(IAutoConnect))]
 public partial class Main : Node {
@@ -19,7 +19,7 @@ public partial class Main : Node {
   #region Lifecycle
   public override void _Ready() {
     Instance = this;
-    MultiplayerManager.CLIENT_OnConnectionResult += OnClientConnectionResult;
+    MultiplayerManager.RegistrationResult += OnRegistrationResult;
   }
 
   public override void _Process(double delta) {
@@ -27,7 +27,7 @@ public partial class Main : Node {
   }
 
   public static void Reset() {
-    MultiplayerManager.Reset(MultiplayerResetReason.None);
+    MultiplayerManager.Disconnect(MultiplayerDisconnectReason.None);
   }
   #endregion
 
@@ -57,8 +57,8 @@ public partial class Main : Node {
   /// <summary>
   /// Called when the user tries to join a lobby from their friends list or from an invite.
   /// </summary>
-  private void OnClientConnectionResult(ConnectionResult result) {
-    if (result.Result == ConnectionResultType.Success) {
+  private void OnRegistrationResult(RegistrationResult result) {
+    if (result.IsSuccess) {
       Main.SwitchScene(MultiplayerLobbyMenu.ScenePath);
     } else {
       GD.PrintErr($"Failed to connect to server: {result.Message}");
@@ -78,7 +78,7 @@ public partial class Main : Node {
 
     Instance.CurrentScene = scene.Instantiate();
 
-    Instance.AddChild(Instance.CurrentScene);
+    Instance.AddChild(Instance.CurrentScene, true);
   }
 
   public static void SwitchScene(Node scene) {
@@ -86,7 +86,7 @@ public partial class Main : Node {
 
     Instance.CurrentScene = scene;
 
-    Instance.AddChild(Instance.CurrentScene);
+    Instance.AddChild(Instance.CurrentScene, true);
   }
   #endregion
 

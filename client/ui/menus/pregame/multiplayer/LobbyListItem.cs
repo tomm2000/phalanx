@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
 using Godot;
+using Steamworks;
 using Steamworks.Data;
 
+namespace Client.UI;
 
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
 public partial class LobbyListItem : Control {
@@ -31,6 +33,8 @@ public partial class LobbyListItem : Control {
   }
 
   public void UpdateLobbyInfo() {
+    if (!SteamClient.IsValid) { return; }
+
     var name = lobby.GetData("hostname");
     if (string.IsNullOrEmpty(name)) {
       name = $"Unknown";
@@ -43,6 +47,6 @@ public partial class LobbyListItem : Control {
   }
 
   private void OnJoinButtonPressed() {
-    MultiplayerManager.ConnectSteam(lobby);
+    MultiplayerManager.JoinSteam(lobby);
   }
 }

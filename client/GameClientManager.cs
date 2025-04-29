@@ -6,6 +6,7 @@ using Chickensoft.Introspection;
 using Client.Terrain;
 using Godot;
 
+namespace Client;
 
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
 public partial class GameClientManager : Node {

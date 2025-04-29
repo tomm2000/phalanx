@@ -5,6 +5,7 @@ using Chickensoft.Introspection;
 using Godot;
 using Steamworks;
 
+namespace Client.UI;
 
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
 public partial class PlayerListItem : Control {
@@ -48,6 +49,6 @@ public partial class PlayerListItem : Control {
   }
 
   private void OnKickButtonPressed() {
-    MultiplayerManager.SERVER_DisconnectPeer(player.PeerId);
+    MultiplayerManager.KickPeer(player.PeerId);
   }
 }

@@ -2,6 +2,8 @@ using Godot;
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
 
+namespace Client.Terrain;
+
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
 public partial class TileSelector : Node3D {
   public override void _Notification(int what) => this.Notify(what);

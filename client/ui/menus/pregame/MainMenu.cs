@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using Tlib;
 using System.Linq;
 
-namespace Client.UI.Menus;
+namespace Client.UI;
 
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
 public partial class MainMenu : Control {

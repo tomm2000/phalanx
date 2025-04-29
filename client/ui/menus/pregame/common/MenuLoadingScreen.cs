@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
-using Client.UI.Menus;
 using Godot;
 
+namespace Client.UI;
 
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
 public partial class MenuLoadingScreen : Control {
@@ -53,6 +53,8 @@ public partial class MenuLoadingScreen : Control {
 
   private void GotoNextScene() {
     Main.SwitchScene(nextScene);
+
+    GD.Print("Switching to scene: ", nextScene);
 
     if (nextScene == MainMenu.ScenePath) {
       Main.Reset();

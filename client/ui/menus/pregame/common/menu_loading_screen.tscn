@@ -89,4 +89,4 @@ layout_mode = 2
 text = "Ok"
 
 [connection signal="timeout" from="TimeoutTimer" to="." method="ReturnToMainMenu"]
-[connection signal="pressed" from="CenterContainer/PanelContainer/VBoxContainer/OkButton" to="." method="ReturnToMainMenu"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/VBoxContainer/OkButton" to="." method="GotoNextScene"]

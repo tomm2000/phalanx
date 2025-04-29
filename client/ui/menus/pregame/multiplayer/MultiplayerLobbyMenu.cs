@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using Tlib;
 using System.Linq;
 
-namespace Client.UI.Menus;
+namespace Client.UI;
 
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
 public partial class MultiplayerLobbyMenu : Control {
@@ -53,14 +53,14 @@ public partial class MultiplayerLobbyMenu : Control {
     UpdateStartButton();
   }
 
-  private void OnExitLobbyButtonPressed() => MultiplayerManager.Reset(MultiplayerResetReason.Disconnect);
+  private void OnExitLobbyButtonPressed() => MultiplayerManager.Disconnect(MultiplayerDisconnectReason.None);
 
-  private void ReturnToMultiplayerMenu(MultiplayerResetReason reason) {
+  private void ReturnToMultiplayerMenu(MultiplayerDisconnectReason reason) {
     // Main.SwitchScene(MultiplayerMenu.ScenePath);
-    if (reason == MultiplayerResetReason.Disconnect || reason == MultiplayerResetReason.None) {
+    if (reason == MultiplayerDisconnectReason.None) {
       Main.SwitchScene(MultiplayerMenu.ScenePath);
 
-    } else if (reason == MultiplayerResetReason.ServerDisconnected) {
+    } else if (reason == MultiplayerDisconnectReason.ServerDisconnected) {
       var loadingScreen = MenuLoadingScreen.Instantiate(
       text: "Disconnected from server.",
       buttonText: "Return to multiplayer menu",
@@ -68,7 +68,7 @@ public partial class MultiplayerLobbyMenu : Control {
       nextScene: MultiplayerMenu.ScenePath
       );
       Main.SwitchScene(loadingScreen);
-    } else if (reason == MultiplayerResetReason.Error) {
+    } else if (reason == MultiplayerDisconnectReason.Error) {
       var loadingScreen = MenuLoadingScreen.Instantiate(
       text: "An error occurred.",
       buttonText: "Return to multiplayer menu",
@@ -83,18 +83,8 @@ public partial class MultiplayerLobbyMenu : Control {
 
   #region Start/Ready
   private void OnReadyButtonPressed() {
+    GD.Print("Ready button pressed");
     RpcId(1, nameof(SERVER_ClientReadyUp));
-  }
-
-  private void OnStartGameButtonPressed() {
-    if (!MultiplayerManager.IsHost) { throw new Exception("Only the host can start the game."); }
-
-    var allReady = PlayerManager.Players.All(p => PlayerReadyStatus.GetValueOrDefault(p.UID, false));
-    if (!allReady) { return; }
-
-    var map = DevMap.GenerateMap(19, 19, seed: 1234);
-
-    Rpc(nameof(CLIENT_StartGame), map.Serialize());
   }
 
   [Rpc(
@@ -125,6 +115,17 @@ public partial class MultiplayerLobbyMenu : Control {
     PlayerReadyStatus[playerUID] = isReady;
 
     UpdateStartButton();
+  }
+
+  private void OnStartGameButtonPressed() {
+    if (!MultiplayerManager.IsHost) { throw new Exception("Only the host can start the game."); }
+
+    var allReady = PlayerManager.Players.All(p => PlayerReadyStatus.GetValueOrDefault(p.UID, false));
+    if (!allReady) { return; }
+
+    var map = DevMap.GenerateMap(19, 19, seed: 1234);
+
+    Rpc(nameof(CLIENT_StartGame), map.Serialize());
   }
 
   [Rpc(

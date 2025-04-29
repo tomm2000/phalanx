@@ -9,6 +9,13 @@ public enum ConnectionStatus {
   Disconnected,
 }
 
+public enum PlayerType {
+  Human,
+  Bot,
+  Spectator,
+}
+
+
 [MessagePackObject]
 public readonly struct Player(
   string uid,
@@ -16,6 +23,7 @@ public readonly struct Player(
   long peerId,
   ConnectionStatus connectionStatus,
   long joinTime,
+  PlayerType playerType = PlayerType.Human,
   ulong? steamId = null
 ) {
   [Key(0)] public readonly string UID = uid;
@@ -23,7 +31,8 @@ public readonly struct Player(
   [Key(2)] public readonly long PeerId = peerId;
   [Key(3)] public readonly ConnectionStatus ConnectionStatus = connectionStatus;
   [Key(4)] public readonly long JoinTime = joinTime;
-  [Key(5)] public readonly ulong? SteamId = steamId;
+  [Key(5)] public readonly PlayerType PlayerType = playerType;
+  [Key(6)] public readonly ulong? SteamId = steamId;
 }
 
 public static class PlayerNewExtensions {
@@ -34,6 +43,7 @@ public static class PlayerNewExtensions {
     long? peerId = null,
     ConnectionStatus? connectionStatus = null,
     long? joinTime = null,
+    PlayerType? playerType = null,
     ulong? steamId = null
   ) {
     return new Player(
@@ -42,6 +52,7 @@ public static class PlayerNewExtensions {
       peerId ?? player.PeerId,
       connectionStatus ?? player.ConnectionStatus,
       joinTime ?? player.JoinTime,
+      playerType ?? player.PlayerType,
       steamId ?? player.SteamId
     );
   }

@@ -1,6 +1,8 @@
 using System;
 using Godot;
 
+namespace Client;
+
 public static class ClientEventBus {
   //========================= Terrain Events =========================
   public static event Action<MapTileData, MouseButton> OnTileClicked = default!;
