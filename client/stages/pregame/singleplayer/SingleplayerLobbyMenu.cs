@@ -24,6 +24,9 @@ public partial class SingleplayerLobbyMenu : Control {
     // OnPlayerListUpdated();
 
     ClientToServerInterface.SelectGameMap("devmap");
+    
+    // NOTE: This is a temporary solution to start the game immediately in singleplayer mode. for testing purposes.
+    OnStartGameButtonPressed();
   }
 
   private void OnStartGameButtonPressed() {
