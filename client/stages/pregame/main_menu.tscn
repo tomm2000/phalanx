@@ -220,8 +220,6 @@ theme_override_constants/separation = 20
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-mouse_default_cursor_shape = 8
-disabled = true
 text = "Singleplayer"
 alignment = 0
 

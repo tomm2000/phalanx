@@ -95,6 +95,7 @@ public partial class MultiplayerManager : Node {
   public static void HostSinglePlayer() {
     var peer = new OfflineMultiplayerPeer();
     Initialize(peer);
+    OnConnectedToServer();
   }
 
   public static void JoinSteam(Lobby lobby) {

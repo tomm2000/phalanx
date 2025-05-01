@@ -46,13 +46,28 @@ public partial class ClientGameManager : Node,
     
     switch (newStage) {
       case GameStage.Lobby:
-        SwitchScene(MultiplayerLobbyMenu.ScenePath);
+        LoadLobbyScene();
         break;
       case GameStage.Battle:
         SwitchScene(ClientBattleStage.Instantiate());
         break;
       default:
         throw new ArgumentOutOfRangeException(nameof(newStage), newStage, null);
+    }
+  }
+
+  private void LoadLobbyScene() {
+    switch (MultiplayerManager.MultiplayerStatus) {
+      case MultiplayerStatus.SinglePlayer:
+        SwitchScene(SingleplayerLobbyMenu.ScenePath);
+        break;
+      case MultiplayerStatus.EnetMultiplayer:
+      case MultiplayerStatus.SteamMultiplayer:
+        SwitchScene(MultiplayerMenu.ScenePath);
+        break;
+      case MultiplayerStatus.Disconnected:
+        Main.SwitchScene(MainMenu.ScenePath);
+        break;
     }
   }
 

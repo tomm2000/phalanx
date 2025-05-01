@@ -16,7 +16,7 @@ public partial class MainMenu : Control {
   public static readonly string ScenePath = "uid://dwjcl253px63k";
 
   private void OnSingleplayerButtonPressed() {
-    Main.SwitchScene(SingleplayerMenu.ScenePath);
+    MultiplayerManager.HostSinglePlayer();
   }
   
   private void OnMultiplayerButtonPressed() {

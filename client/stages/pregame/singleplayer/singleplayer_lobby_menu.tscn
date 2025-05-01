@@ -1,14 +1,14 @@
 [gd_scene load_steps=9 format=3 uid="uid://dukh8gnwwqll6"]
 
-[ext_resource type="Script" uid="uid://c6ppfw0x1m2y" path="res://client/stages/pregame/singleplayer/SingleplayerMenu.cs" id="1_qkwbe"]
-[ext_resource type="Texture2D" uid="uid://dcaf4ygdvskhv" path="res://client/stages/common/ui/assets/background.png" id="2_i0kf1"]
-[ext_resource type="Shader" uid="uid://d1hi66rm126v2" path="res://client/stages/common/ui/background_blur_shader.gdshader" id="3_y8wov"]
-[ext_resource type="PackedScene" uid="uid://brewcawnrqh1y" path="res://client/stages/common/ui/list_vbox_container.tscn" id="4_j6k41"]
-[ext_resource type="PackedScene" uid="uid://rdhk223fvvon" path="res://client/stages/common/ui/filler.tscn" id="5_prla4"]
-[ext_resource type="PackedScene" uid="uid://bwqtr45lx05f" path="res://client/stages/common/ui/standard_button.tscn" id="6_ewomu"]
+[ext_resource type="Script" uid="uid://ceud3xuuwccch" path="res://client/stages/pregame/singleplayer/SingleplayerLobbyMenu.cs" id="1_rl685"]
+[ext_resource type="Texture2D" uid="uid://dcaf4ygdvskhv" path="res://client/stages/common/ui/assets/background.png" id="2_ivoxx"]
+[ext_resource type="Shader" uid="uid://d1hi66rm126v2" path="res://client/stages/common/ui/background_blur_shader.gdshader" id="3_tlxuj"]
+[ext_resource type="PackedScene" uid="uid://brewcawnrqh1y" path="res://client/stages/common/ui/list_vbox_container.tscn" id="4_gp5rw"]
+[ext_resource type="PackedScene" uid="uid://bwqtr45lx05f" path="res://client/stages/common/ui/standard_button.tscn" id="5_47eqn"]
+[ext_resource type="PackedScene" uid="uid://rdhk223fvvon" path="res://client/stages/common/ui/filler.tscn" id="6_gd0nb"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_qvhqo"]
-shader = ExtResource("3_y8wov")
+shader = ExtResource("3_tlxuj")
 shader_parameter/blur_amount = 3.353
 shader_parameter/mix_amount = 0.548
 shader_parameter/color_over = Color(0.0941176, 0.117647, 0.14902, 1)
@@ -16,14 +16,14 @@ shader_parameter/color_over = Color(0.0941176, 0.117647, 0.14902, 1)
 [sub_resource type="LabelSettings" id="LabelSettings_qvhqo"]
 font_size = 30
 
-[node name="SingleplayerMenu" type="Control"]
+[node name="SingleplayerLobbyMenu" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_qkwbe")
+script = ExtResource("1_rl685")
 metadata/_edit_lock_ = true
 
 [node name="BoxContainer" type="BoxContainer" parent="."]
@@ -42,7 +42,7 @@ metadata/_edit_lock_ = true
 
 [node name="TextureRect" type="TextureRect" parent="BoxContainer"]
 layout_mode = 2
-texture = ExtResource("2_i0kf1")
+texture = ExtResource("2_ivoxx")
 expand_mode = 3
 metadata/_edit_lock_ = true
 
@@ -81,16 +81,21 @@ label_settings = SubResource("LabelSettings_qvhqo")
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="ListVboxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer" instance=ExtResource("4_j6k41")]
+[node name="ListVboxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer" instance=ExtResource("4_gp5rw")]
 layout_mode = 2
 
-[node name="Filler" parent="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="0" instance=ExtResource("5_prla4")]
+[node name="StartGameButton" parent="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="0" instance=ExtResource("5_47eqn")]
+layout_mode = 2
+text = "Start Game"
+
+[node name="Filler" parent="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="1" instance=ExtResource("6_gd0nb")]
 layout_mode = 2
 
-[node name="StandardButton" parent="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="1" instance=ExtResource("6_ewomu")]
+[node name="StandardButton" parent="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="2" instance=ExtResource("5_47eqn")]
 layout_mode = 2
 text = "Quit to Main Menu"
 
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/StartGameButton" to="." method="OnStartGameButtonPressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/StandardButton" to="." method="OnQuitToMainMenuButtonPressed"]
 
 [editable path="MarginContainer/VBoxContainer/HBoxContainer/ListVboxContainer"]
