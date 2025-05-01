@@ -1,0 +1,92 @@
+[gd_scene load_steps=8 format=3 uid="uid://ds17brhc3vm3e"]
+
+[ext_resource type="Texture2D" uid="uid://dcaf4ygdvskhv" path="res://client/stages/common/ui/assets/background.png" id="1_7iyh5"]
+[ext_resource type="Script" uid="uid://bsxnowca1ndce" path="res://client/stages/pregame/common/MenuLoadingScreen.cs" id="1_aap2m"]
+[ext_resource type="Shader" uid="uid://d1hi66rm126v2" path="res://client/stages/common/ui/background_blur_shader.gdshader" id="2_6204o"]
+[ext_resource type="PackedScene" uid="uid://bwqtr45lx05f" path="res://client/stages/common/ui/standard_button.tscn" id="4_cf3jg"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_aap2m"]
+shader = ExtResource("2_6204o")
+shader_parameter/blur_amount = 1.712
+shader_parameter/mix_amount = 0.695
+shader_parameter/color_over = Color(0.0941176, 0.117647, 0.14902, 1)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_cf3jg"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_cf3jg"]
+font_size = 25
+
+[node name="MenuLoadingScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_aap2m")
+
+[node name="TimeoutTimer" type="Timer" parent="."]
+unique_name_in_owner = true
+wait_time = 5.0
+one_shot = true
+
+[node name="BoxContainer" type="BoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -382.0
+offset_top = -149.0
+offset_right = 383.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+metadata/_edit_lock_ = true
+
+[node name="TextureRect" type="TextureRect" parent="BoxContainer"]
+layout_mode = 2
+texture = ExtResource("1_7iyh5")
+expand_mode = 3
+metadata/_edit_lock_ = true
+
+[node name="Panel" type="Panel" parent="."]
+material = SubResource("ShaderMaterial_aap2m")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_lock_ = true
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="CenterContainer"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_cf3jg")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/PanelContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="LoadingText" type="Label" parent="CenterContainer/PanelContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "loading..."
+label_settings = SubResource("LabelSettings_cf3jg")
+horizontal_alignment = 1
+
+[node name="OkButton" parent="CenterContainer/PanelContainer/VBoxContainer" instance=ExtResource("4_cf3jg")]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Ok"
+
+[connection signal="timeout" from="TimeoutTimer" to="." method="ReturnToMainMenu"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/VBoxContainer/OkButton" to="." method="GotoNextScene"]

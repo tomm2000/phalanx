@@ -22,6 +22,8 @@ public partial class StandardTile : Node3D {
   public override void _Notification(int what) => this.Notify(what);
   public static readonly string ScenePath = "uid://clkgqxom5swiy";
 
+  [Dependency] private ClientEventBus ClientEventBus => this.DependOn<ClientEventBus>();
+
   [Node] private MeshInstance3D MeshInstance { get; set; } = default!;
   [Node] private CollisionShape3D CollisionShape { get; set; } = default!;
   [Node] private Area3D CollisionArea { get; set; } = default!;
@@ -47,7 +49,7 @@ public partial class StandardTile : Node3D {
     return instance;
   }
 
-  public override void _Ready() {
+  public void OnResolved() {
     CollisionArea.InputEvent += OnInputEvent;
   }
 
@@ -84,6 +86,7 @@ public partial class StandardTile : Node3D {
   #region Surface Generation
   public void GenerateSurface(
     IEnumerable<(HexDirection, MapTileData)> neighbors,
+    DeferredQueueExecutor deferredQueueExecutor,
     float terrainScale = 1f
   ) {
     var worldPosition = TileData.coords.GridToWorld3D(terrainScale);
@@ -146,30 +149,23 @@ public partial class StandardTile : Node3D {
 
       Color WaterColor = new("#3b8cba");
       WaterColor += WaterColor * GD.Randf().Spread(0f, 1f, -0.05f, 0.05f);
-      // if ((a.riverness + b.riverness + c.riverness) / 3 >= 0.60f) {
       if (Math.Min(a.riverness, Math.Min(b.riverness, c.riverness)) >= 0.50f) {
         triangleColor = WaterColor;
       }
 
       surfaceTool.SetCustom(0, new Color(a.riverness, a.flowDirection.X, a.flowDirection.Y));
-      // surfaceTool.SetCustom(0, new Color(a.riverness, 0, a.flowDirection.Y));
-      // surfaceTool.SetCustom(0, new Color(a.riverness, a.flowDirection.X, 0.5f));
       surfaceTool.SetColor(triangleColor);
       surfaceTool.SetNormal(triangleNormal);
       surfaceTool.SetUV(uv_a);
       surfaceTool.AddVertex(a_vector);
 
       surfaceTool.SetCustom(0, new Color(b.riverness, b.flowDirection.X, b.flowDirection.Y));
-      // surfaceTool.SetCustom(0, new Color(b.riverness, 0, b.flowDirection.Y));
-      // surfaceTool.SetCustom(0, new Color(b.riverness, b.flowDirection.X, 0.5f));
       surfaceTool.SetColor(triangleColor);
       surfaceTool.SetNormal(triangleNormal);
       surfaceTool.SetUV(uv_b);
       surfaceTool.AddVertex(b_vector);
 
       surfaceTool.SetCustom(0, new Color(c.riverness, c.flowDirection.X, c.flowDirection.Y));
-      // surfaceTool.SetCustom(0, new Color(c.riverness, 0, c.flowDirection.Y));
-      // surfaceTool.SetCustom(0, new Color(c.riverness, c.flowDirection.X, 0.5f));
       surfaceTool.SetColor(triangleColor);
       surfaceTool.SetNormal(triangleNormal);
       surfaceTool.SetUV(uv_c);
@@ -177,8 +173,7 @@ public partial class StandardTile : Node3D {
     }
 
     var mesh = surfaceTool.Commit();
-
-    MeshInstance.CallDeferred(() => {
+    deferredQueueExecutor.Add(() => {
       MeshInstance.Mesh = mesh;
       GenerateInputMesh();
     });

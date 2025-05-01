@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://l4mtbmsj8a1x"]
+
+[ext_resource type="Script" uid="uid://bhpldrpv7e60" path="res://common/interfaces/ClientToServerInterface.cs" id="1_fekjy"]
+
+[node name="ClientToServerInterface" type="Node"]
+script = ExtResource("1_fekjy")

@@ -1,0 +1,86 @@
+[gd_scene load_steps=8 format=3 uid="uid://vm8lg46yfki1"]
+
+[ext_resource type="Script" uid="uid://csvewwsteabpr" path="res://client/stages/common/ui/menus/SettingsMenu.cs" id="1_y4xkx"]
+[ext_resource type="Shader" uid="uid://d1hi66rm126v2" path="res://client/stages/common/ui/background_blur_shader.gdshader" id="2_a6u21"]
+[ext_resource type="Texture2D" uid="uid://dcaf4ygdvskhv" path="res://client/stages/common/ui/assets/background.png" id="2_hm0cw"]
+[ext_resource type="Theme" uid="uid://guyqcrq35q6u" path="res://client/stages/common/ui/standard_theme.tres" id="4_5fmhn"]
+[ext_resource type="PackedScene" uid="uid://bwqtr45lx05f" path="res://client/stages/common/ui/standard_button.tscn" id="5_l8k4w"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_hm0cw"]
+resource_local_to_scene = true
+shader = ExtResource("2_a6u21")
+shader_parameter/blur_amount = 3.358
+shader_parameter/mix_amount = 0.41
+shader_parameter/color_over = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hm0cw"]
+content_margin_left = 100.0
+content_margin_top = 50.0
+content_margin_right = 100.0
+content_margin_bottom = 50.0
+
+[node name="SettingsMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_y4xkx")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = -334.0
+offset_top = -146.0
+offset_right = 1583.0
+offset_bottom = 801.0
+texture = ExtResource("2_hm0cw")
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+material = SubResource("ShaderMaterial_hm0cw")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_hm0cw")
+
+[node name="TabContainer" type="TabContainer" parent="PanelContainer"]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+theme = ExtResource("4_5fmhn")
+current_tab = 0
+
+[node name="General" type="VBoxContainer" parent="PanelContainer/TabContainer"]
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="Sound" type="VBoxContainer" parent="PanelContainer/TabContainer"]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 1
+
+[node name="Graphics" type="VBoxContainer" parent="PanelContainer/TabContainer"]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 2
+
+[node name="Keybinds" type="VBoxContainer" parent="PanelContainer/TabContainer"]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 3
+
+[node name="StandardButton" parent="." instance=ExtResource("5_l8k4w")]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -56.0
+offset_top = 17.0
+offset_right = -16.0
+offset_bottom = 57.0
+grow_horizontal = 0
+text = "X"
+
+[connection signal="pressed" from="StandardButton" to="." method="Exit"]

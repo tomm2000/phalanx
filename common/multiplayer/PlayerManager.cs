@@ -50,6 +50,26 @@ public partial class PlayerManager : Node {
   public static event Action<string>? PlayerExited;
 
   public static IEnumerable<Player> Players => Instance.registeredPlayers.Values;
+  public static Player RpcSenderPlayer() => Players.FindByPeerID(MultiplayerManager.RpcSenderId()).Value;
+
+  // TODO: have a proper way to say who is game master. (this is in case the host is not the game master)
+  public static bool PlayerIsMaster(string uid) {
+    var player = Players.FindByUID(uid);
+    if (player.IsFailed) return false;
+
+    return player.Value.PeerId == 1;
+  }
+
+  public static bool PlayerIsMaster(long peerId) {
+    var player = Players.FindByPeerID(peerId);
+    if (player.IsFailed) return false;
+
+    return player.Value.PeerId == 1;
+  }
+
+  public static bool IsMaster() {
+    return PlayerIsMaster(MultiplayerManager.PeerId);
+  }
 
   public static RegistrationResult SERVER_RegisterPlayer(
     string name,

@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://wq18lv7molho"]
-
-[ext_resource type="Script" uid="uid://cwcatlra71alu" path="res://common/GameDataInterface.cs" id="1_2do4p"]
-
-[node name="GameDataInterface" type="Node"]
-script = ExtResource("1_2do4p")

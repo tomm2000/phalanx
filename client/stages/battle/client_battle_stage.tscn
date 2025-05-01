@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://g18c7hr0hg8v"]
+
+[ext_resource type="Script" uid="uid://c7wviv4un67a4" path="res://client/stages/battle/ClientBattleStage.cs" id="1_78vqh"]
+[ext_resource type="PackedScene" uid="uid://bgu2ycrayqu6s" path="res://client/terrain/standard_terrain.tscn" id="2_kqm7q"]
+
+[node name="ClientBattleStage" type="Node"]
+script = ExtResource("1_78vqh")
+
+[node name="Terrain" parent="." instance=ExtResource("2_kqm7q")]
+unique_name_in_owner = true

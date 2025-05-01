@@ -1,13 +1,21 @@
-[gd_scene load_steps=4 format=3 uid="uid://ct7ufhj47seep"]
+[gd_scene load_steps=5 format=3 uid="uid://ct7ufhj47seep"]
 
 [ext_resource type="Script" uid="uid://crh2mjyyjhbbd" path="res://Main.cs" id="1_ig7tw"]
 [ext_resource type="PackedScene" uid="uid://joo2g4y1psu7" path="res://common/multiplayer/multiplayer_manager.tscn" id="2_h2yge"]
-[ext_resource type="PackedScene" uid="uid://dwjcl253px63k" path="res://client/ui/menus/pregame/main_menu.tscn" id="3_h2yge"]
+[ext_resource type="PackedScene" uid="uid://dwjcl253px63k" path="res://client/stages/pregame/main_menu.tscn" id="3_h2yge"]
+[ext_resource type="PackedScene" uid="uid://vm8lg46yfki1" path="res://client/stages/common/ui/menus/settings_menu.tscn" id="4_1bvp3"]
 
-[node name="Main" type="Node" node_paths=PackedStringArray("CurrentScene")]
+[node name="Main" type="Node"]
 script = ExtResource("1_ig7tw")
-CurrentScene = NodePath("MainMenu")
 
 [node name="MultiplayerManager" parent="." instance=ExtResource("2_h2yge")]
 
-[node name="MainMenu" parent="." instance=ExtResource("3_h2yge")]
+[node name="ActiveSceneContainer" type="Node" parent="."]
+unique_name_in_owner = true
+
+[node name="MainMenu" parent="ActiveSceneContainer" instance=ExtResource("3_h2yge")]
+
+[node name="SettingsMenu" parent="." instance=ExtResource("4_1bvp3")]
+unique_name_in_owner = true
+process_mode = 4
+visible = false

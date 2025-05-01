@@ -6,11 +6,16 @@ using ImGuiNET;
 using System.IO;
 using Steamworks;
 using Client.UI;
+using Client;
+using Tlib.Nodes;
 
 [Meta(typeof(IAutoConnect))]
 public partial class Main : Node {
   public static Main Instance { get; set; } = default!;
   public override void _Notification(int what) => this.Notify(what);
+
+  [Node] private SettingsMenu SettingsMenu { get; set; } = default!;
+  [Node] private Node ActiveSceneContainer { get; set; } = default!;
   
   public Main() {
     InitSteam();
@@ -24,10 +29,6 @@ public partial class Main : Node {
 
   public override void _Process(double delta) {
     DebugUI();
-  }
-
-  public static void Reset() {
-    MultiplayerManager.Disconnect(MultiplayerDisconnectReason.None);
   }
   #endregion
 
@@ -59,34 +60,55 @@ public partial class Main : Node {
   /// </summary>
   private void OnRegistrationResult(RegistrationResult result) {
     if (result.IsSuccess) {
-      Main.SwitchScene(MultiplayerLobbyMenu.ScenePath);
+      ServerGameManager? server = null;
+
+      if (MultiplayerManager.IsHost) {
+        server = ServerGameManager.Instantiate();
+      }
+
+      // create the client instance
+      var client = ClientGameManager.Instantiate();
+
+      // create the game instance
+      var gameInstance = GameInstance.Instantiate(
+        gameStage: GameStage.Lobby,
+        client: client,
+        server: server
+      );
+
+      SwitchScene(gameInstance);
     } else {
       GD.PrintErr($"Failed to connect to server: {result.Message}");
     }
   }
+
+  #endregion
+  public static void ToggleSettingsMenu(bool forceClose = false) {
+    if (forceClose) {
+      Instance.SettingsMenu.Visible = false;
+      Instance.SettingsMenu.ProcessMode = ProcessModeEnum.Disabled;
+      return;
+    }
+    Instance.SettingsMenu.Visible = !Instance.SettingsMenu.Visible;
+    Instance.SettingsMenu.ProcessMode = Instance.SettingsMenu.Visible ? ProcessModeEnum.Always : ProcessModeEnum.Disabled;
+
+  }
+  #region Settings Menu
+
   #endregion
 
   #region Scene Management
-  [Export] private Node? CurrentScene { get; set; }
-
   public static void SwitchScene(string path) {
     SwitchScene((PackedScene) ResourceLoader.Load(path));
   }
 
   public static void SwitchScene(PackedScene scene) {
-    Instance.CurrentScene?.QueueFree();
-
-    Instance.CurrentScene = scene.Instantiate();
-
-    Instance.AddChild(Instance.CurrentScene, true);
+    SwitchScene(scene.Instantiate());
   }
 
   public static void SwitchScene(Node scene) {
-    Instance.CurrentScene?.QueueFree();
-
-    Instance.CurrentScene = scene;
-
-    Instance.AddChild(Instance.CurrentScene, true);
+    Instance.ActiveSceneContainer.QueueFreeChildren();
+    Instance.ActiveSceneContainer.AddChild(scene, true);
   }
   #endregion
 

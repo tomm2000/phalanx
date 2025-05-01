@@ -6,11 +6,22 @@ using MessagePack;
 [MessagePackObject(AllowPrivate = true)]
 public partial class MapData {
   [Key(0)] private Dictionary<HexCoords, MapTileData> tileDict = [];
+  [Key(1)] public string mapId = default!;
+  [Key(2)] public string mapName = "default map name";
+  [Key(3)] public string mapDescription = String.Empty;
 
-  public MapData(IEnumerable<MapTileData> tiles) {
+  public MapData(
+    string mapId = default!,
+    string mapName = "Default Map",
+    string mapDescription = "Default Map Description",
+    IEnumerable<MapTileData> tiles = default!
+  ) {
     foreach (var tile in tiles) {
       tileDict[tile.coords] = tile;
     }
+    this.mapId = mapId;
+    this.mapName = mapName;
+    this.mapDescription = mapDescription;
   }
 
   private MapData() { }

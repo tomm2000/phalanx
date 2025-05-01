@@ -9,10 +9,12 @@ using System.Collections.Generic;
 
 namespace Client.Terrain;
 
-[Meta(typeof(IAutoConnect))]
+[Meta(typeof(IAutoConnect), typeof(IAutoNode))]
 public partial class StandardTerrain : Node3D {
   public override void _Notification(int what) => this.Notify(what);
   public static readonly string ScenePath = "uid://bgu2ycrayqu6s";
+
+  [Dependency] private ClientEventBus ClientEventBus => this.DependOn<ClientEventBus>();
 
   public static StandardTerrain Instantiate() {
     var scene = ResourceLoader.Load<PackedScene>(ScenePath);
@@ -41,7 +43,7 @@ public partial class StandardTerrain : Node3D {
     }
   }
 
-  public override void _Ready() {
+  public void OnResolved() {
     ClientEventBus.OnTileLeftClicked += (tile) => { SelectedTile = tile; };
     ClientEventBus.OnTileHovered += (tile) => { HoveredTile = tile; };
   }
@@ -60,11 +62,13 @@ public partial class StandardTerrain : Node3D {
       tiles.Add(tileInstance);
     }
 
+    var deferredQueueExecutor = new DeferredQueueExecutor(this);
+
     var task = Task.Run(() => {
       Parallel.ForEach(tiles, tileInstance => {
         var neighbors = map.NeighborsWithDirections(tileInstance.TileData.coords);
 
-        tileInstance.GenerateSurface(neighbors);
+        tileInstance.GenerateSurface(neighbors, deferredQueueExecutor);
       });
     });
 

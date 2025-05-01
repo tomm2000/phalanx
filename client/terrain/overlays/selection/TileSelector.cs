@@ -8,10 +8,12 @@ namespace Client.Terrain;
 public partial class TileSelector : Node3D {
   public override void _Notification(int what) => this.Notify(what);
 
+  [Dependency] private ClientEventBus ClientEventBus => this.DependOn<ClientEventBus>();
+
   private Vector3 targetPosition = Vector3.Zero;
   private bool isMoving = false;
 
-  public override void _Ready() {
+  public void OnResolved() {
     ClientEventBus.OnTileHovered += OnTileHovered;
   }
 

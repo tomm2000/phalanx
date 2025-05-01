@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://dpcx02yegoorx"]
+
+[ext_resource type="Script" uid="uid://drfmesd65xsuu" path="res://client/ClientEventBus.cs" id="1_l1tqk"]
+
+[node name="ClientEventBus" type="Node"]
+script = ExtResource("1_l1tqk")

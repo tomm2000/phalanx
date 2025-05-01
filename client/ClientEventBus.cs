@@ -3,12 +3,12 @@ using Godot;
 
 namespace Client;
 
-public static class ClientEventBus {
+public partial class ClientEventBus : Node {
   //========================= Terrain Events =========================
-  public static event Action<MapTileData, MouseButton> OnTileClicked = default!;
-  public static event Action<MapTileData> OnTileRightClicked = default!;
-  public static event Action<MapTileData> OnTileLeftClicked = default!;
-  public static void TileClicked(MapTileData tile, MouseButton button) {
+  public event Action<MapTileData, MouseButton> OnTileClicked = default!;
+  public event Action<MapTileData> OnTileRightClicked = default!;
+  public event Action<MapTileData> OnTileLeftClicked = default!;
+  public void TileClicked(MapTileData tile, MouseButton button) {
     OnTileClicked?.Invoke(tile, button);
 
     if (button == MouseButton.Left) {
@@ -18,6 +18,6 @@ public static class ClientEventBus {
     }
   }
 
-  public static event Action<MapTileData> OnTileHovered = default!;
-  public static void TileHovered(MapTileData tile) => OnTileHovered?.Invoke(tile);
+  public event Action<MapTileData> OnTileHovered = default!;
+  public void TileHovered(MapTileData tile) => OnTileHovered?.Invoke(tile);
 }

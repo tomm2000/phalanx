@@ -79,4 +79,13 @@ public static class SceneTreeExpansion {
 
     return count;
   }
+
+  /// <summary>
+  /// Adds the child to the parent, removing it from its current parent if it has one
+  /// </summary>
+  public static void AddAsChildTo(this Node child, Node parent) {
+    child.GetParent()?.RemoveChild(child);
+
+    parent.AddChild(child);
+  }
 }

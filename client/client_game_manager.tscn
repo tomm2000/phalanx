@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://dn86mibpjnhpv"]
+
+[ext_resource type="Script" uid="uid://mm24oqig4a5x" path="res://client/ClientGameManager.cs" id="1_dkime"]
+[ext_resource type="PackedScene" uid="uid://dpcx02yegoorx" path="res://client/client_event_bus.tscn" id="2_3mlc5"]
+
+[node name="ClientGameManager" type="Node"]
+script = ExtResource("1_dkime")
+
+[node name="ClientEventBus" parent="." instance=ExtResource("2_3mlc5")]
+unique_name_in_owner = true

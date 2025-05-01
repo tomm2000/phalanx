@@ -43,7 +43,7 @@ public static class DevMap {
       }
     }
 
-    var map = new MapData(tiles);
+    var map = new MapData("devmap", "Dev test map", tiles: tiles);
 
     GD.Print("tiles generated: ", map.Tiles.Count());
 
