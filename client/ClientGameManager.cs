@@ -63,7 +63,7 @@ public partial class ClientGameManager : Node,
         break;
       case MultiplayerStatus.EnetMultiplayer:
       case MultiplayerStatus.SteamMultiplayer:
-        SwitchScene(MultiplayerMenu.ScenePath);
+        SwitchScene(MultiplayerLobbyMenu.ScenePath);
         break;
       case MultiplayerStatus.Disconnected:
         Main.SwitchScene(MainMenu.ScenePath);
