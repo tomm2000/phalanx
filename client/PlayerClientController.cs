@@ -1,54 +1,48 @@
-[gd_scene load_steps=3 format=3 uid="uid://bwgjweoqh28wh"]
-
-[ext_resource type="PackedScene" uid="uid://dpcx02yegoorx" path="res://client/client_event_bus.tscn" id="2_3mlc5"]
-
-[sub_resource type="CSharpScript" id="CSharpScript_dkime"]
-script/source = "using System;
+using System;
 using System.Collections.Generic;
 using Chickensoft.AutoInject;
-using Chickensoft.Collections;
 using Chickensoft.Introspection;
-using Client.Terrain;
 using Client.UI;
 using Godot;
 
 namespace Client;
 
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
-public partial class ClientGameManager : Node,
+public partial class PlayerClientController : ClientController,
   IProvide<ClientEventBus>
 {
-  public override void _Notification(int what) => this.Notify(what);
-  public static readonly string ScenePath = \"uid://dn86mibpjnhpv\";
+	public override void _Notification(int what) => this.Notify(what);
+	public static readonly string ScenePath = "uid://nss3qj5556mk";
 
   ClientEventBus IProvide<ClientEventBus>.Value() => ClientEventBus;
-
-  [Dependency] GameInstance GameInstance => this.DependOn<GameInstance>();
-
+  
   #region Nodes
   [Node] ClientEventBus ClientEventBus { get; set; } = default!;
   #endregion
 
-  private Node ActiveScene { get; set; } = default!;
-
-  public static ClientGameManager Instantiate() {
+  public static PlayerClientController Instantiate() {
     var scene = ResourceLoader.Load<PackedScene>(ScenePath);
-    var instance = scene.Instantiate<ClientGameManager>();
-
+    var instance = scene.Instantiate<PlayerClientController>();
     return instance;
   }
 
-  public void OnResolved() {
-    GameInstance.GameStageChanged += OnGameStageChanged;
+	private Node ActiveScene { get; set; } = default!;
 
-    OnGameStageChanged(GameInstance.currentGameStage, GameInstance.currentGameStage);
+  public override void OnResolved() {
+    base.OnResolved();
+
+    OnGameStageChanged(GameStage.Lobby, SharedDataBase.CurrentGameStage.Value);
 
     this.Provide();
   }
 
-  private void OnGameStageChanged(GameStage oldStage, GameStage newStage) {
-    GD.Print($\"Game stage changed from {oldStage} to {newStage}\");
-    
+  public override void _ExitTree() {
+    base._ExitTree();
+  }
+
+  protected override void OnGameStageChanged(GameStage oldStage, GameStage newStage) {
+    GD.Print($"Game stage changed from {oldStage} to {newStage}");
+
     switch (newStage) {
       case GameStage.Lobby:
         LoadLobbyScene();
@@ -93,10 +87,3 @@ public partial class ClientGameManager : Node,
   }
   #endregion
 }
-"
-
-[node name="ClientGameManager" type="Node"]
-script = SubResource("CSharpScript_dkime")
-
-[node name="ClientEventBus" parent="." instance=ExtResource("2_3mlc5")]
-unique_name_in_owner = true

@@ -5,7 +5,7 @@ shader_type spatial;
 // #include "res://lib/shaders/hexlib.gdshaderinc"
 
 void vertex() {
-	
+
 }
 
 

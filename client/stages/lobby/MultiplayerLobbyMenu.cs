@@ -20,30 +20,30 @@ public partial class MultiplayerLobbyMenu : Control {
   [Node] private Button ReadyButton { get; set; } = default!;
   [Node] private Button StartButton { get; set; } = default!;
 
-  [Dependency] public GameInstance GameInstance => this.DependOn<GameInstance>();
-  [Dependency] public ClientToServerInterface ClientToServerInterface => this.DependOn<ClientToServerInterface>();
-  [Dependency] public GameDataInterface GameDataInterface => this.DependOn<GameDataInterface>();
-
-  public Dictionary<string, bool> PlayerReadyStatus { get; set; } = [];
+  [Dependency] public PlayerManager PlayerManager => this.DependOn<PlayerManager>();
+  [Dependency] public ClientToServerBus ClientToServerBus => this.DependOn<ClientToServerBus>();
+  [Dependency] public SharedDataBase SharedDataBase => this.DependOn<SharedDataBase>();
+  [Dependency] public ClientInterface ClientInterface => this.DependOn<ClientInterface>();
 
   public void OnResolved() {
     PlayerManager.PlayerListUpdated += OnPlayerListUpdated;
-    MultiplayerManager.Disconnected += ReturnToMultiplayerMenu;
+    MultiplayerManager.CLIENT_Disconnected += ReturnToMultiplayerMenu;
+    SharedDataBase.LobbyPlayerReadyStatus.DictionaryChanged += UpdateStartButton;
 
     OnPlayerListUpdated();
 
-    if (PlayerManager.IsMaster()) {
+    if (ClientInterface.IsMaster) {
       UpdateStartButton();
-      ClientToServerInterface.SelectGameMap("devmap");
+      ClientToServerBus.LobbySelectMap("devmap");
     } else {
       StartButton.Visible = false;
-      GameDataInterface.gameMap.ValueChanged += OnMapChanged;
+      SharedDataBase.SelectedMap.ValueChanged += OnMapChanged;
     }
   }
 
   public override void _ExitTree() {
     PlayerManager.PlayerListUpdated -= OnPlayerListUpdated;
-    MultiplayerManager.Disconnected -= ReturnToMultiplayerMenu;
+    MultiplayerManager.CLIENT_Disconnected -= ReturnToMultiplayerMenu;
   }
 
   private void OnMapChanged(MapData? oldValue, MapData? newValue) {
@@ -68,7 +68,6 @@ public partial class MultiplayerLobbyMenu : Control {
   private void OnExitLobbyButtonPressed() => MultiplayerManager.Disconnect(MultiplayerDisconnectReason.None);
 
   private void ReturnToMultiplayerMenu(MultiplayerDisconnectReason reason) {
-    // Main.SwitchScene(MultiplayerMenu.ScenePath);
     if (reason == MultiplayerDisconnectReason.None) {
       Main.SwitchScene(MultiplayerMenu.ScenePath);
 
@@ -95,51 +94,25 @@ public partial class MultiplayerLobbyMenu : Control {
 
   #region Start/Ready
   private void OnReadyButtonPressed() {
-    GD.Print("Ready button pressed");
-    RpcId(1, nameof(SERVER_ClientReadyUp));
-  }
-
-  [Rpc(
-    mode: MultiplayerApi.RpcMode.AnyPeer,
-    CallLocal = true,
-    TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
-  )]
-  private void SERVER_ClientReadyUp() {
-    var peerId = MultiplayerManager.RpcSenderId();
-    var playerResult = PlayerManager.Players.FindByPeerID(peerId);
-
-    if (playerResult.IsFailed) {
-      throw new Exception($"Player with peer ID {peerId} not found.");
-    }
-
-    var player = playerResult.Value;
-    var newStatus = !PlayerReadyStatus.GetValueOrDefault(player.UID, false);
-
-    Rpc(nameof(CLIENT_PlayerStatusUpdate), player.UID, newStatus);
-  }
-
-  [Rpc(
-    mode: MultiplayerApi.RpcMode.Authority,
-    CallLocal = true,
-    TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
-  )]
-  private void CLIENT_PlayerStatusUpdate(string playerUID, bool isReady) {
-    PlayerReadyStatus[playerUID] = isReady;
-
-    UpdateStartButton();
+    var currentReady = SharedDataBase.LobbyPlayerReadyStatus.Value.GetValueOrDefault(ClientInterface.PlayerId, false);
+    ClientToServerBus.LobbySetPlayerReady(!currentReady);
   }
 
   private void OnStartGameButtonPressed() {
-    if (!PlayerManager.IsMaster()) { throw new Exception("Only the host can start the game."); }
+    if (!ClientInterface.IsMaster) { throw new Exception("Only the host can start the game."); }
 
-    var allReady = PlayerManager.Players.All(p => PlayerReadyStatus.GetValueOrDefault(p.UID, false));
+    var allReady = PlayerManager
+      .Players
+      .All(p => SharedDataBase.LobbyPlayerReadyStatus.Value.GetValueOrDefault(p.UID, false));
     if (!allReady) { return; }
 
-    GameInstance.SERVER_ChangeGameStage(GameStage.Battle);
+    ClientToServerBus.LobbyStartGame();
   }
 
   private void UpdateStartButton() {
-    bool allReady = PlayerManager.Players.All(p => PlayerReadyStatus.GetValueOrDefault(p.UID, false));
+    bool allReady = PlayerManager
+      .Players
+      .All(p => SharedDataBase.LobbyPlayerReadyStatus.Value.GetValueOrDefault(p.UID, false));
     StartButton.Disabled = !allReady;
   }
   #endregion

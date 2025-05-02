@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://c7d47kkq7lhcf"]
-
-[ext_resource type="Script" uid="uid://cqea2kibg0k77" path="res://common/interfaces/ServerToClientInterface.cs" id="1_6611x"]
-
-[node name="ServerToClientInterface" type="Node"]
-script = ExtResource("1_6611x")

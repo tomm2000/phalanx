@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://dr1b75c32sida"]
+[gd_scene load_steps=14 format=3 uid="uid://dr1b75c32sida"]
 
 [ext_resource type="Script" uid="uid://bov7qcdg8a6nj" path="res://client/stages/lobby/MultiplayerLobbyMenu.cs" id="1_0b2yv"]
 [ext_resource type="Texture2D" uid="uid://dcaf4ygdvskhv" path="res://client/stages/common/ui/assets/background.png" id="2_t4306"]
@@ -10,7 +10,6 @@
 [ext_resource type="PackedScene" uid="uid://c68j3jaf4ip0k" path="res://client/stages/pregame/common/player_list_item.tscn" id="7_npv11"]
 [ext_resource type="Theme" uid="uid://guyqcrq35q6u" path="res://client/stages/common/ui/standard_theme.tres" id="8_yiw7l"]
 [ext_resource type="PackedScene" uid="uid://dq3f6m2ju3ihr" path="res://client/stages/pregame/common/user_tag.tscn" id="10_orrdb"]
-[ext_resource type="PackedScene" uid="uid://wq18lv7molho" path="res://common/interfaces/game_data_interface.tscn" id="11_3krhc"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_3dws0"]
 shader = ExtResource("3_i10d0")
@@ -36,8 +35,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_0b2yv")
-
-[node name="GameDataInterface" parent="." instance=ExtResource("11_3krhc")]
 
 [node name="RefreshLobbiesTimer" type="Timer" parent="."]
 wait_time = 5.0

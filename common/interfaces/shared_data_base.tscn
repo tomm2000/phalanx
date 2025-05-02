@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://c8hg5xqd3dk0c"]
+
+[ext_resource type="Script" uid="uid://cte01lgi5gup7" path="res://common/interfaces/SharedDataBase.cs" id="1_165qr"]
+
+[node name="SharedDataBase" type="Node"]
+script = ExtResource("1_165qr")

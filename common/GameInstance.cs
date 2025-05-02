@@ -17,69 +17,59 @@ public enum GameStage {
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
 public partial class GameInstance :
   Node,
-  IProvide<GameStage>,
   IProvide<GameInstance>,
-  IProvide<GameDataInterface>,
-  IProvide<ServerToClientInterface>,
-  IProvide<ClientToServerInterface>
-{
+  IProvide<PlayerManager>,
+  IProvide<SharedDataBase> {
   public override void _Notification(int what) => this.Notify(what);
   public static readonly string ScenePath = "uid://cexnf1ilp6b4b";
 
-  public GameStage currentGameStage { get; private set; } = GameStage.Lobby;
-  
-  GameStage IProvide<GameStage>.Value() => currentGameStage;
   GameInstance IProvide<GameInstance>.Value() => this;
-  GameDataInterface IProvide<GameDataInterface>.Value() => GameDataInterface;
-  ServerToClientInterface IProvide<ServerToClientInterface>.Value() => ServerToClientInterface;
-  ClientToServerInterface IProvide<ClientToServerInterface>.Value() => ClientToServerInterface;
+  PlayerManager IProvide<PlayerManager>.Value() => _playerManager;
+  SharedDataBase IProvide<SharedDataBase>.Value() => _sharedDataBase;
+
+  #region Nodes
+  [Node] private PlayerManager _playerManager { get; set; } = default!;
+  [Node] private SharedDataBase _sharedDataBase { get; set; } = default!;
+  #endregion
 
   public event Action<Player>? SERVER_PlayerReady;
   public event Action<GameStage, GameStage>? GameStageChanged;
 
-  public static GameInstance Instantiate(
-    GameStage gameStage = GameStage.Lobby,
-    ClientGameManager? client = null,
-    ServerGameManager? server = null
-  ) {
+  public static GameInstance Instantiate(bool withServer) {
     var scene = ResourceLoader.Load<PackedScene>(ScenePath);
     var instance = scene.Instantiate<GameInstance>();
 
-    instance.currentGameStage = gameStage;
-
-    client?.AddAsChildTo(instance);
-    server?.AddAsChildTo(instance);
+    if (withServer) {
+      var server = ServerManager.Instantiate();
+      instance.AddChild(server);
+    }
 
     return instance;
   }
 
+  public void AttachClient(Player player) {
+    var clientInterface = ClientInterface.Instantiate(player);
+
+    ClientController clientController = player.PlayerType switch {
+      PlayerType.Human => PlayerClientController.Instantiate(),
+      PlayerType.Bot => throw new NotImplementedException("Bot client interface not implemented"),
+      _ => throw new NotImplementedException($"Player type {player.PlayerType} not implemented"),
+    };
+
+    AddChild(clientInterface, true);
+
+    clientInterface.AttachClientController(clientController);
+  }
+
   #region Nodes
-  [Node] GameDataInterface GameDataInterface { get; set; } = default!;
-  [Node] ServerToClientInterface ServerToClientInterface { get; set; } = default!;
-  [Node] ClientToServerInterface ClientToServerInterface { get; set; } = default!;
+  [Node] public PlayerManager PlayerManager { get; private set; } = default!;
   #endregion
 
   #region Lifecycle
   public void OnResolved() {
     this.Provide();
 
-    InitializationComplete();
-  }
-
-  public override void _ExitTree() {
-    SERVER_PlayerReady = null;
-    GameStageChanged = null;
-  }
-
-  public void ExitGame() {
-    MultiplayerManager.Disconnect(MultiplayerDisconnectReason.None);
-    Main.SwitchScene(MainMenu.ScenePath);
-  }
-  #endregion
-
-  #region Client Initialization
-  private void InitializationComplete() {
-    RpcId(1, nameof(SERVER_OnClientReady));
+    RpcId(1, nameof(SERVER_InitializePeer));
   }
 
   [Rpc(
@@ -87,37 +77,16 @@ public partial class GameInstance :
     CallLocal = true,
     TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
   )]
-  public void SERVER_OnClientReady() {
-    try {
-      var player = PlayerManager.RpcSenderPlayer();
-      SERVER_PlayerReady?.Invoke(player);
-      RpcId(player.PeerId, nameof(CLIENT_LoadGameStage), currentGameStage.Serialize());
-    } catch (Exception e) {
-      throw new Exception("Failed to get player from RPC sender", e);
-    }
+  private void SERVER_InitializePeer() {
+    if (!MultiplayerManager.IsHost) return;
+
+    var peerId = MultiplayerManager.RpcSenderId();
+    SERVER_PeerInitialized?.Invoke(peerId);
   }
+
+  public event Action<long>? SERVER_PeerInitialized;
   #endregion
 
   #region Game Stage
-  public void SERVER_ChangeGameStage(GameStage gameStage) {
-    if (gameStage == currentGameStage) { return; }
-
-    Rpc(nameof(CLIENT_LoadGameStage), gameStage.Serialize());
-  }
-
-  [Rpc(
-    mode: MultiplayerApi.RpcMode.Authority,
-    CallLocal = true,
-    TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
-  )]
-  private void CLIENT_LoadGameStage(byte[] gameStageData) {
-    var gameStage = gameStageData.Deserialize<GameStage>();
-    if (gameStage == currentGameStage) { return;  }
-
-    var previousGameStage = currentGameStage;
-    currentGameStage = gameStage;
-    
-    GameStageChanged?.Invoke(previousGameStage, gameStage);
-  }
   #endregion
 }

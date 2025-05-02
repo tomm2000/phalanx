@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://nss3qj5556mk"]
+
+[ext_resource type="Script" uid="uid://c1nl81o7ose4v" path="res://client/PlayerClientController.cs" id="1_bfyel"]
+[ext_resource type="PackedScene" uid="uid://dpcx02yegoorx" path="res://client/client_event_bus.tscn" id="2_5vbhn"]
+
+[node name="PlayerClientController" type="Node"]
+script = ExtResource("1_bfyel")
+
+[node name="ClientEventBus" parent="." instance=ExtResource("2_5vbhn")]
+unique_name_in_owner = true

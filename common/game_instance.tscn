@@ -1,18 +1,16 @@
 [gd_scene load_steps=5 format=3 uid="uid://cexnf1ilp6b4b"]
 
 [ext_resource type="Script" uid="uid://css4gkfci01b6" path="res://common/GameInstance.cs" id="1_gfaag"]
-[ext_resource type="PackedScene" uid="uid://wq18lv7molho" path="res://common/interfaces/game_data_interface.tscn" id="2_7x6j8"]
-[ext_resource type="PackedScene" uid="uid://l4mtbmsj8a1x" path="res://common/interfaces/client_to_server_interface.tscn" id="3_b47oe"]
-[ext_resource type="PackedScene" uid="uid://c7d47kkq7lhcf" path="res://common/interfaces/server_to_client_interface.tscn" id="4_u210c"]
+[ext_resource type="PackedScene" uid="uid://b45pi6s6v775p" path="res://common/interfaces/player_manager.tscn" id="2_7x6j8"]
+[ext_resource type="Script" uid="uid://qjtkhbqnxxcc" path="res://common/interfaces/PlayerManager.cs" id="3_a8ixj"]
+[ext_resource type="PackedScene" uid="uid://c8hg5xqd3dk0c" path="res://common/interfaces/shared_data_base.tscn" id="4_b47oe"]
 
 [node name="GameInstance" type="Node"]
 script = ExtResource("1_gfaag")
 
-[node name="GameDataInterface" parent="." instance=ExtResource("2_7x6j8")]
+[node name="PlayerManager" parent="." instance=ExtResource("2_7x6j8")]
 unique_name_in_owner = true
+script = ExtResource("3_a8ixj")
 
-[node name="ClientToServerInterface" parent="." instance=ExtResource("3_b47oe")]
-unique_name_in_owner = true
-
-[node name="ServerToClientInterface" parent="." instance=ExtResource("4_u210c")]
+[node name="SharedDataBase" parent="." instance=ExtResource("4_b47oe")]
 unique_name_in_owner = true

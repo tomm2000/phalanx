@@ -40,7 +40,7 @@ public partial class MultiplayerManager : Node {
     /// </summary>
     SteamFriends.OnGameLobbyJoinRequested += (lobby, id) => JoinSteam(lobby);
 
-    Instance.Multiplayer.ConnectedToServer += OnConnectedToServer;
+    Instance.Multiplayer.ConnectedToServer += () => { CLIENT_ConnectedToServer?.Invoke(); };
     Instance.Multiplayer.PeerDisconnected += OnPeerDisconnected;
 
     // NOTE: this might never be called
@@ -86,7 +86,7 @@ public partial class MultiplayerManager : Node {
 
     if (error == Error.Ok) {
       Initialize(peer);
-      OnConnectedToServer();
+      SERVER_CreatedServer?.Invoke();
     } else {
       GD.PushError($"<enet> Failed to create server: {error}");
     }
@@ -95,7 +95,7 @@ public partial class MultiplayerManager : Node {
   public static void HostSinglePlayer() {
     var peer = new OfflineMultiplayerPeer();
     Initialize(peer);
-    OnConnectedToServer();
+    SERVER_CreatedServer?.Invoke();
   }
 
   public static void JoinSteam(Lobby lobby) {
@@ -119,11 +119,10 @@ public partial class MultiplayerManager : Node {
     Peer.DisconnectPeer((int) peerId);
   }
   
-  public static event Action<RegistrationResult>? RegistrationResult;
-  public static event Action<MultiplayerDisconnectReason>? Disconnected;
-  #endregion
-
-  #region Private Properties
+  public static event Action<MultiplayerDisconnectReason>? CLIENT_Disconnected;
+  public static event Action? CLIENT_ConnectedToServer;
+  public static event Action? SERVER_CreatedServer;
+  public static event Action<long>? SERVER_PlayerDisconnected;
   #endregion
 
   #region Initialization
@@ -162,8 +161,7 @@ public partial class MultiplayerManager : Node {
     
     Instance.Multiplayer.MultiplayerPeer = null;
     
-    PlayerManager.Reset();
-    Disconnected?.Invoke(reason);
+    CLIENT_Disconnected?.Invoke(reason);
   }
   #endregion
 
@@ -188,93 +186,8 @@ public partial class MultiplayerManager : Node {
 
     // NOTE: for client peers this will be instead called by OnConnectedToServer callback
     if (IsHost) {
-      OnConnectedToServer();
+      SERVER_CreatedServer?.Invoke();
     }
-  }
-
-  /// <summary>
-  /// Called when a peer (either client or host) is connected to the server.
-  /// </summary>
-  private static void OnConnectedToServer() {
-    if (SteamClient.IsValid) {
-      var steamId = SteamClient.SteamId;
-      var name = ClientData.Username;
-      Instance.RpcId(1, nameof(SERVER_RegisterSteamPlayer), (ulong)steamId, name);
-    } else {
-      var name = ClientData.Username;
-      Instance.RpcId(1, nameof(SERVER_RegisterEnetPlayer), name);
-    }
-  }
-  #endregion
-
-  #region Player registration
-  [Rpc(
-    mode: MultiplayerApi.RpcMode.AnyPeer,
-    CallLocal = true,
-    TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
-  )]
-  private void SERVER_RegisterSteamPlayer(ulong steamId, string name) {
-    if (!IsHost) throw new InvalidOperationException($"[{nameof(SERVER_RegisterSteamPlayer)}] Only the host can call this method.");
-
-    var peerId = Multiplayer.GetRemoteSenderId();
-    var registrationResult = PlayerManager.SERVER_RegisterPlayer(
-      name,
-      peerId,
-      steamId,
-      PlayerType.Human
-    );
-
-    SERVER_RelayRegistrationResult(registrationResult, peerId);
-  }
-
-  [Rpc(
-    mode: MultiplayerApi.RpcMode.AnyPeer,
-    CallLocal = true,
-    TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
-  )]
-  private void SERVER_RegisterEnetPlayer(string name) {
-    if (!IsHost) throw new InvalidOperationException($"[{nameof(SERVER_RegisterEnetPlayer)}] Only the host can call this method.");
-
-    var peerId = Multiplayer.GetRemoteSenderId();
-    var registrationResult = PlayerManager.SERVER_RegisterPlayer(
-      name,
-      peerId,
-      steamId: null,
-      PlayerType.Human
-    );
-
-    SERVER_RelayRegistrationResult(registrationResult, peerId);
-  }
-
-  private void SERVER_RelayRegistrationResult(RegistrationResult result, int peerId) {
-    RpcId(peerId, nameof(CLIENT_HandleRegistrationResult), result.Serialize());
-
-    if (result.IsFailure) {
-      GD.PushError($"<multiplayer> Failed to register player: {result}");
-      Peer.DisconnectPeer(peerId);
-      return;
-    } else {
-      PlayerManager.SERVER_SynchronizeClient(peerId);
-    }
-  }
-
-  [Rpc(
-    mode: MultiplayerApi.RpcMode.Authority,
-    CallLocal = true,
-    TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
-  )]
-  private void CLIENT_HandleRegistrationResult(byte[] resultData) {
-    var result = resultData.Deserialize<RegistrationResult>();
-
-    RegistrationResult?.Invoke(result);
-
-    if (result.IsFailure) {
-      GD.PushError($"<multiplayer> Failed to register player: {result}");
-      Disconnect(MultiplayerDisconnectReason.Error);
-      return;
-    }
-
-    GD.PushWarning($"<multiplayer> Player registered successfully: {result}");
   }
   #endregion
 
@@ -291,8 +204,7 @@ public partial class MultiplayerManager : Node {
     if (IsHost) {
       GD.PushWarning($"<multiplayer> Client disconnected: {disconnectedPeerId}");
       // FIXME: properly implement player disconnection
-      // PlayerManager.PeerDisconnected(disconnectedPeerId);
-      PlayerManager.PlayerQuit(disconnectedPeerId);
+      SERVER_PlayerDisconnected?.Invoke(disconnectedPeerId);
     }
   }
 

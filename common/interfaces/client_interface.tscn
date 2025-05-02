@@ -1,0 +1,18 @@
+[gd_scene load_steps=5 format=3 uid="uid://bs182f4xfpyg5"]
+
+[ext_resource type="Script" uid="uid://cprdxudit44b5" path="res://common/interfaces/ClientInterface.cs" id="1_1f5bj"]
+[ext_resource type="PackedScene" uid="uid://wrcmbwl6qevl" path="res://common/interfaces/player_data_interface.tscn" id="2_n5tys"]
+[ext_resource type="PackedScene" uid="uid://c0iaowtpoh8bq" path="res://common/interfaces/client_to_server_bus.tscn" id="3_3iso2"]
+[ext_resource type="PackedScene" uid="uid://c2rvfb2x0dv3q" path="res://common/interfaces/server_to_client_bus.tscn" id="4_3ilg1"]
+
+[node name="ClientInterface" type="Node"]
+script = ExtResource("1_1f5bj")
+
+[node name="PlayerDataInterface" parent="." instance=ExtResource("2_n5tys")]
+unique_name_in_owner = true
+
+[node name="ClientToServerBus" parent="." instance=ExtResource("3_3iso2")]
+unique_name_in_owner = true
+
+[node name="ServerToClientBus" parent="." instance=ExtResource("4_3ilg1")]
+unique_name_in_owner = true

@@ -11,7 +11,7 @@ public partial class ClientBattleStage : Node {
 	public override void _Notification(int what) => this.Notify(what);
 	public static readonly string ScenePath = "uid://g18c7hr0hg8v";
   
-  [Dependency] private GameDataInterface GameDataInterface => this.DependOn<GameDataInterface>();
+  [Dependency] private SharedDataBase SharedDataBase => this.DependOn<SharedDataBase>();
 	
 	public static ClientBattleStage Instantiate() {
     var scene = ResourceLoader.Load<PackedScene>(ScenePath);
@@ -24,12 +24,7 @@ public partial class ClientBattleStage : Node {
   #endregion
 
   public void OnResolved() {
-    var map = GameDataInterface.gameMap;
-
-    if (map == null) {
-      GD.PrintErr("Map is null");
-      return;
-    }
+    var map = SharedDataBase.SelectedMap ?? throw new Exception("Started without a map selected");
 
     Terrain.GenerateTerrain(map!);
   }

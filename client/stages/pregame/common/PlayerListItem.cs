@@ -27,7 +27,7 @@ public partial class PlayerListItem : Control {
   private Player player;
 
   public override async void _Ready() {
-    PlayerNameLabel.Text = player.Username;
+    PlayerNameLabel.Text = player.Name;
 
     if (MultiplayerManager.IsHost) {
       KickButton.Visible = true;

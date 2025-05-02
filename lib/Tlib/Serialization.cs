@@ -30,4 +30,13 @@ public static class Serialization {
     }
     return result;
   }
+
+  public static string PrintDictionary<K, V>(this IDictionary<K, V> dict) {
+    var result = "{ ";
+    foreach (var kvp in dict) {
+      result += $"{kvp.Key}: {kvp.Value}, ";
+    }
+    result += "}";
+    return result;
+  }
 }

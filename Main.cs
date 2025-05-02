@@ -24,8 +24,10 @@ public partial class Main : Node {
   #region Lifecycle
   public override void _Ready() {
     Instance = this;
-    MultiplayerManager.RegistrationResult += OnRegistrationResult;
+    MultiplayerManager.CLIENT_ConnectedToServer += OnConnectedToServer;
+    MultiplayerManager.SERVER_CreatedServer += OnCreatedServer;
   }
+
 
   public override void _Process(double delta) {
     DebugUI();
@@ -58,28 +60,14 @@ public partial class Main : Node {
   /// <summary>
   /// Called when the user tries to join a lobby from their friends list or from an invite.
   /// </summary>
-  private void OnRegistrationResult(RegistrationResult result) {
-    if (result.IsSuccess) {
-      ServerGameManager? server = null;
+  private void OnConnectedToServer() {
+    var gameInstance = GameInstance.Instantiate(withServer: false);
+    SwitchScene(gameInstance);
+  }
 
-      if (MultiplayerManager.IsHost) {
-        server = ServerGameManager.Instantiate();
-      }
-
-      // create the client instance
-      var client = ClientGameManager.Instantiate();
-
-      // create the game instance
-      var gameInstance = GameInstance.Instantiate(
-        gameStage: GameStage.Lobby,
-        client: client,
-        server: server
-      );
-
-      SwitchScene(gameInstance);
-    } else {
-      GD.PrintErr($"Failed to connect to server: {result.Message}");
-    }
+  private void OnCreatedServer() {
+    var gameInstance = GameInstance.Instantiate(withServer: true);
+    SwitchScene(gameInstance);
   }
 
   #endregion

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://wrcmbwl6qevl"]
+
+[ext_resource type="Script" uid="uid://c1ayqprtjdvkw" path="res://common/interfaces/PlayerDataInterface.cs" id="1_5cvb2"]
+
+[node name="PlayerDataInterface" type="Node"]
+script = ExtResource("1_5cvb2")

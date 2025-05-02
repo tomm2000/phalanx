@@ -27,6 +27,21 @@ project/assembly_name="Phalanx"
 
 enabled=PackedStringArray("res://addons/imgui-godot/plugin.cfg")
 
+[file_customization]
+
+folder_colors={
+"res://Facepunch/": "gray",
+"res://addons/": "gray",
+"res://client/": "green",
+"res://common/": "purple",
+"res://debug/": "gray",
+"res://exports/": "gray",
+"res://garbage/": "gray",
+"res://lib/": "yellow",
+"res://script_templates/": "gray",
+"res://server/": "red"
+}
+
 [gui]
 
 theme/custom_font="uid://d2okuqqg1gogx"
