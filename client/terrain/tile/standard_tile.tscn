@@ -1,6 +1,6 @@
 [gd_scene load_steps=13 format=3 uid="uid://clkgqxom5swiy"]
 
-[ext_resource type="Script" uid="uid://dklhh2tjx2wdo" path="res://client/terrain/StandardTile.cs" id="1_fihpe"]
+[ext_resource type="Script" uid="uid://dklhh2tjx2wdo" path="res://client/terrain/tile/StandardTile.cs" id="1_fihpe"]
 [ext_resource type="Shader" uid="uid://dw8sfu5i5p4as" path="res://client/terrain/shaders/terrain_standard.gdshader" id="2_oogjt"]
 [ext_resource type="ArrayMesh" uid="uid://cwalql85a2lf" path="res://client/terrain/tile/empty_tile.obj" id="3_htqwh"]
 [ext_resource type="PackedScene" uid="uid://dlrmpm0ngdfs0" path="res://client/terrain/objects/vegetation/tree_spawner.tscn" id="3_yl6lh"]

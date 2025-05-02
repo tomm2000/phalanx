@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://dn2jlnrm6t8g8"]
+
+[ext_resource type="Script" uid="uid://bvxdf03sotbsw" path="res://client/terrain/debug/DebugSphere.cs" id="1_fcwwd"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_fcwwd"]
+radius = 0.05
+height = 0.1
+
+[node name="DebugSphere" type="Node3D"]
+script = ExtResource("1_fcwwd")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_fcwwd")

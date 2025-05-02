@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://c4f1f41yascj5" path="res://client/terrain/StandardTerrain.cs" id="1_emmf8"]
 [ext_resource type="PackedScene" uid="uid://bsrixdt0qos6l" path="res://client/terrain/overlays/selection/tile_selector.tscn" id="2_ioyjb"]
-[ext_resource type="PackedScene" uid="uid://clkgqxom5swiy" path="res://client/terrain/standard_tile.tscn" id="2_qyloc"]
+[ext_resource type="PackedScene" uid="uid://clkgqxom5swiy" path="res://client/terrain/tile/standard_tile.tscn" id="2_qyloc"]
 [ext_resource type="Script" uid="uid://b1wyeulf3ivgu" path="res://free_look_camera.gd" id="4_hpsse"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_emmf8"]
@@ -22,6 +22,7 @@ mesh = SubResource("SphereMesh_emmf8")
 
 [node name="TileSelector" parent="." instance=ExtResource("2_ioyjb")]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
+visible = false
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.704349, 0.709853, 0, -0.709853, 0.704349, 5.24227, 4.85037, 10.714)

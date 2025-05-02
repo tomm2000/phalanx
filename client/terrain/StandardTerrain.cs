@@ -10,11 +10,13 @@ using System.Collections.Generic;
 namespace Client.Terrain;
 
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
-public partial class StandardTerrain : Node3D {
+public partial class StandardTerrain : Node3D, IProvide<StandardTerrain> {
   public override void _Notification(int what) => this.Notify(what);
   public static readonly string ScenePath = "uid://bgu2ycrayqu6s";
 
   [Dependency] private ClientEventBus ClientEventBus => this.DependOn<ClientEventBus>();
+
+  StandardTerrain IProvide<StandardTerrain>.Value() => this;
 
   public static StandardTerrain Instantiate() {
     var scene = ResourceLoader.Load<PackedScene>(ScenePath);
@@ -24,10 +26,12 @@ public partial class StandardTerrain : Node3D {
   }
 
   [Node] private Node3D TileContainer { get; set; } = default!;
-  public IEnumerable<StandardTile> Tiles => TileContainer.GetChildrenOfType<StandardTile>();
+  private List<ITerrainTile> _tiles { get; set; } = [];
+  public IEnumerable<ITerrainTile> Tiles => _tiles;
 
   public MapTileData? HoveredTile { get; private set; } = default!;
   public MapTileData? SelectedTile { get; private set; } = default!;
+  public DeferredQueueExecutor TerrainQueueExecutor { get; private set; } = default!;
 
   private TerrainShader activeShader = TerrainShader.Standard;
   public TerrainShader ActiveShader {
@@ -36,9 +40,11 @@ public partial class StandardTerrain : Node3D {
       if (activeShader == value) return;
 
       activeShader = value;
-      
-      foreach (var child in TileContainer.GetChildrenOfType<StandardTile>()) {
-        child.SetShader(activeShader);
+
+      foreach (var tile in _tiles) {
+        if (tile is StandardTile standardTile) {
+          standardTile.SetShader(activeShader);
+        }
       }
     }
   }
@@ -46,6 +52,10 @@ public partial class StandardTerrain : Node3D {
   public void OnResolved() {
     ClientEventBus.OnTileLeftClicked += (tile) => { SelectedTile = tile; };
     ClientEventBus.OnTileHovered += (tile) => { HoveredTile = tile; };
+
+    TerrainQueueExecutor = new DeferredQueueExecutor(this, 2);
+
+    this.Provide();
   }
 
   public override void _Process(double delta) {
@@ -54,25 +64,28 @@ public partial class StandardTerrain : Node3D {
 
   public Task GenerateTerrain(MapData map) {
     TileContainer.QueueFreeChildren();
-    var tiles = new List<StandardTile>();
+    _tiles.Clear();
 
     foreach (var tile in map.Tiles) {
-      var tileInstance = StandardTile.Instantiate(tile);
+      var tileInstance = IndexedTile.Instantiate(tile);
       TileContainer.AddChild(tileInstance);
-      tiles.Add(tileInstance);
+      _tiles.Add(tileInstance);
     }
 
-    var deferredQueueExecutor = new DeferredQueueExecutor(this);
+    // var task = Task.Run(() => {
+    //   Parallel.ForEach(_tiles, tileInstance => {
+    //     var neighbors = map.NeighborsWithDirections(tileInstance.TileData.coords);
 
-    var task = Task.Run(() => {
-      Parallel.ForEach(tiles, tileInstance => {
-        var neighbors = map.NeighborsWithDirections(tileInstance.TileData.coords);
+    //     tileInstance.GenerateSurface(neighbors);
+    //   });
+    // });
 
-        tileInstance.GenerateSurface(neighbors, deferredQueueExecutor);
-      });
-    });
+    foreach (var tileInstance in _tiles) {
+      var neighbors = map.NeighborsWithDirections(tileInstance.TileData.coords);
+      tileInstance.GenerateSurface(neighbors);
+    }
 
-    return task;
+    return new Task(() => {});
   }
 
   public HexCoords GetCoords(Vector3 position) {

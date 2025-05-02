@@ -10,26 +10,20 @@ using System.Linq;
 
 namespace Client.Terrain;
 
-public struct VertexData {
-  public Vector3 position;
-  public float steepness;
-  public float riverness;
-  public Vector2 flowDirection;
-}
-
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
-public partial class StandardTile : Node3D {
+public partial class StandardTile : Node3D, ITerrainTile {
   public override void _Notification(int what) => this.Notify(what);
   public static readonly string ScenePath = "uid://clkgqxom5swiy";
 
-  [Dependency] private ClientEventBus ClientEventBus => this.DependOn<ClientEventBus>();
+  [Dependency] ClientEventBus ClientEventBus => this.DependOn<ClientEventBus>();
+  [Dependency] StandardTerrain terrain => this.DependOn<StandardTerrain>();
 
-  [Node] private MeshInstance3D MeshInstance { get; set; } = default!;
-  [Node] private CollisionShape3D CollisionShape { get; set; } = default!;
-  [Node] private Area3D CollisionArea { get; set; } = default!;
+  [Node] MeshInstance3D MeshInstance { get; set; } = default!;
+  [Node] CollisionShape3D CollisionShape { get; set; } = default!;
+  [Node] Area3D CollisionArea { get; set; } = default!;
 
-  [Export] private NoiseTexture2D TerrainColorNoise { get; set; } = default!;
-  [Export] private NoiseTexture2D RiverShapeNoise { get; set; } = default!;
+  [Export] NoiseTexture2D TerrainColorNoise { get; set; } = default!;
+  [Export] NoiseTexture2D RiverShapeNoise { get; set; } = default!;
 
   private SurfaceTool surfaceTool = new();
   private ShaderMaterial ShaderMaterial => (MeshInstance.MaterialOverride as ShaderMaterial)!;
@@ -38,8 +32,8 @@ public partial class StandardTile : Node3D {
   public IEnumerable<VertexData> Vertices => vertices;
 
   public MapTileData TileData { get; private set; } = default!;
-  public Action OnTileReady { get; set; } = default!;
-  public Action OnTileReadyDeferred { get; set; } = default!;
+  public event Action? OnTileReady;
+  public event Action? OnTileReadyDeferred;
 
   public static StandardTile Instantiate(MapTileData tileData) {
     var scene = GD.Load<PackedScene>(ScenePath);
@@ -85,11 +79,9 @@ public partial class StandardTile : Node3D {
 
   #region Surface Generation
   public void GenerateSurface(
-    IEnumerable<(HexDirection, MapTileData)> neighbors,
-    DeferredQueueExecutor deferredQueueExecutor,
-    float terrainScale = 1f
+    IEnumerable<(HexDirection, MapTileData)> neighbors
   ) {
-    var worldPosition = TileData.coords.GridToWorld3D(terrainScale);
+    var worldPosition = TileData.coords.GridToWorld3D(Constants.TERRAIN_SCALE);
 
     SetDeferred("position", worldPosition);
 
@@ -97,12 +89,12 @@ public partial class StandardTile : Node3D {
     surfaceTool.Begin(Godot.Mesh.PrimitiveType.Triangles);
     surfaceTool.SetCustomFormat(0, SurfaceTool.CustomFormat.RgbaFloat);
 
-    var triangles = Meshes.CreateHexagonMesh(radius: terrainScale, Constants.TERRAIN_MESH_SUBDIVISIONS);
+    var triangles = Meshes.CreateHexagonMesh(radius: Constants.TERRAIN_SCALE, Constants.TERRAIN_MESH_SUBDIVISIONS);
 
     foreach (var triangle in triangles) {
-      var a = ProjectVertex(triangle.A, TileData, terrainScale, neighbors);
-      var b = ProjectVertex(triangle.B, TileData, terrainScale, neighbors);
-      var c = ProjectVertex(triangle.C, TileData, terrainScale, neighbors);
+      var a = ProjectVertex(triangle.A, TileData, Constants.TERRAIN_SCALE, neighbors);
+      var b = ProjectVertex(triangle.B, TileData, Constants.TERRAIN_SCALE, neighbors);
+      var c = ProjectVertex(triangle.C, TileData, Constants.TERRAIN_SCALE, neighbors);
 
       a = CalculateRiverness(a, TileData);
       b = CalculateRiverness(b, TileData);
@@ -173,7 +165,7 @@ public partial class StandardTile : Node3D {
     }
 
     var mesh = surfaceTool.Commit();
-    deferredQueueExecutor.Add(() => {
+    terrain.TerrainQueueExecutor.Add(() => {
       MeshInstance.Mesh = mesh;
       GenerateInputMesh();
     });

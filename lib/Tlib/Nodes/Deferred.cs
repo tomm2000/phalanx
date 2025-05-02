@@ -21,10 +21,12 @@ public static class DeferredExtensions {
 public partial class DeferredQueueExecutor: Node {
   private readonly ConcurrentQueue<Action> _queue = new ConcurrentQueue<Action>();
   private readonly Node _node;
+  private int speed = 1;
 
-  public DeferredQueueExecutor(Node node) {
+  public DeferredQueueExecutor(Node node, int speed = 1) {
     _node = node;
     _node.AddChild(this);
+    this.speed = speed;
   }
 
   public void Add(Action action) {
@@ -32,8 +34,12 @@ public partial class DeferredQueueExecutor: Node {
   }
 
   public override void _Process(double delta) {
-    var action = _queue.TryDequeue(out var result) ? result : null;
-
-    action?.Invoke();
+    for (int i = 0; i < speed; i++) {
+      if (_queue.TryDequeue(out var action)) {
+        action.Invoke();
+      } else {
+        break;
+      }
+    }
   }
 }
