@@ -7,10 +7,11 @@ using Godot;
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
 public partial class ClientToServerInterface : Node {
   public override void _Notification(int what) => this.Notify(what);
-  
   [Dependency] private GameInstance GameInstance => this.DependOn<GameInstance>();
   [Dependency] private GameDataInterface GameDataInterface => this.DependOn<GameDataInterface>();
 
+  #region Lobby
+  // ------------------ Game Map
   public void SelectGameMap(string mapId) {
     RpcId(1, nameof(SERVER_SetGameMap), mapId);
   }
@@ -34,4 +35,20 @@ public partial class ClientToServerInterface : Node {
 
     GD.Print($"[{nameof(ServerToClientInterface)}] {sender.Username} set the game map to {mapId}.");
   }
-}
+
+  // ------------------ Player Colors
+  public void SelectPlayerColor(PlayerColor color) {
+  }
+
+  [Rpc(
+    mode: MultiplayerApi.RpcMode.AnyPeer,
+    CallLocal = true,
+    TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
+  )]
+  private void SERVER_SetPlayerColor(PlayerColor color) {
+    var sender = PlayerManager.RpcSenderPlayer();
+
+    
+  }
+  #endregion
+  }
