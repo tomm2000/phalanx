@@ -10,7 +10,7 @@
 > - [X] (System) Terrain meshing
 > - [ ] (Map) Map loading from file
 > - [ ] (Lobby) Map selector
-> - [ ] (Lobby) Player customization
+> - [ ] (Lobby) Basic player customization (color, name)
 > - [ ] (**WIP**) (Map) Rivers
 > - [ ] (Entities) Multiplayer entity system, synchronization, events, stats, attributes, ...
 > - [ ] (Entities) Visibility system
@@ -18,7 +18,7 @@
 > - [ ] (Entities) Melee combat
 > - [ ] (Entities) Ranged combat
 > - [ ] (Game) Deathmatch mode
-> - [ ] (UI) Elevation/Slope overlayù
+> - [ ] (UI) Elevation/Slope overlay
 > - [ ] (UI) Entity interaction UI
 > - [ ] (Content) Basic Units
 > - [ ] (Content) 2 Handmade maps
@@ -36,6 +36,7 @@
 > - [ ] (Game) Proper Deployment phase
 > - [ ] (Map) Points of interest (ex: healing camps)
 > - [ ] (UI) Action keybinds
+> - [ ] (UI) Different player badges
 
 ---
 
@@ -46,5 +47,8 @@
 > - [ ] (Tools) Entity editor
 > - [ ] (System) Hotjoin/Rejoin
 > - [ ] (Content) Unit factions (Ex: vikings, Romans, etc...)
+> - [ ] (Content) More units
+> - [ ] (Content) More maps
+> - [ ] (Content) More & more interesting game modes
 
 Phalanx © 2025 by Tomm2000 is licensed under CC BY-NC-ND 4.0 
