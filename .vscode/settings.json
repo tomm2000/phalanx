@@ -24,7 +24,11 @@
     "**/*.gltf": true,
     "addons": true,
     "script_templates": true,
-    ".VSCodeCounter": true
+    ".VSCodeCounter": true,
+    "notes": true,
+    "**/*.dll": true,
+    "Facepunch": true,
+    "exports": true
   },
   "explorerExclude.backup": {}
 }

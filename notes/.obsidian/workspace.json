@@ -1,0 +1,192 @@
+{
+  "main": {
+    "id": "cc69d6f8315128ff",
+    "type": "split",
+    "children": [
+      {
+        "id": "10fa2b1fbe4df3f6",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "5deca93fb9da357e",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "terrain/hex_meshing.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "hex_meshing"
+            }
+          },
+          {
+            "id": "622237fc722cf5e1",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "terrain/rivers.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "rivers"
+            }
+          }
+        ],
+        "currentTab": 1
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "8d7abccc162aa3fd",
+    "type": "split",
+    "children": [
+      {
+        "id": "2d3abd30affe918f",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "909c632319ff97e9",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "1530595dfe5bc3c2",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "32f7f145c1d8e61b",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "c430bc0ef89062b2",
+    "type": "split",
+    "children": [
+      {
+        "id": "fa693b8e57fc5a0b",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "fdb3444d8bbf3658",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "terrain/rivers.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for rivers"
+            }
+          },
+          {
+            "id": "b7637fb9bf434d8a",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "terrain/rivers.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from rivers"
+            }
+          },
+          {
+            "id": "d9e5aad56c2eb4d1",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "53a1f75591d3b9e9",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "terrain/rivers.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of rivers"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "obsidian-excalidraw-plugin:New drawing": false
+    }
+  },
+  "active": "622237fc722cf5e1",
+  "lastOpenFiles": [
+    "terrain/hex_meshing.md",
+    "terrain/rivers.md",
+    "Untitled.md",
+    "Excalidraw",
+    "Welcome.md",
+    "terrain"
+  ]
+}

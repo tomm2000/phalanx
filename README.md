@@ -6,6 +6,8 @@
 
 ### First Playtest
 > #### Required
+> - [X] (System) Multiplayer system
+> - [X] (System) Terrain meshing
 > - [ ] (Map) Map loading from file
 > - [ ] (Lobby) Map selector
 > - [ ] (Lobby) Player customization
@@ -16,7 +18,10 @@
 > - [ ] (Entities) Melee combat
 > - [ ] (Entities) Ranged combat
 > - [ ] (Game) Deathmatch mode
-> - [ ] (UI) Elevation/Slope overlay
+> - [ ] (UI) Elevation/Slope overlayù
+> - [ ] (UI) Entity interaction UI
+> - [ ] (Content) Basic Units
+> - [ ] (Content) 2 Handmade maps
 
 > #### Maybe
 > - [ ] (Map) Roads
@@ -27,6 +32,10 @@
 > - [ ] (UI) Fog of war/vision overlay
 > - [ ] (Game) Game configuration (ex: time limit, deterministic combat, etc...)
 > - [ ] (Game) Teams
+> - [ ] (Map) More biomes & decorations
+> - [ ] (Game) Proper Deployment phase
+> - [ ] (Map) Points of interest (ex: healing camps)
+> - [ ] (UI) Action keybinds
 
 ---
 
@@ -35,5 +44,7 @@
 > - [ ] (Entities) Active abilities
 > - [ ] (Tools) Map editor
 > - [ ] (Tools) Entity editor
+> - [ ] (System) Hotjoin/Rejoin
+> - [ ] (Content) Unit factions (Ex: vikings, Romans, etc...)
 
 Phalanx © 2025 by Tomm2000 is licensed under CC BY-NC-ND 4.0 
