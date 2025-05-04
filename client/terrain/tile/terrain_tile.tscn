@@ -1,0 +1,62 @@
+[gd_scene load_steps=14 format=3 uid="uid://bmydftsu36dtn"]
+
+[ext_resource type="Script" uid="uid://bq1aeqjied60m" path="res://client/terrain/tile/TerrainTile.cs" id="1_8eqx6"]
+[ext_resource type="Shader" uid="uid://dw8sfu5i5p4as" path="res://client/terrain/shaders/terrain_standard.gdshader" id="2_ka7dk"]
+[ext_resource type="PackedScene" uid="uid://dlrmpm0ngdfs0" path="res://client/terrain/objects/vegetation/tree_spawner.tscn" id="3_n3yx8"]
+[ext_resource type="PackedScene" uid="uid://yu0am88i7uy8" path="res://client/terrain/objects/vegetation/rock_spawner.tscn" id="4_y5ui2"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_i71n3"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_lvdct"]
+noise = SubResource("FastNoiseLite_i71n3")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_rlvba"]
+fractal_octaves = 3
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_i71n3"]
+noise = SubResource("FastNoiseLite_rlvba")
+
+[sub_resource type="Curve" id="Curve_8eqx6"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1e-05, 1), 0.0, 0.0, 0, 0, Vector2(0.380282, 0.614327), -3.30756, -3.30756, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_aj3nk"]
+frequency = 0.011
+domain_warp_fractal_octaves = 1
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_htqwh"]
+seamless = true
+noise = SubResource("FastNoiseLite_aj3nk")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_lvdct"]
+render_priority = 0
+shader = ExtResource("2_ka7dk")
+shader_parameter/edge_color = Color(0.0588235, 0.203922, 0.176471, 0.670588)
+shader_parameter/noise_texture = SubResource("NoiseTexture2D_htqwh")
+shader_parameter/time_scale = 0.2
+shader_parameter/flow_strength = 0.5
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_8eqx6"]
+
+[node name="indexed_tile" type="Node3D"]
+script = ExtResource("1_8eqx6")
+TerrainColorNoise = SubResource("NoiseTexture2D_lvdct")
+RiverShapeNoise = SubResource("NoiseTexture2D_i71n3")
+RiverBankShape = SubResource("Curve_8eqx6")
+
+[node name="MeshInstance" type="MeshInstance3D" parent="."]
+unique_name_in_owner = true
+material_override = SubResource("ShaderMaterial_lvdct")
+mesh = SubResource("PlaneMesh_8eqx6")
+
+[node name="TreeSpawner" parent="." instance=ExtResource("3_n3yx8")]
+
+[node name="RockSpawner" parent="." instance=ExtResource("4_y5ui2")]
+maxRocks = 2
+
+[node name="CollisionArea" type="Area3D" parent="."]
+unique_name_in_owner = true
+collision_mask = 0
+
+[node name="CollisionShape" type="CollisionShape3D" parent="CollisionArea"]
+unique_name_in_owner = true

@@ -16,7 +16,7 @@ public partial class Main : Node {
 
   [Node] private SettingsMenu SettingsMenu { get; set; } = default!;
   [Node] private Node ActiveSceneContainer { get; set; } = default!;
-  
+
   public Main() {
     InitSteam();
   }

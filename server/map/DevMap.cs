@@ -22,11 +22,11 @@ public static class DevMap {
 
     for (int y = 0; y < height; y++) {
       for (int x = 0; x < width; x++) {
-        // var elevation = (uint)random.Next((int)minElevation, (int)maxElevation + 1);
+        var elevation = (uint)random.Next((int)minElevation, (int)maxElevation + 1);
 
         // uint elevation = 1;
 
-        uint elevation = (uint) x;
+        // uint elevation = (uint) x;
 
         var isForest = noise.GetNoise2D(x * 20, y * 20) > 0f;
         // var (riverInDirection, riverOutDirection) = DevStraightRiver(HexCoords.FromOffsetCoords(x, y));

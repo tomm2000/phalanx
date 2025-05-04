@@ -42,8 +42,8 @@ public partial class StandardTerrain : Node3D, IProvide<StandardTerrain> {
       activeShader = value;
 
       foreach (var tile in _tiles) {
-        if (tile is StandardTile standardTile) {
-          standardTile.SetShader(activeShader);
+        if (tile is ITerrainTile terrainTile) {
+          terrainTile.SetShader(activeShader);
         }
       }
     }
@@ -67,25 +67,30 @@ public partial class StandardTerrain : Node3D, IProvide<StandardTerrain> {
     _tiles.Clear();
 
     foreach (var tile in map.Tiles) {
-      var tileInstance = IndexedTile.Instantiate(tile);
+      var tileInstance = TerrainTile.Instantiate(tile);
       TileContainer.AddChild(tileInstance);
       _tiles.Add(tileInstance);
     }
 
-    // var task = Task.Run(() => {
-    //   Parallel.ForEach(_tiles, tileInstance => {
-    //     var neighbors = map.NeighborsWithDirections(tileInstance.TileData.coords);
+    var task = Task.Run(() => {
+      Parallel.ForEach(_tiles, tileInstance => {
+        var neighbors = map.NeighborsWithDirections(tileInstance.TileData.coords);
 
-    //     tileInstance.GenerateSurface(neighbors);
-    //   });
-    // });
+        tileInstance.GenerateSurface(neighbors);
+      });
+    });
 
-    foreach (var tileInstance in _tiles) {
-      var neighbors = map.NeighborsWithDirections(tileInstance.TileData.coords);
-      tileInstance.GenerateSurface(neighbors);
-    }
+    // var sw = new System.Diagnostics.Stopwatch();
+    // sw.Start();
+    // foreach (var tileInstance in _tiles) {
+    //   var neighbors = map.NeighborsWithDirections(tileInstance.TileData.coords);
+    //   tileInstance.GenerateSurface(neighbors);
+    // }
+    // sw.Stop();
 
-    return new Task(() => {});
+    // GD.Print($"Terrain generation took {sw.ElapsedMilliseconds}ms");
+
+    return new Task(() => { });
   }
 
   public HexCoords GetCoords(Vector3 position) {

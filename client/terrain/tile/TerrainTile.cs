@@ -1,56 +1,75 @@
 using System;
-using System.Threading.Tasks;
-using Godot;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
-using Tlib.Nodes;
-using System.Collections.Generic;
+using Client.Terrain;
+using Godot;
 using Tlib;
-using System.Linq;
+using Tlib.Nodes;
 
-namespace Client.Terrain;
+namespace Client;
 
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
-public partial class StandardTile : Node3D, ITerrainTile {
+public partial class TerrainTile : Node3D, ITerrainTile {
   public override void _Notification(int what) => this.Notify(what);
-  public static readonly string ScenePath = "uid://clkgqxom5swiy";
+  public static readonly string ScenePath = "uid://bmydftsu36dtn";
 
-  [Dependency] ClientEventBus ClientEventBus => this.DependOn<ClientEventBus>();
-  [Dependency] StandardTerrain terrain => this.DependOn<StandardTerrain>();
-
-  [Node] MeshInstance3D MeshInstance { get; set; } = default!;
-  [Node] CollisionShape3D CollisionShape { get; set; } = default!;
-  [Node] Area3D CollisionArea { get; set; } = default!;
-
-  [Export] NoiseTexture2D TerrainColorNoise { get; set; } = default!;
-  [Export] NoiseTexture2D RiverShapeNoise { get; set; } = default!;
-
-  private SurfaceTool surfaceTool = new();
-  private ShaderMaterial ShaderMaterial => (MeshInstance.MaterialOverride as ShaderMaterial)!;
-
-  private HashSet<VertexData> vertices = [];
-  public IEnumerable<VertexData> Vertices => vertices;
-
+  #region public interface
   public MapTileData TileData { get; private set; } = default!;
+  public IEnumerable<VertexData> Vertices => vertices.Values;
   public event Action? OnTileReady;
-  public event Action? OnTileReadyDeferred;
+  #endregion
 
-  public static StandardTile Instantiate(MapTileData tileData) {
+  #region private properties
+  private Dictionary<HexVertexIndex, VertexData> vertices = new();
+  private SurfaceTool surfaceTool = new();
+  #endregion
+
+  #region export properties
+  [ExportGroup(name: "terrain")]
+  [Export] NoiseTexture2D TerrainColorNoise { get; set; } = default!;
+
+  [ExportGroup(name: "river")]
+  [Export] NoiseTexture2D RiverShapeNoise { get; set; } = default!;
+  [Export] Curve RiverBankShape { get; set; } = default!;
+  [Export(PropertyHint.Range, "0.1, 1.0, 0.1")] float RiverWidth { get; set; } = 0.25f;
+  [Export(PropertyHint.Range, "0.1, 1.0, 0.1")] float RiverNoiseImpact { get; set; } = 0.4f;
+
+  [ExportGroup(name: "colors")]
+  [Export] Color GrassColor { get; set; } = new("008013");
+  [Export] Color ForestColor { get; set; } = new("0b662f");
+  [Export] Color DirtColor { get; set; } = new("662f0b");
+  [Export] Color WaterColor { get; set; } = new("#3b8cba");
+  #endregion
+
+  public static TerrainTile Instantiate(MapTileData tileData) {
     var scene = GD.Load<PackedScene>(ScenePath);
-    var instance = scene.Instantiate<StandardTile>();
+    var instance = scene.Instantiate<TerrainTile>();
     instance.TileData = tileData;
 
     return instance;
   }
 
+  #region Nodes
+  [Node] MeshInstance3D MeshInstance { get; set; } = default!;
+  [Node] CollisionShape3D CollisionShape { get; set; } = default!;
+  [Node] Area3D CollisionArea { get; set; } = default!;
+  [Dependency] StandardTerrain Terrain => this.DependOn<StandardTerrain>();
+  [Dependency] ClientEventBus ClientEventBus => this.DependOn<ClientEventBus>();
+  #endregion
+
   public void OnResolved() {
     CollisionArea.InputEvent += OnInputEvent;
+    Position = TileData.coords.GridToWorld3D();
   }
 
   public void SetShader(TerrainShader shader) {
     var loadedShader = TerrainShaders.GetShader(shader);
-    var shaderMaterial = new ShaderMaterial();
-    shaderMaterial.Shader = loadedShader;
+    var shaderMaterial = new ShaderMaterial {
+      Shader = loadedShader
+    };
     MeshInstance.MaterialOverride = shaderMaterial;
   }
 
@@ -77,134 +96,172 @@ public partial class StandardTile : Node3D, ITerrainTile {
   }
   #endregion
 
-  #region Surface Generation
+  #region Mesh Generation
   public void GenerateSurface(
     IEnumerable<(HexDirection, MapTileData)> neighbors
   ) {
-    var worldPosition = TileData.coords.GridToWorld3D(Constants.TERRAIN_SCALE);
-
-    SetDeferred("position", worldPosition);
+    var strips = Constants.TERRAIN_MESH_RESOLUTION;
 
     surfaceTool.Clear();
-    surfaceTool.Begin(Godot.Mesh.PrimitiveType.Triangles);
+    surfaceTool.Begin(Mesh.PrimitiveType.Triangles);
     surfaceTool.SetCustomFormat(0, SurfaceTool.CustomFormat.RgbaFloat);
 
-    var triangles = Meshes.CreateHexagonMesh(radius: Constants.TERRAIN_SCALE, Constants.TERRAIN_MESH_SUBDIVISIONS);
+    var worldPosition = TileData.coords.GridToWorld3D();
 
-    foreach (var triangle in triangles) {
-      var a = ProjectVertex(triangle.A, TileData, Constants.TERRAIN_SCALE, neighbors);
-      var b = ProjectVertex(triangle.B, TileData, Constants.TERRAIN_SCALE, neighbors);
-      var c = ProjectVertex(triangle.C, TileData, Constants.TERRAIN_SCALE, neighbors);
+    // ----------- 0. generate the vertices ---------------
+    var vertices = TlibHexMesher.GenerateVertices(strips, 1);
+    this.vertices = vertices;
 
-      a = CalculateRiverness(a, TileData);
-      b = CalculateRiverness(b, TileData);
-      c = CalculateRiverness(c, TileData);
+    // ----------- 1. apply the vertex pipeline ---------------
+    foreach (var (index, vertex) in vertices) {
+      var updatedVertex = ApplyVertexPipeline(
+        vertex,
+        index,
+        neighbors
+      );
 
-      vertices.Add(a);
-      vertices.Add(b);
-      vertices.Add(c);
-
-      var a_vector = a.position;
-      var b_vector = b.position;
-      var c_vector = c.position;
-
-      var uv_a = VertexToUV(a_vector);
-      var uv_b = VertexToUV(b_vector);
-      var uv_c = VertexToUV(c_vector);
-
-      var triangleNormal = (a_vector - b_vector).Cross(c_vector - a_vector).Normalized();
-
-      float normalDot = 1 - Math.Abs(triangleNormal.Dot(Vector3.Up));
-      normalDot = (float)Math.Sqrt(normalDot);
-
-      var noiseX = a_vector.X + worldPosition.X;
-      var noiseY = a_vector.Z + worldPosition.Z;
-
-      Color GrassColor = new("008013");
-      Color ForestGrassColor = new("0b662f");
-
-      if (TileData.vegetation == VegetationType.Forest) {
-        GrassColor = ForestGrassColor;
-      }
-
-      Color DirtColor = new("662f0b");
-
-      GrassColor += GrassColor * GD.Randf().Spread(0f, 1f, -0.03f, 0.03f);
-      GrassColor += GrassColor * TerrainColorNoise.Noise.GetNoise2D(noiseX * 20, noiseY * 20).Spread(0f, 1f, -0.15f, 0.15f);
-
-      DirtColor += DirtColor * GD.Randf().Spread(0f, 1f, -0.05f, 0.05f);
-      DirtColor += DirtColor * TerrainColorNoise.Noise.GetNoise2D(noiseX * 40 + 12454, noiseY * 40 + 21455).Spread(0f, 1f, -0.20f, 0.20f);
-
-      normalDot += TerrainColorNoise.Noise.GetNoise2D(noiseX * 40, noiseY * 40).Spread(0f, 1f, 0.0f, 0.25f);
-
-      Color triangleColor = normalDot < 0.30f ? GrassColor : DirtColor;
-
-      Color WaterColor = new("#3b8cba");
-      WaterColor += WaterColor * GD.Randf().Spread(0f, 1f, -0.05f, 0.05f);
-      if (Math.Min(a.riverness, Math.Min(b.riverness, c.riverness)) >= 0.50f) {
-        triangleColor = WaterColor;
-      }
-
-      surfaceTool.SetCustom(0, new Color(a.riverness, a.flowDirection.X, a.flowDirection.Y));
-      surfaceTool.SetColor(triangleColor);
-      surfaceTool.SetNormal(triangleNormal);
-      surfaceTool.SetUV(uv_a);
-      surfaceTool.AddVertex(a_vector);
-
-      surfaceTool.SetCustom(0, new Color(b.riverness, b.flowDirection.X, b.flowDirection.Y));
-      surfaceTool.SetColor(triangleColor);
-      surfaceTool.SetNormal(triangleNormal);
-      surfaceTool.SetUV(uv_b);
-      surfaceTool.AddVertex(b_vector);
-
-      surfaceTool.SetCustom(0, new Color(c.riverness, c.flowDirection.X, c.flowDirection.Y));
-      surfaceTool.SetColor(triangleColor);
-      surfaceTool.SetNormal(triangleNormal);
-      surfaceTool.SetUV(uv_c);
-      surfaceTool.AddVertex(c_vector);
+      vertices[index] = updatedVertex;
     }
 
+    // ----------- 2. generate the triangles ---------------
+    var triangles = TlibHexMesher.GenerateTriangleIndices(strips);
+
+    // ----------- 3. add the triangles to the surface tool
+    foreach (var triangle in triangles) {
+      var vertexA = vertices[triangle.a];
+      var vertexB = vertices[triangle.b];
+      var vertexC = vertices[triangle.c];
+
+      var triangleNormal = (vertexA.position - vertexB.position).Cross(vertexC.position - vertexA.position).Normalized();
+      var triangleColor = GetVertexColor(vertexA, vertexB, vertexC, triangleNormal, worldPosition);
+
+      surfaceTool.SetCustom(0, new Color(vertexA.riverFactor, vertexA.riverFlowDirection.X, vertexA.riverFlowDirection.Y));
+      surfaceTool.SetColor(triangleColor);
+      surfaceTool.SetUV(vertexA.UV);
+      surfaceTool.SetNormal(triangleNormal);
+      surfaceTool.AddVertex(vertexA.position);
+
+      surfaceTool.SetCustom(0, new Color(vertexB.riverFactor, vertexB.riverFlowDirection.X, vertexB.riverFlowDirection.Y));
+      surfaceTool.SetColor(triangleColor);
+      surfaceTool.SetUV(vertexB.UV);
+      surfaceTool.SetNormal(triangleNormal);
+      surfaceTool.AddVertex(vertexB.position);
+
+      surfaceTool.SetCustom(0, new Color(vertexC.riverFactor, vertexC.riverFlowDirection.X, vertexC.riverFlowDirection.Y));
+      surfaceTool.SetColor(triangleColor);
+      surfaceTool.SetUV(vertexC.UV);
+      surfaceTool.SetNormal(triangleNormal);
+      surfaceTool.AddVertex(vertexC.position);
+    }
+
+    // ----------- 4. generate the mesh --------------------
     var mesh = surfaceTool.Commit();
-    terrain.TerrainQueueExecutor.Add(() => {
+
+    Terrain.TerrainQueueExecutor.Add(() => {
       MeshInstance.Mesh = mesh;
       GenerateInputMesh();
+      OnTileReady?.Invoke();
     });
-
-    OnTileReady?.Invoke();
-    this.CallDeferred(() => {
-      OnTileReadyDeferred?.Invoke();
-    });
-
-    return;
   }
 
-  private Vector2 VertexToUV(Vector3 vertex) {
-    var uv = new Vector2(vertex.X, vertex.Z) / 2 + new Vector2(0.5f, 0.5f);
-    uv.X = Mathf.Clamp(uv.X, 0, 1);
-    uv.Y = Mathf.Clamp(uv.Y, 0, 1);
-    return uv;
-  }
-
-  private VertexData ProjectVertex(
-    Vector3 vertex,
-    MapTileData tile,
-    float terrainScale,
+  public VertexData ApplyVertexPipeline(
+    VertexData vertex,
+    HexVertexIndex index,
     IEnumerable<(HexDirection, MapTileData)> neighbors
   ) {
+    // ----------- 1. vertex UV ---------------
+    vertex = SetVertexUV(vertex);
+
+    // ----------- 2. vertex elevation ---------------
+    vertex = SetVertexElevation(
+      index,
+      vertex,
+      neighbors
+    );
+
+    // ----------- 3. vertex river ---------------
+    vertex = SetVertexRiver(vertex);
+
+    // ----------- (last) 4. vertex color ---------------
+
+    return vertex;
+  }
+
+  // FIXME: rework color selection to consider biome, vegetation, etc.
+  private Color GetVertexColor(
+    VertexData vertexA,
+    VertexData vertexB,
+    VertexData vertexC,
+    Vector3 triangleNormal,
+    Vector3 worldPosition
+  ) {
+    Color color;
+    var noiseX = vertexA.position.X + worldPosition.X;
+    var noiseY = vertexA.position.Z + worldPosition.Z;
+
+    // if the tile is water, return the water color
+    if (Math.Min(vertexA.riverFactor, Math.Min(vertexB.riverFactor, vertexC.riverFactor)) >= 0.50f) {
+      color = WaterColor + WaterColor * GD.Randf().Spread(0f, 1f, -0.05f, 0.05f);
+      return color;
+    }
+
+    float normalDot = 1 - Math.Abs(triangleNormal.Dot(Vector3.Up));
+    normalDot = (float)Math.Sqrt(normalDot);
+    normalDot += TerrainColorNoise.Noise.GetNoise2D(noiseX * 40, noiseY * 40).Spread(0f, 1f, 0.0f, 0.25f);
+
+    // if normalDot is less than 0.3, its a slope
+    if (normalDot > 0.3f) {
+      color = DirtColor + DirtColor * GD.Randf().Spread(0f, 1f, -0.05f, 0.05f);
+      color += DirtColor * TerrainColorNoise.Noise.GetNoise2D(noiseX * 40 + 12454, noiseY * 40 + 21455).Spread(0f, 1f, -0.20f, 0.20f);
+      return color;
+    }
+
+    // else, its grass
+    color = GrassColor;
+    if (TileData.vegetation == VegetationType.Forest) {
+      color = ForestColor;
+    }
+
+    color += color * GD.Randf().Spread(0f, 1f, -0.03f, 0.03f);
+    color += color * TerrainColorNoise.Noise.GetNoise2D(noiseX * 20, noiseY * 20).Spread(0f, 1f, -0.15f, 0.15f);
+
+    return color;
+  }
+
+  // FIXME: consider scale
+  private VertexData SetVertexUV(VertexData vertex) {
+    var uv = new Vector2(vertex.position.X, vertex.position.Z) / 2 + new Vector2(0.5f, 0.5f);
+    uv.X = Mathf.Clamp(uv.X, 0, 1);
+    uv.Y = Mathf.Clamp(uv.Y, 0, 1);
+    vertex.UV = uv;
+    return vertex.With(
+      UV: uv
+    );
+  }
+
+  // FIXME: consider scale
+  private VertexData SetVertexElevation(
+    HexVertexIndex index,
+    VertexData vertex,
+    IEnumerable<(HexDirection, MapTileData)> neighbors
+  ) {
+    var tile = TileData;
+    var scale = Constants.TERRAIN_SCALE;
+
     var totalContribution = 1.0f;
     var totalHeight = (float)tile.elevation;
     var totalSteepness = 0f;
     var steepnessContributes = 1f;
 
     foreach (var (direction, neighbor) in neighbors) {
-      var distance = vertex.DistanceToEdge(direction, terrainScale); // from 0 to radius+
+      var distance = vertex.position.DistanceToEdge(direction, scale); // from 0 to radius+
       var contribution = 0f;
 
-      if (distance <= 0.05 * terrainScale) {
+      if (distance <= 0.05 * scale) {
         contribution = 1;
 
       } else {
-        distance /= terrainScale; // from 0 to 2 (at opposite edge)
+        distance /= scale; // from 0 to 2 (at opposite edge)
 
         contribution = 2 - distance; // from 2 (at edge) to 0 (at opposite edge), 1 at center
         contribution -= 2f; // from 1 (at edge) to -1 (at opposite edge), 0 at center
@@ -224,26 +281,26 @@ public partial class StandardTile : Node3D, ITerrainTile {
     var baseHeight = totalHeight / totalContribution;
     var steepness = totalSteepness / steepnessContributes;
 
-    vertex.Y = baseHeight * Constants.HEIGHT_SCALE;
+    vertex.position.Y = baseHeight * Constants.HEIGHT_SCALE;
 
-    return new VertexData {
-      position = vertex,
-      steepness = steepness
-    };
+    return vertex.With(
+      position: vertex.position,
+      steepness: steepness
+    );
   }
+
   #endregion
 
+  // FIXME: consider scale
   #region Rivers
-  private VertexData CalculateRiverness(
-    VertexData vertex,
-    MapTileData tile
+  private VertexData SetVertexRiver(
+    VertexData vertex
   ) {
+    var tile = TileData;
     var (distance, flow) = CalculateRiverPosition(vertex, tile);
 
-    var riverness = 1 - distance * 4;
-    riverness = riverness * 2 - 1;
-    riverness = Numerics.LogisticSmooth(riverness, 0.8f, 0.2f);
-    riverness = Mathf.Clamp(riverness, 0, 1);
+    var riverness = 1 - Mathf.Clamp(distance / RiverWidth, 0, 1);
+    riverness = 1 - RiverBankShape.Sample(riverness);
 
     vertex.position.Y -= Mathf.Min(riverness, 0.5f) * Constants.RIVER_HEIGHT_SCALE;
 
@@ -252,13 +309,12 @@ public partial class StandardTile : Node3D, ITerrainTile {
     flow.X = (flow.X + 1) / 2;
     flow.Y = (flow.Y + 1) / 2;
 
-    return new VertexData {
-      position = vertex.position,
-      steepness = vertex.steepness,
-      riverness = riverness,
-      flowDirection = flow
-    };
+    return vertex.With(
+      riverFactor: riverness,
+      riverFlowDirection: flow
+    );
   }
+
 
   private (float, Vector2) CalculateRiverPosition(
     VertexData vertex,
@@ -344,7 +400,7 @@ public partial class StandardTile : Node3D, ITerrainTile {
     var noise = RiverShapeNoise.Noise
       .GetNoise2D(noiseX * 25, noiseY * 25);
 
-    noise *= 0.5f;
+    noise *= RiverNoiseImpact;
     var offset = flowNormal * noise;
     var offsetVertex = vertex.position.XZ() + offset;
 
@@ -377,7 +433,7 @@ public partial class StandardTile : Node3D, ITerrainTile {
     var noise = RiverShapeNoise.Noise
       .GetNoise2D(noiseX * 25, noiseY * 25);
 
-    noise *= 0.5f;
+    noise *= RiverNoiseImpact;
     var offset = flowNormal * noise;
     var offsetVertex = vertex.position.XZ() + offset;
 
@@ -407,7 +463,7 @@ public partial class StandardTile : Node3D, ITerrainTile {
     var noise = RiverShapeNoise.Noise
       .GetNoise2D(noiseX * 25, noiseY * 25);
 
-    noise *= 0.5f;
+    noise *= RiverNoiseImpact;
 
     // offset the distance in the normal direction by the noise
     var offset = flowNormal * noise;
@@ -457,7 +513,7 @@ public partial class StandardTile : Node3D, ITerrainTile {
     var noise = RiverShapeNoise.Noise
       .GetNoise2D(noiseX * 25, noiseY * 25);
 
-    noise *= 0.5f;
+    noise *= RiverNoiseImpact;
     var offset = flowNormal * noise;
     var offsetVertex = vertex.position.XZ() + offset;
 
@@ -498,7 +554,7 @@ public partial class StandardTile : Node3D, ITerrainTile {
     var noise = RiverShapeNoise.Noise
       .GetNoise2D(noiseX * 25, noiseY * 25);
 
-    noise *= 0.5f;
+    noise *= RiverNoiseImpact;
     var offset = flowNormal * noise;
     var offsetVertex = vertex.position.XZ() + offset;
 

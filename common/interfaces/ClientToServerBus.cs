@@ -68,7 +68,7 @@ public partial class ClientToServerBus : Node {
     ValidatePlayer(nameof(SERVER_LobbySelectMap), mustBeMaster: true);
 
     // FIXME: here the map would get loaded from file
-    var map = DevMap.GenerateMap(1, 1, seed: 1);
+    var map = DevMap.GenerateMap(19, 19, seed: 1);
 
     SharedDataBase.SelectedMap.SERVER_SetValue(map);
     SERVER_MapSelected?.Invoke(mapId);

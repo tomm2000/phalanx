@@ -10,15 +10,12 @@ public partial class ObjectSpawner : Node3D {
   public override void _Notification(int what) => this.Notify(what);
 
   [Node] protected Node3D MultiMeshContainer { get; set; } = default!;
-  protected StandardTile tile = default!;
+  protected ITerrainTile tile = default!;
 
   public override void _Ready() {
-    tile = GetParent<StandardTile>();
+    tile = GetParent<ITerrainTile>();
 
-    tile.OnTileReady += () => {
-      SpawnObjects();
-    };
-
+    tile.OnTileReady += SpawnObjects;
   }
 
   protected virtual void SpawnObjects() {

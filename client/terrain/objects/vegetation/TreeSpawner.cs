@@ -24,7 +24,7 @@ public partial class TreeSpawner : ObjectSpawner {
     // generate random positions for pine trees
     for (int i = 0; i < maxPineTrees; i++) {
       var vertex = vertices.Random();
-      if (vertex.riverness > 0.1f) { continue; }
+      if (vertex.riverFactor > 0.1f) { continue; }
 
       var position = vertex.position;
 
@@ -42,7 +42,7 @@ public partial class TreeSpawner : ObjectSpawner {
     // generate random positions for oak trees
     for (int i = 0; i < maxOakTrees; i++) {
       var vertex = vertices.Random();
-      if (vertex.riverness > 0.1f) { continue; }
+      if (vertex.riverFactor > 0.1f) { continue; }
 
       var position = vertex.position;
 
