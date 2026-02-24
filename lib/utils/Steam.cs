@@ -9,8 +9,8 @@ public enum AvatarSize {
   Large
 }
 
-public static class TlibSteam {
-  public static async Task<Result<ImageTexture>> GetAvatarTextureAsync(SteamId steamId, AvatarSize size) {
+public static class SteamUtils {
+  public static async Task<Result<ImageTexture>> GetAvatarTextureAsync(SteamID steamId, AvatarSize size) {
     var avatar = size switch {
       AvatarSize.Small => await SteamFriends.GetSmallAvatarAsync(steamId),
       AvatarSize.Medium => await SteamFriends.GetMediumAvatarAsync(steamId),

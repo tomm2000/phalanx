@@ -37,7 +37,7 @@ public partial class PlayerListItem : Control {
     }
 
     if (SteamClient.IsValid && ClientData.SteamId != null && player.SteamId != null) {
-      var avatar = await TlibSteam.GetAvatarTextureAsync(player.SteamId!.Value, AvatarSize.Medium);
+      var avatar = await SteamUtils.GetAvatarTextureAsync(player.SteamId!.Value, AvatarSize.Medium);
       
       if (avatar.IsFailed) {
         GD.Print(avatar);

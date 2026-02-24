@@ -46,7 +46,7 @@ public partial class SharedValue<T> : Node {
   private void CLIENT_ValueSet(byte[] serializedValue) {
     var newValue = serializedValue.Deserialize<T>();
     
-    if (TlibGeneric.EqualsNullable(Value, newValue)) { return; }
+    if (MiscUtils.EqualsNullable(Value, newValue)) { return; }
 
     var oldValue = Value;
     Value = newValue;

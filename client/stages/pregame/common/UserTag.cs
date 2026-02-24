@@ -21,7 +21,7 @@ public partial class UserTag : Control {
 
   public override async void _Ready() {
     if (SteamClient.IsValid && ClientData.SteamId != null) {
-      var avatar = await TlibSteam.GetAvatarTextureAsync(ClientData.SteamId.Value, AvatarSize.Medium);
+      var avatar = await SteamUtils.GetAvatarTextureAsync(ClientData.SteamId.Value, AvatarSize.Medium);
       if (avatar.IsFailed) {
         GD.PrintErr(avatar.Errors);
         return;
