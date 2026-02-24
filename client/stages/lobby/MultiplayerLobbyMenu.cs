@@ -3,10 +3,10 @@ using System.Threading.Tasks;
 using Godot;
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
-using Tlib.Nodes;
 using System.Collections.Generic;
 using Tlib;
 using System.Linq;
+using Tlib.NodeExt;
 
 namespace Client.UI;
 
@@ -53,7 +53,7 @@ public partial class MultiplayerLobbyMenu : Control {
   }
 
   private void OnPlayerListUpdated() {
-    foreach (var child in PlayerList.GetChildrenOfType<PlayerListItem>()) {
+    foreach (var child in PlayerList.GetChildren<PlayerListItem>()) {
       child.QueueFree();
     }
 

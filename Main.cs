@@ -7,7 +7,7 @@ using System.IO;
 using Steamworks;
 using Client.UI;
 using Client;
-using Tlib.Nodes;
+using Tlib.NodeExt;
 
 [Meta(typeof(IAutoConnect))]
 public partial class Main : Node {

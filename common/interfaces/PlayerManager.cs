@@ -6,7 +6,8 @@ using Chickensoft.Introspection;
 using Client;
 using Godot;
 using Steamworks;
-using Tlib.Nodes;
+using Tlib.NodeExt;
+using Tlib.Serialization;
 
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
 public partial class PlayerManager : Node {
@@ -31,7 +32,7 @@ public partial class PlayerManager : Node {
   #endregion
 
   #region Server
-  private IEnumerable<ClientInterface> SERVER_ClientInterfaces => GameInstance.GetChildrenOfType<ClientInterface>();
+  private IEnumerable<ClientInterface> SERVER_ClientInterfaces => GameInstance.GetChildren<ClientInterface>();
 
   public ClientInterface? SERVER_GetClientInterface(string playerUID) {
     foreach (var clientInterface in SERVER_ClientInterfaces) {
@@ -65,7 +66,7 @@ public partial class PlayerManager : Node {
     if (SteamClient.IsValid) {
       var steamId = SteamClient.SteamId;
       var name = ClientData.Username;
-      RpcId(1, nameof(SERVER_RegisterSteamPlayer), (ulong)steamId, name);
+      RpcId(1, nameof(SERVER_RegisterSteamPlayer), (SteamID) steamId, name);
     } else {
       var name = ClientData.Username;
       RpcId(1, nameof(SERVER_RegisterEnetPlayer), name);
@@ -77,7 +78,7 @@ public partial class PlayerManager : Node {
     CallLocal = true,
     TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
   )]
-  private void SERVER_RegisterSteamPlayer(ulong steamId, string name) {
+  private void SERVER_RegisterSteamPlayer(SteamID steamId, string name) {
     if (!MultiplayerManager.IsHost) throw new InvalidOperationException($"[{nameof(SERVER_RegisterSteamPlayer)}] Only the host can call this method.");
 
     var peerId = Multiplayer.GetRemoteSenderId();
@@ -222,7 +223,7 @@ public partial class PlayerManager : Node {
   #endregion
 
   #region Player disconnection
-  private void OnPlayerDisconnected(long peerId) {
+  private void OnPlayerDisconnected(PeerID peerId) {
     if (!MultiplayerManager.IsHost) throw new InvalidOperationException($"[{nameof(OnPlayerDisconnected)}] Only the host can call this method.");
 
     var player = Players.FindByPeerID(peerId);

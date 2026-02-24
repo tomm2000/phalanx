@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using FluentResults;
 using Godot;
 
-namespace Tlib.Nodes;
+namespace Tlib;
 
 public static class DeferredExtensions {
   /// <summary>

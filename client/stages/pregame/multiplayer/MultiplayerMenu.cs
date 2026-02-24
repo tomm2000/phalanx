@@ -3,12 +3,12 @@ using System.Threading.Tasks;
 using Godot;
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
-using Tlib.Nodes;
 using System.Collections.Generic;
 using Tlib;
 using System.Linq;
 using Steamworks;
 using Steamworks.Data;
+using Tlib.NodeExt;
 
 namespace Client.UI;
 
@@ -83,7 +83,7 @@ public partial class MultiplayerMenu : Control {
   private async void UpdateLobbyList() {
     if (!SteamClient.IsValid) { return; }
 
-    foreach (var child in LobbyList.GetChildrenOfType<LobbyListItem>()) {
+    foreach (var child in LobbyList.GetChildren<LobbyListItem>()) {
       child.QueueFree();
     }
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using MessagePack;
+using Tlib.HexLib;
 
 [MessagePackObject(AllowPrivate = true)]
 public partial class MapData {

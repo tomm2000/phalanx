@@ -1,6 +1,8 @@
 using Godot;
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
+using Tlib.HexLib;
+using Tlib;
 
 namespace Client.Terrain;
 
@@ -29,7 +31,8 @@ public partial class TileSelector : Node3D {
   }
 
   private void OnTileHovered(MapTileData data) {
-    var position = data.coords.GridToWorld3D(Constants.TERRAIN_SCALE);
+    // var position = data.coords.GridToWorld3D(Constants.TERRAIN_SCALE);
+    var position = data.coords.GridToWorld(Constants.TERRAIN_SCALE).ExtendY(0);
     position.Y = data.elevation * Constants.HEIGHT_SCALE;
 
     targetPosition = position;

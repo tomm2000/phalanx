@@ -1,3 +1,6 @@
+global using PeerID = long;
+global using SteamID = ulong;
+
 public static class Constants {
   // Terrain
   public const float TERRAIN_SCALE = 1f;

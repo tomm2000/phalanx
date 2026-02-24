@@ -7,7 +7,8 @@ using Chickensoft.Introspection;
 using Client.Terrain;
 using Godot;
 using Tlib;
-using Tlib.Nodes;
+using Tlib.HexLib;
+using Tlib.MathLib;
 
 namespace Client;
 
@@ -18,12 +19,12 @@ public partial class TerrainTile : Node3D, ITerrainTile {
 
   #region public interface
   public MapTileData TileData { get; private set; } = default!;
-  public IEnumerable<VertexData> Vertices => vertices.Values;
+  public IEnumerable<TerrainVertexData> Vertices => vertices.Values;
   public event Action? OnTileReady;
   #endregion
 
   #region private properties
-  private Dictionary<HexVertexIndex, VertexData> vertices = new();
+  private Dictionary<HexVertexIndex, TerrainVertexData> vertices = new();
   private SurfaceTool surfaceTool = new();
   #endregion
 
@@ -62,7 +63,7 @@ public partial class TerrainTile : Node3D, ITerrainTile {
 
   public void OnResolved() {
     CollisionArea.InputEvent += OnInputEvent;
-    Position = TileData.coords.GridToWorld3D();
+    Position = TileData.coords.GridToWorld().ExtendY(0);
   }
 
   public void SetShader(TerrainShader shader) {
@@ -106,10 +107,10 @@ public partial class TerrainTile : Node3D, ITerrainTile {
     surfaceTool.Begin(Mesh.PrimitiveType.Triangles);
     surfaceTool.SetCustomFormat(0, SurfaceTool.CustomFormat.RgbaFloat);
 
-    var worldPosition = TileData.coords.GridToWorld3D();
+    var worldPosition = TileData.coords.GridToWorld().ExtendY(0);
 
     // ----------- 0. generate the vertices ---------------
-    var vertices = TlibHexMesher.GenerateVertices(strips, 1);
+    var vertices = TlibHexMesher<TerrainVertexData>.GenerateVertices(strips, 1);
     this.vertices = vertices;
 
     // ----------- 1. apply the vertex pipeline ---------------
@@ -124,7 +125,7 @@ public partial class TerrainTile : Node3D, ITerrainTile {
     }
 
     // ----------- 2. generate the triangles ---------------
-    var triangles = TlibHexMesher.GenerateTriangleIndices(strips);
+    var triangles = TlibHexMesher<TerrainVertexData>.GenerateTriangleIndices(strips);
 
     // ----------- 3. add the triangles to the surface tool
     foreach (var triangle in triangles) {
@@ -133,6 +134,7 @@ public partial class TerrainTile : Node3D, ITerrainTile {
       var vertexC = vertices[triangle.c];
 
       var triangleNormal = (vertexA.position - vertexB.position).Cross(vertexC.position - vertexA.position).Normalized();
+      // FIXME: consider moving color to the pipeline and storing it in the vertex data
       var triangleColor = GetVertexColor(vertexA, vertexB, vertexC, triangleNormal, worldPosition);
 
       surfaceTool.SetCustom(0, new Color(vertexA.riverFactor, vertexA.riverFlowDirection.X, vertexA.riverFlowDirection.Y));
@@ -164,8 +166,8 @@ public partial class TerrainTile : Node3D, ITerrainTile {
     });
   }
 
-  public VertexData ApplyVertexPipeline(
-    VertexData vertex,
+  public TerrainVertexData ApplyVertexPipeline(
+    TerrainVertexData vertex,
     HexVertexIndex index,
     IEnumerable<(HexDirection, MapTileData)> neighbors
   ) {
@@ -189,9 +191,9 @@ public partial class TerrainTile : Node3D, ITerrainTile {
 
   // FIXME: rework color selection to consider biome, vegetation, etc.
   private Color GetVertexColor(
-    VertexData vertexA,
-    VertexData vertexB,
-    VertexData vertexC,
+    TerrainVertexData vertexA,
+    TerrainVertexData vertexB,
+    TerrainVertexData vertexC,
     Vector3 triangleNormal,
     Vector3 worldPosition
   ) {
@@ -229,7 +231,7 @@ public partial class TerrainTile : Node3D, ITerrainTile {
   }
 
   // FIXME: consider scale
-  private VertexData SetVertexUV(VertexData vertex) {
+  private TerrainVertexData SetVertexUV(TerrainVertexData vertex) {
     var uv = new Vector2(vertex.position.X, vertex.position.Z) / 2 + new Vector2(0.5f, 0.5f);
     uv.X = Mathf.Clamp(uv.X, 0, 1);
     uv.Y = Mathf.Clamp(uv.Y, 0, 1);
@@ -240,9 +242,9 @@ public partial class TerrainTile : Node3D, ITerrainTile {
   }
 
   // FIXME: consider scale
-  private VertexData SetVertexElevation(
+  private TerrainVertexData SetVertexElevation(
     HexVertexIndex index,
-    VertexData vertex,
+    TerrainVertexData vertex,
     IEnumerable<(HexDirection, MapTileData)> neighbors
   ) {
     var tile = TileData;
@@ -254,7 +256,8 @@ public partial class TerrainTile : Node3D, ITerrainTile {
     var steepnessContributes = 1f;
 
     foreach (var (direction, neighbor) in neighbors) {
-      var distance = vertex.position.DistanceToEdge(direction, scale); // from 0 to radius+
+      // var distance = vertex.position.DistanceToEdge(direction, scale); // from 0 to radius+
+      var distance = vertex.position.XZ().DistanceToEdgeStd(direction, scale); // from 0 to radius+
       var contribution = 0f;
 
       if (distance <= 0.05 * scale) {
@@ -281,7 +284,8 @@ public partial class TerrainTile : Node3D, ITerrainTile {
     var baseHeight = totalHeight / totalContribution;
     var steepness = totalSteepness / steepnessContributes;
 
-    vertex.position.Y = baseHeight * Constants.HEIGHT_SCALE;
+    // vertex.position.Y = baseHeight * Constants.HEIGHT_SCALE;
+    vertex.position = vertex.position.WithY(baseHeight * Constants.HEIGHT_SCALE);
 
     return vertex.With(
       position: vertex.position,
@@ -293,8 +297,8 @@ public partial class TerrainTile : Node3D, ITerrainTile {
 
   // FIXME: consider scale
   #region Rivers
-  private VertexData SetVertexRiver(
-    VertexData vertex
+  private TerrainVertexData SetVertexRiver(
+    TerrainVertexData vertex
   ) {
     var tile = TileData;
     var (distance, flow) = CalculateRiverPosition(vertex, tile);
@@ -302,7 +306,8 @@ public partial class TerrainTile : Node3D, ITerrainTile {
     var riverness = 1 - Mathf.Clamp(distance / RiverWidth, 0, 1);
     riverness = 1 - RiverBankShape.Sample(riverness);
 
-    vertex.position.Y -= Mathf.Min(riverness, 0.5f) * Constants.RIVER_HEIGHT_SCALE;
+    // vertex.position.Y -= Mathf.Min(riverness, 0.5f) * Constants.RIVER_HEIGHT_SCALE;
+    vertex.position = vertex.position.WithY(vertex.position.Y - Mathf.Min(riverness, 0.5f) * Constants.RIVER_HEIGHT_SCALE);
 
     // transform flow vector from [-1, 1] to [0, 1]
     flow = flow.Normalized();
@@ -317,7 +322,7 @@ public partial class TerrainTile : Node3D, ITerrainTile {
 
 
   private (float, Vector2) CalculateRiverPosition(
-    VertexData vertex,
+    TerrainVertexData vertex,
     MapTileData tile
   ) {
     // if the tile has no river, return 1 (no river)
@@ -377,13 +382,14 @@ public partial class TerrainTile : Node3D, ITerrainTile {
   }
 
   private (float, Vector2) RiverSource(
-    VertexData vertex,
+    TerrainVertexData vertex,
     MapTileData tile,
     HexDirection direction
   ) {
-    var edge = WorldHexCoordsExtension.GetEdge(direction);
+    // var edge = WorldHexCoordsExtension.GetEdge(direction);
+    var edge = WorldHexCoords.GetEdgeStd(direction);
     // anchor is the middle of the edge
-    var anchorOut = Numerics.EdgeMidpoint(edge);
+    var anchorOut = Geometry.EdgeMidpoint(edge);
     var riverSegment = new Vector4(
       anchorOut.X,
       anchorOut.Y,
@@ -394,7 +400,7 @@ public partial class TerrainTile : Node3D, ITerrainTile {
     var flow = (anchorOut - new Vector2(0, 0)).Normalized();
 
     var flowNormal = new Vector2(flow.Y, -flow.X);
-    var worldPosition = TileData.coords.GridToWorld3D();
+    var worldPosition = TileData.coords.GridToWorld().ExtendY(0);
     var noiseX = vertex.position.X + worldPosition.X;
     var noiseY = vertex.position.Z + worldPosition.Z;
     var noise = RiverShapeNoise.Noise
@@ -404,19 +410,20 @@ public partial class TerrainTile : Node3D, ITerrainTile {
     var offset = flowNormal * noise;
     var offsetVertex = vertex.position.XZ() + offset;
 
-    var distance = Numerics.PointEdgeDistance(riverSegment, offsetVertex);
+    var distance = Geometry.PointEdgeDistance(riverSegment, offsetVertex);
 
     return (distance, flow);
   }
 
   private (float, Vector2) RiverEnd(
-    VertexData vertex,
+    TerrainVertexData vertex,
     MapTileData tile,
     HexDirection direction
   ) {
-    var edge = WorldHexCoordsExtension.GetEdge(direction);
+    // var edge = WorldHexCoordsExtension.GetEdge(direction);
+    var edge = WorldHexCoords.GetEdgeStd(direction);
     // anchor is the middle of the edge
-    var anchorIn = Numerics.EdgeMidpoint(edge);
+    var anchorIn = Geometry.EdgeMidpoint(edge);
     var riverSegment = new Vector4(
       0,
       0,
@@ -427,7 +434,7 @@ public partial class TerrainTile : Node3D, ITerrainTile {
     var flow = (new Vector2(0, 0) - anchorIn).Normalized();
 
     var flowNormal = new Vector2(flow.Y, -flow.X);
-    var worldPosition = TileData.coords.GridToWorld3D();
+    var worldPosition = TileData.coords.GridToWorld().ExtendY(0);
     var noiseX = vertex.position.X + worldPosition.X;
     var noiseY = vertex.position.Z + worldPosition.Z;
     var noise = RiverShapeNoise.Noise
@@ -437,27 +444,29 @@ public partial class TerrainTile : Node3D, ITerrainTile {
     var offset = flowNormal * noise;
     var offsetVertex = vertex.position.XZ() + offset;
 
-    var distance = Numerics.PointEdgeDistance(riverSegment, offsetVertex);
+    var distance = Geometry.PointEdgeDistance(riverSegment, offsetVertex);
 
     return (distance, flow);
   }
 
   private (float, Vector2) RiverStraight(
-    VertexData vertex,
+    TerrainVertexData vertex,
     MapTileData tile,
     HexDirection inDirection,
     HexDirection outDirection
   ) {
-    var edgeIn = WorldHexCoordsExtension.GetEdge(inDirection);
-    var anchorIn = Numerics.EdgeMidpoint(edgeIn);
+    // var edgeIn = WorldHexCoordsExtension.GetEdge(inDirection);
+    var edgeIn = WorldHexCoords.GetEdgeStd(inDirection);
+    var anchorIn = Geometry.EdgeMidpoint(edgeIn);
 
-    var edgeOut = WorldHexCoordsExtension.GetEdge(outDirection);
-    var anchorOut = Numerics.EdgeMidpoint(edgeOut);
+    // var edgeOut = WorldHexCoordsExtension.GetEdge(outDirection);
+    var edgeOut = WorldHexCoords.GetEdgeStd(outDirection);
+    var anchorOut = Geometry.EdgeMidpoint(edgeOut);
 
     var flow = (anchorOut - anchorIn).Normalized();
 
     var flowNormal = new Vector2(flow.Y, -flow.X);
-    var worldPosition = TileData.coords.GridToWorld3D();
+    var worldPosition = TileData.coords.GridToWorld().ExtendY(0);
     var noiseX = vertex.position.X + worldPosition.X;
     var noiseY = vertex.position.Z + worldPosition.Z;
     var noise = RiverShapeNoise.Noise
@@ -475,21 +484,23 @@ public partial class TerrainTile : Node3D, ITerrainTile {
       anchorOut.X,
       anchorOut.Y
     );
-    var distance = Numerics.PointEdgeDistance(riverSegment, offsetVertex);
+    var distance = Geometry.PointEdgeDistance(riverSegment, offsetVertex);
 
 
     return (distance, flow);
   }
 
   private (float, Vector2) RiverSmallCurve(
-    VertexData vertex,
+    TerrainVertexData vertex,
     MapTileData tile,
     HexDirection inDirection,
     HexDirection outDirection
   ) {
-    var curveCenter = Numerics.EdgeProjectionIntersection(
-      WorldHexCoordsExtension.GetEdge(inDirection),
-      WorldHexCoordsExtension.GetEdge(outDirection)
+    var curveCenter = Geometry.EdgeProjectionIntersection(
+      // WorldHexCoordsExtension.GetEdge(inDirection),
+      WorldHexCoords.GetEdgeStd(inDirection),
+      // WorldHexCoordsExtension.GetEdge(outDirection)
+      WorldHexCoords.GetEdgeStd(outDirection)
     );
 
     // Flow direction is the normalized vector from curve center to vertex
@@ -507,7 +518,7 @@ public partial class TerrainTile : Node3D, ITerrainTile {
     }
 
     var flowNormal = new Vector2(flow.Y, -flow.X);
-    var worldPosition = TileData.coords.GridToWorld3D();
+    var worldPosition = TileData.coords.GridToWorld().ExtendY(0);
     var noiseX = vertex.position.X + worldPosition.X;
     var noiseY = vertex.position.Z + worldPosition.Z;
     var noise = RiverShapeNoise.Noise
@@ -524,14 +535,16 @@ public partial class TerrainTile : Node3D, ITerrainTile {
   }
 
   private (float, Vector2) RiverBigCurve(
-    VertexData vertex,
+    TerrainVertexData vertex,
     MapTileData tile,
     HexDirection inDirection,
     HexDirection outDirection
   ) {
-    var curveCenter = Numerics.EdgeProjectionIntersection(
-      WorldHexCoordsExtension.GetEdge(inDirection),
-      WorldHexCoordsExtension.GetEdge(outDirection)
+    var curveCenter = Geometry.EdgeProjectionIntersection(
+      // WorldHexCoordsExtension.GetEdge(inDirection),
+      WorldHexCoords.GetEdgeStd(inDirection),
+      // WorldHexCoordsExtension.GetEdge(outDirection)
+      WorldHexCoords.GetEdgeStd(outDirection)
     );
     
     var toVertex = vertex.position.XZ() - curveCenter;
@@ -548,7 +561,7 @@ public partial class TerrainTile : Node3D, ITerrainTile {
     }
 
     var flowNormal = new Vector2(flow.Y, -flow.X);
-    var worldPosition = TileData.coords.GridToWorld3D();
+    var worldPosition = TileData.coords.GridToWorld().ExtendY(0);
     var noiseX = vertex.position.X + worldPosition.X;
     var noiseY = vertex.position.Z + worldPosition.Z;
     var noise = RiverShapeNoise.Noise

@@ -4,6 +4,8 @@ using Chickensoft.Introspection;
 using System;
 using System.Collections.Generic;
 using Tlib;
+using Tlib.MathLib;
+using Tlib.RngLib;
 
 namespace Client.Terrain;
 
@@ -18,7 +20,7 @@ public partial class RockSpawner : ObjectSpawner {
     var spawnedPositions = new HashSet<Vector3>();
 
     for (int i = 0; i < maxRocks; i++) {
-      var vertex = vertices.Random();
+      var vertex = vertices.RandomGet();
       if (vertex.riverFactor > 0.3f) { continue; }
       var position = vertex.position;
 

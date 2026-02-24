@@ -20,19 +20,19 @@ public enum PlayerType {
 public readonly struct Player(
   string uid,
   string name,
-  long peerId,
+  PeerID peerId,
   ConnectionStatus connectionStatus,
   long joinTime,
   PlayerType playerType = PlayerType.Human,
-  ulong? steamId = null
+  SteamID? steamId = null
 ) {
   [Key(0)] public readonly string UID = uid;
   [Key(1)] public readonly string Name = name;
-  [Key(2)] public readonly long PeerId = peerId;
+  [Key(2)] public readonly PeerID PeerId = peerId;
   [Key(3)] public readonly ConnectionStatus ConnectionStatus = connectionStatus;
   [Key(4)] public readonly long JoinTime = joinTime;
   [Key(5)] public readonly PlayerType PlayerType = playerType;
-  [Key(6)] public readonly ulong? SteamId = steamId;
+  [Key(6)] public readonly SteamID? SteamId = steamId;
 }
 
 public static class PlayerNewExtensions {
@@ -40,11 +40,11 @@ public static class PlayerNewExtensions {
     this Player player,
     string? uid = null,
     string? name = null,
-    long? peerId = null,
+    PeerID? peerId = null,
     ConnectionStatus? connectionStatus = null,
     long? joinTime = null,
     PlayerType? playerType = null,
-    ulong? steamId = null
+    SteamID? steamId = null
   ) {
     return new Player(
       uid ?? player.UID,
@@ -67,7 +67,7 @@ public static class PlayerNewExtensions {
   }
 
   // ==================== Mapping ====================
-  public static IEnumerable<long> PeerIds(this IEnumerable<Player> players) {
+  public static IEnumerable<PeerID> PeerIds(this IEnumerable<Player> players) {
     return players.Select(player => player.PeerId);
   }
 
@@ -84,11 +84,11 @@ public static class PlayerNewExtensions {
     return players.FirstOrFailure(player => player.UID == uid, $"Player not found with UID: {uid}");
   }
 
-  public static Result<Player> FindByPeerID(this IEnumerable<Player> players, long peerId) {
+  public static Result<Player> FindByPeerID(this IEnumerable<Player> players, PeerID peerId) {
     return players.FirstOrFailure(player => player.PeerId == peerId, $"Player not found with PeerId: {peerId}");
   }
 
-  public static Result<Player> FindBySteamID(this IEnumerable<Player> players, ulong steamId) {
+  public static Result<Player> FindBySteamID(this IEnumerable<Player> players, SteamID steamId) {
     return players.FirstOrFailure(player => player.SteamId == steamId, $"Player not found with SteamId: {steamId}");
   }
 
@@ -101,7 +101,7 @@ public static class PlayerNewExtensions {
     return players.Any(player => player.UID == uid);
   }
 
-  public static bool Contains(this IEnumerable<Player> players, long peerId) {
+  public static bool Contains(this IEnumerable<Player> players, PeerID peerId) {
     return players.Any(player => player.PeerId == peerId);
   }
 

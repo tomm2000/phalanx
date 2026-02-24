@@ -1,5 +1,6 @@
 using System;
 using Godot;
+using Tlib.Serialization;
 
 
 public partial class SharedValue<T> : Node {
@@ -15,11 +16,12 @@ public partial class SharedValue<T> : Node {
   }
 
   public override void _Ready() {
-    _sharedDataBase.SyncPeer += SERVER_SyncClient;
+    _sharedDataBase.SyncPeer += SERVER_SyncPeer;
   }
 
   public delegate void OnValueChanged(T oldValue, T newValue);
   public event OnValueChanged? ValueChanged;
+  public void InvokeValueChanged(T oldValue, T newValue) => ValueChanged?.Invoke(oldValue, newValue);
 
 
   public static implicit operator T(SharedValue<T> serverValue) => serverValue.Value;
@@ -27,13 +29,13 @@ public partial class SharedValue<T> : Node {
   public void SERVER_SetValue(T value) {
     if (!MultiplayerManager.IsHost) { throw new InvalidOperationException("Only the host can set server values."); }
 
-    Rpc(nameof(CLIENT_SetValue), value.Serialize());
+    Rpc(nameof(CLIENT_ValueSet), value.Serialize());
   }
 
-  private void SERVER_SyncClient(long peer) {
+  private void SERVER_SyncPeer(PeerID peer) {
     if (!MultiplayerManager.IsHost) { throw new InvalidOperationException("Only the host can sync server values."); }
 
-    RpcId(peer, nameof(CLIENT_SetValue), Value.Serialize());
+    RpcId(peer, nameof(CLIENT_ValueSet), Value.Serialize());
   }
 
   [Rpc(
@@ -41,7 +43,7 @@ public partial class SharedValue<T> : Node {
     CallLocal = true,
     TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
   )]
-  private void CLIENT_SetValue(byte[] serializedValue) {
+  private void CLIENT_ValueSet(byte[] serializedValue) {
     var newValue = serializedValue.Deserialize<T>();
     
     if (TlibGeneric.EqualsNullable(Value, newValue)) { return; }

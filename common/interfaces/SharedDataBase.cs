@@ -12,7 +12,7 @@ public partial class SharedDataBase : Node {
 
   [Dependency] GameInstance GameInstance => this.DependOn<GameInstance>();
 
-  public event Action<long>? SyncPeer;
+  public event Action<PeerID>? SyncPeer;
 
   #region Lobby Properties
   public SharedDictionary<string, bool> LobbyPlayerReadyStatus { get; private set; } = default!;

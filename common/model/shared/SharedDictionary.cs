@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Godot;
+using Tlib.Serialization;
 
 public partial class SharedDictionary<K, V> : Node where K : notnull {
   private Dictionary<K, V> _value { get; set; } = [];
@@ -46,28 +47,28 @@ public partial class SharedDictionary<K, V> : Node where K : notnull {
   public delegate void OnValueAdded(K key, V newValue);
   public event OnValueAdded? ValueAdded;
 
+  public void SERVER_SetDictionary(Dictionary<K, V> newDictionary) {
+    if (!MultiplayerManager.IsHost) { throw new InvalidOperationException("Only the host can set server values."); }
+
+    Rpc(nameof(CLIENT_DictionarySet), newDictionary.Serialize());
+  }
+
   public void SERVER_SetValue(K key, V value) {
     if (!MultiplayerManager.IsHost) { throw new InvalidOperationException("Only the host can set server values."); }
 
-    Rpc(nameof(CLIENT_SetValue), key.Serialize(), value.Serialize());
+    Rpc(nameof(CLIENT_ValueSet), key.Serialize(), value.Serialize());
   }
 
-  public void SERVER_AddValue(K key, V value) {
+  public void SERVER_DeleteValue(K key) {
     if (!MultiplayerManager.IsHost) { throw new InvalidOperationException("Only the host can set server values."); }
 
-    Rpc(nameof(CLIENT_SetValue), key.Serialize(), value.Serialize());
+    Rpc(nameof(CLIENT_ValueDeleted), key.Serialize());
   }
 
-  public void SERVER_RemoveValue(K key) {
-    if (!MultiplayerManager.IsHost) { throw new InvalidOperationException("Only the host can set server values."); }
-
-    Rpc(nameof(CLIENT_RemoveValue), key.Serialize());
-  }
-
-  public void SERVER_SyncPeer(long peerId) {
+  public void SERVER_SyncPeer(PeerID peerId) {
     if (!MultiplayerManager.IsHost) { throw new InvalidOperationException("Only the host can sync server values."); }
 
-    RpcId(peerId, nameof(CLIENT_SyncDictionary), _value.Serialize());
+    RpcId(peerId, nameof(CLIENT_Sync), _value.Serialize());
   }
 
   [Rpc(
@@ -75,7 +76,24 @@ public partial class SharedDictionary<K, V> : Node where K : notnull {
     CallLocal = true,
     TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
   )]
-  private void CLIENT_SetValue(byte[] serializedKey, byte[] serializedValue) {
+  private void CLIENT_DictionarySet(byte[] serializedDictionary) {
+    var dictionary = serializedDictionary.Deserialize<Dictionary<K, V>>();
+
+    if (dictionary == null) {
+      GD.PrintErr($"SharedDictionary: {nameof(dictionary)} is null after deserialization. Dictionary: {dictionary}");
+      return;
+    }
+
+    _value = dictionary;
+    DictionaryChanged?.Invoke();
+  }
+
+  [Rpc(
+    mode: MultiplayerApi.RpcMode.Authority,
+    CallLocal = true,
+    TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
+  )]
+  private void CLIENT_ValueSet(byte[] serializedKey, byte[] serializedValue) {
     var key = serializedKey.Deserialize<K>();
     var newValue = serializedValue.Deserialize<V>();
 
@@ -102,7 +120,7 @@ public partial class SharedDictionary<K, V> : Node where K : notnull {
     CallLocal = true,
     TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
   )]
-  private void CLIENT_RemoveValue(byte[] serializedKey) {
+  private void CLIENT_ValueDeleted(byte[] serializedKey) {
     var key = serializedKey.Deserialize<K>();
 
     if (key == null) {
@@ -123,7 +141,7 @@ public partial class SharedDictionary<K, V> : Node where K : notnull {
     CallLocal = true,
     TransferMode = MultiplayerPeer.TransferModeEnum.Reliable
   )]
-  private void CLIENT_SyncDictionary(byte[] serializedDictionary) {
+  private void CLIENT_Sync(byte[] serializedDictionary) {
     var dictionary = serializedDictionary.Deserialize<Dictionary<K, V>>();
 
     if (dictionary == null) {

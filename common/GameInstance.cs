@@ -5,7 +5,6 @@ using Chickensoft.Introspection;
 using Client;
 using Client.UI;
 using Godot;
-using Tlib.Nodes;
 
 public enum GameStage {
   Lobby,
@@ -84,7 +83,7 @@ public partial class GameInstance :
     SERVER_PeerInitialized?.Invoke(peerId);
   }
 
-  public event Action<long>? SERVER_PeerInitialized;
+  public event Action<PeerID>? SERVER_PeerInitialized;
   #endregion
 
   #region Game Stage

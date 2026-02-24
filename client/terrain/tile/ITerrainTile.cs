@@ -2,23 +2,20 @@ using System;
 using System.Collections.Generic;
 using Chickensoft.GodotNodeInterfaces;
 using Godot;
-using Tlib.Nodes;
+using Tlib.HexLib;
 
-public struct VertexData {
-  public Vector3 position;
-  public HexVertexIndex index;
+public struct TerrainVertexData: VertexData {
+  public Vector3 position { get; set; }
+  public HexVertexIndex index { get; set; }
   public float steepness;
   public Vector2 UV;
   public float riverFactor;
   public Vector2 riverFlowDirection;
-
-  public static implicit operator Vector3(VertexData vertex) => vertex.position;
-
 }
 
 public static class VertexDataExtensions {
-  public static VertexData With(
-    this VertexData vertexFrom,
+  public static TerrainVertexData With(
+    this TerrainVertexData vertexFrom,
     Vector3? position = null,
     HexVertexIndex? index = null,
     float? steepness = null,
@@ -26,7 +23,7 @@ public static class VertexDataExtensions {
     float? riverFactor = null,
     Vector2? riverFlowDirection = null
   ) {
-    return new VertexData {
+    return new TerrainVertexData {
       position = position ?? vertexFrom.position,
       index = index ?? vertexFrom.index,
       steepness = steepness ?? vertexFrom.steepness,
@@ -39,7 +36,7 @@ public static class VertexDataExtensions {
 
 public interface ITerrainTile {
   public MapTileData TileData { get; }
-  public IEnumerable<VertexData> Vertices { get; }
+  public IEnumerable<TerrainVertexData> Vertices { get; }
   public event Action OnTileReady;
   public void GenerateSurface(
     IEnumerable<(HexDirection, MapTileData)> neighbors

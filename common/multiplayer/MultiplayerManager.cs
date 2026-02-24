@@ -113,7 +113,7 @@ public partial class MultiplayerManager : Node {
     }
   }
 
-  public static void KickPeer(long peerId) {
+  public static void KickPeer(PeerID peerId) {
     if (!IsHost) throw new InvalidOperationException($"[{nameof(KickPeer)}] Only the host can call this method.");
 
     Peer.DisconnectPeer((int) peerId);
@@ -122,7 +122,7 @@ public partial class MultiplayerManager : Node {
   public static event Action<MultiplayerDisconnectReason>? CLIENT_Disconnected;
   public static event Action? CLIENT_ConnectedToServer;
   public static event Action? SERVER_CreatedServer;
-  public static event Action<long>? SERVER_PlayerDisconnected;
+  public static event Action<PeerID>? SERVER_PlayerDisconnected;
   #endregion
 
   #region Initialization
@@ -192,7 +192,7 @@ public partial class MultiplayerManager : Node {
   #endregion
 
   #region Peer Disconnected
-  private static void OnPeerDisconnected(long disconnectedPeerId) {
+  private static void OnPeerDisconnected(PeerID disconnectedPeerId) {
     // If the host disconnects, we need to disconnect the client as well.
     if (disconnectedPeerId == 1) {
       GD.PushWarning("<multiplayer> Server disconnected from client.");

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
+using Tlib.HexLib;
 
 public static class DevMap {
   public static MapData GenerateMap(

@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Godot;
 using MessagePack;
+using Tlib.HexLib;
 
 public enum VegetationType {
   None,

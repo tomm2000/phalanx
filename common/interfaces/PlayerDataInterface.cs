@@ -11,7 +11,7 @@ public partial class PlayerDataInterface : Node {
 	public static readonly string ScenePath = "uid://_UID_";
   
   [Dependency] public ClientInterface ClientInterface => this.DependOn<ClientInterface>();
-  public long ClientPeerId => ClientInterface.PeerId;
+  public PeerID ClientPeerId => ClientInterface.PeerId;
 	
 	public static PlayerDataInterface Instantiate() {
     var scene = ResourceLoader.Load<PackedScene>(ScenePath);

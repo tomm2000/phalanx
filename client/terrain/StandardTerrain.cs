@@ -3,9 +3,11 @@ using System.Threading.Tasks;
 using Godot;
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
-using Tlib.Nodes;
 using ImGuiNET;
 using System.Collections.Generic;
+using Tlib.HexLib;
+using Tlib.NodeExt;
+using Tlib;
 
 namespace Client.Terrain;
 

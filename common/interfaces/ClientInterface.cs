@@ -45,7 +45,7 @@ public partial class ClientInterface : Node,
 
   #region Properties
   public string PlayerId { get; private set; } = string.Empty;
-  public long PeerId => PlayerManager.GetPlayer(PlayerId).PeerId;
+  public PeerID PeerId => PlayerManager.GetPlayer(PlayerId).PeerId;
 
   // FIXME: This is a temporary solution. need to handle multiple players on same peerid.
   public bool IsMaster => MultiplayerManager.IsHost;
