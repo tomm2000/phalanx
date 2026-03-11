@@ -3,7 +3,7 @@ using Godot;
 using Steam;
 using Steamworks;
 
-namespace Client;
+
 
 public static class ClientData {
   public static string Username { get; private set; }

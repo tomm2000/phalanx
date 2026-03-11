@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://bwvdg17watsbe"]
+
+[ext_resource type="Script" uid="uid://pvc7bjkv27ya" path="res://common/interface/ServerToClientBus.cs" id="1_i3bjt"]
+
+[node name="ServerToClientBus" type="Node" unique_id=1399901903]
+script = ExtResource("1_i3bjt")

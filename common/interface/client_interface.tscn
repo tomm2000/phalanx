@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://bs182f4xfpyg5"]
+
+[ext_resource type="Script" uid="uid://cprdxudit44b5" path="res://common/interface/ClientInterface.cs" id="1_1f5bj"]
+[ext_resource type="PackedScene" uid="uid://b4m4yj5g37t7o" path="res://common/interface/client_to_server_bus.tscn" id="2_xp67s"]
+[ext_resource type="PackedScene" uid="uid://bwvdg17watsbe" path="res://common/interface/server_to_client_bus.tscn" id="3_h44b4"]
+
+[node name="ClientInterface" type="Node" unique_id=399172400]
+script = ExtResource("1_1f5bj")
+
+[node name="ClientToServerBus" parent="." unique_id=1169813841 instance=ExtResource("2_xp67s")]
+unique_name_in_owner = true
+
+[node name="ServerToClientBus" parent="." unique_id=1399901903 instance=ExtResource("3_h44b4")]
+unique_name_in_owner = true

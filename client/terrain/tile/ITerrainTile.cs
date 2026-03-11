@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using Chickensoft.GodotNodeInterfaces;
 using Godot;
-using Tlib.HexLib;
+using Tlib.Hex;
 
-public struct TerrainVertexData: VertexData {
+public struct TerrainVertexData: IVertexData {
   public Vector3 position { get; set; }
   public HexVertexIndex index { get; set; }
   public float steepness;

@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://bmydftsu36dtn"]
+[gd_scene format=3 uid="uid://bmydftsu36dtn"]
 
 [ext_resource type="Script" uid="uid://bq1aeqjied60m" path="res://client/terrain/tile/TerrainTile.cs" id="1_8eqx6"]
 [ext_resource type="Shader" uid="uid://dw8sfu5i5p4as" path="res://client/terrain/shaders/terrain_standard.gdshader" id="2_ka7dk"]
@@ -25,8 +25,8 @@ frequency = 0.011
 domain_warp_fractal_octaves = 1
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_htqwh"]
-seamless = true
 noise = SubResource("FastNoiseLite_aj3nk")
+seamless = true
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_lvdct"]
 render_priority = 0
@@ -38,25 +38,25 @@ shader_parameter/flow_strength = 0.5
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_8eqx6"]
 
-[node name="indexed_tile" type="Node3D"]
+[node name="terrain_tile" type="Node3D" unique_id=1147990791]
 script = ExtResource("1_8eqx6")
 TerrainColorNoise = SubResource("NoiseTexture2D_lvdct")
 RiverShapeNoise = SubResource("NoiseTexture2D_i71n3")
 RiverBankShape = SubResource("Curve_8eqx6")
 
-[node name="MeshInstance" type="MeshInstance3D" parent="."]
+[node name="MeshInstance" type="MeshInstance3D" parent="." unique_id=1316469013]
 unique_name_in_owner = true
 material_override = SubResource("ShaderMaterial_lvdct")
 mesh = SubResource("PlaneMesh_8eqx6")
 
-[node name="TreeSpawner" parent="." instance=ExtResource("3_n3yx8")]
+[node name="TreeSpawner" parent="." unique_id=1243230690 instance=ExtResource("3_n3yx8")]
 
-[node name="RockSpawner" parent="." instance=ExtResource("4_y5ui2")]
+[node name="RockSpawner" parent="." unique_id=91000975 instance=ExtResource("4_y5ui2")]
 maxRocks = 2
 
-[node name="CollisionArea" type="Area3D" parent="."]
+[node name="CollisionArea" type="Area3D" parent="." unique_id=634586451]
 unique_name_in_owner = true
 collision_mask = 0
 
-[node name="CollisionShape" type="CollisionShape3D" parent="CollisionArea"]
+[node name="CollisionShape" type="CollisionShape3D" parent="CollisionArea" unique_id=864269274]
 unique_name_in_owner = true

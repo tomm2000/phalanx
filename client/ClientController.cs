@@ -9,15 +9,14 @@ using Godot;
 public abstract partial class ClientController : Node {
   public override void _Notification(int what) => this.Notify(what);
 
-  [Dependency] protected PlayerDataInterface ClientInterface => this.DependOn<PlayerDataInterface>();
-  [Dependency] protected SharedDataBase SharedDataBase => this.DependOn<SharedDataBase>();
+  [Dependency] protected LobbyManager LobbyManager => this.DependOn<LobbyManager>();
 
   public virtual void OnResolved() {
-    SharedDataBase.CurrentGameStage.ValueChanged += OnGameStageChanged;
+    LobbyManager.CurrentGameStage.OnValueChanged += OnGameStageChanged;
   }
 
   public override void _ExitTree() {
-    SharedDataBase.CurrentGameStage.ValueChanged -= OnGameStageChanged;
+    LobbyManager.CurrentGameStage.OnValueChanged -= OnGameStageChanged;
   }
 
   protected abstract void OnGameStageChanged(GameStage oldStage, GameStage newStage);

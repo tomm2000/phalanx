@@ -1,0 +1,43 @@
+{
+  "name": "Archer",
+  "id": "phalanx:unit.archer",
+  "description": "A ranged unit that excels at attacking from a distance.",
+  "icon": "phalanx:unit.archer",
+  "model": "phalanx:unit.archer",
+  "traits": [
+    {
+      "id": "ATTRIBUTE.DEFENSE",
+      "value": 5
+    },
+    {
+      "id": "ATTRIBUTE.MOVEMENT_POINTS",
+      "value": 2
+    },
+    {
+      "id": "ATTRIBUTE.STEALTH",
+      "value": 1
+    },
+    {
+      "id": "ATTRIBUTE.COST",
+      "value": 50
+    },
+    {
+      "id": "ATTRIBUTE.VISION_RANGE",
+      "value": 4
+    },
+    {
+      "id": "ACTION.RANGED_ATTACK",
+      "strength": 8,
+      "range": 3,
+      "ignore_terrain": true
+    },
+    {
+      "id": "ACTION.RANGED_ATTACK",
+      "custom_name": "Arrow Volley",
+      "strength": 12,
+      "cost": 2,
+      "range": 3,
+      "ignore_terrain": true
+    }
+  ]
+}

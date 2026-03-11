@@ -1,10 +1,10 @@
 using Godot;
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
-using Tlib.HexLib;
+using Tlib.Hex;
 using Tlib;
 
-namespace Client.Terrain;
+
 
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
 public partial class TileSelector : Node3D {

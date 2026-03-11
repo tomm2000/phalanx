@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://b45pi6s6v775p"]
+
+[ext_resource type="Script" uid="uid://qjtkhbqnxxcc" path="res://common/managers/ClientManager.cs" id="1_shlhp"]
+
+[node name="ClientManager" type="Node" unique_id=151200849]
+script = ExtResource("1_shlhp")

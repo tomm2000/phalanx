@@ -1,7 +1,7 @@
 using System;
 using Godot;
 
-namespace Client;
+
 
 public partial class ClientEventBus : Node {
   //========================= Terrain Events =========================

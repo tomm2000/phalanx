@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://dwjcl253px63k"]
+[gd_scene format=3 uid="uid://dwjcl253px63k"]
 
 [ext_resource type="Texture2D" uid="uid://dcaf4ygdvskhv" path="res://client/stages/common/ui/assets/background.png" id="1_bix3n"]
 [ext_resource type="Script" uid="uid://dqwu5r8fo333o" path="res://client/stages/pregame/MainMenu.cs" id="1_p56k4"]
@@ -101,7 +101,7 @@ _data = {
 font = ExtResource("4_an7u6")
 font_size = 90
 
-[node name="MainMenu" type="Control"]
+[node name="MainMenu" type="Control" unique_id=1524368060]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -111,7 +111,7 @@ grow_vertical = 2
 script = ExtResource("1_p56k4")
 metadata/_edit_lock_ = true
 
-[node name="BoxContainer" type="BoxContainer" parent="."]
+[node name="BoxContainer" type="BoxContainer" parent="." unique_id=1964632666]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -125,13 +125,14 @@ grow_vertical = 2
 alignment = 1
 metadata/_edit_lock_ = true
 
-[node name="TextureRect" type="TextureRect" parent="BoxContainer"]
+[node name="TextureRect" type="TextureRect" parent="BoxContainer" unique_id=83102309]
+visible = false
 layout_mode = 2
 texture = ExtResource("1_bix3n")
 expand_mode = 3
 metadata/_edit_lock_ = true
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="."]
+[node name="VBoxContainer2" type="VBoxContainer" parent="." unique_id=431921485]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -139,25 +140,25 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Filler" parent="VBoxContainer2" instance=ExtResource("6_tr1vk")]
+[node name="Filler" parent="VBoxContainer2" unique_id=1057479311 instance=ExtResource("6_tr1vk")]
 layout_mode = 2
 
-[node name="PanelContainer2" type="PanelContainer" parent="VBoxContainer2"]
+[node name="PanelContainer2" type="PanelContainer" parent="VBoxContainer2" unique_id=334175780]
 material = SubResource("ShaderMaterial_7rnj1")
 layout_mode = 2
 size_flags_horizontal = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_an7u6")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer2/PanelContainer2"]
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer2/PanelContainer2" unique_id=1409114844]
 layout_mode = 2
 size_flags_horizontal = 0
 theme_override_constants/separation = 8
 
-[node name="RotatePanelContainer" type="Control" parent="VBoxContainer2/PanelContainer2/VBoxContainer"]
+[node name="RotatePanelContainer" type="Control" parent="VBoxContainer2/PanelContainer2/VBoxContainer" unique_id=63818598]
 visible = false
 layout_mode = 2
 
-[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer2/PanelContainer2/VBoxContainer/RotatePanelContainer"]
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer2/PanelContainer2/VBoxContainer/RotatePanelContainer" unique_id=975329081]
 material = SubResource("ShaderMaterial_tr1vk")
 layout_mode = 1
 anchors_preset = -1
@@ -171,13 +172,12 @@ grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_an7u6")
 script = ExtResource("3_an7u6")
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="VBoxContainer2/PanelContainer2/VBoxContainer/RotatePanelContainer/PanelContainer"]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="VBoxContainer2/PanelContainer2/VBoxContainer/RotatePanelContainer/PanelContainer" unique_id=2094110048]
 unique_name_in_owner = true
-libraries = {
-&"": SubResource("AnimationLibrary_jdry5")
-}
+libraries/ = SubResource("AnimationLibrary_jdry5")
 
-[node name="Title" type="TextureRect" parent="VBoxContainer2/PanelContainer2/VBoxContainer"]
+[node name="Title" type="TextureRect" parent="VBoxContainer2/PanelContainer2/VBoxContainer" unique_id=162440818]
+visible = false
 texture_filter = 4
 custom_minimum_size = Vector2(600, 150)
 layout_mode = 2
@@ -185,25 +185,25 @@ texture = ExtResource("5_y45rc")
 expand_mode = 1
 stretch_mode = 4
 
-[node name="Label" type="Label" parent="VBoxContainer2/PanelContainer2/VBoxContainer"]
+[node name="Label" type="Label" parent="VBoxContainer2/PanelContainer2/VBoxContainer" unique_id=58333067]
 visible = false
 layout_mode = 2
 text = "Phalanx"
 label_settings = SubResource("LabelSettings_o1icm")
 
-[node name="Filler" parent="VBoxContainer2/PanelContainer2/VBoxContainer" instance=ExtResource("6_tr1vk")]
+[node name="Filler" parent="VBoxContainer2/PanelContainer2/VBoxContainer" unique_id=50151763 instance=ExtResource("6_tr1vk")]
 custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer2/PanelContainer2/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer2/PanelContainer2/VBoxContainer" unique_id=140338535]
 layout_mode = 2
 
-[node name="Control" type="Control" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer"]
+[node name="Control" type="Control" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer" unique_id=1290136044]
 visible = false
 custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 
-[node name="ListVboxContainer" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer" instance=ExtResource("4_7ylq8")]
+[node name="ListVboxContainer" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer" unique_id=1737487333 instance=ExtResource("4_7ylq8")]
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 1
@@ -211,74 +211,74 @@ mouse_filter = 1
 [node name="VBoxContainer" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer" index="0"]
 theme_override_constants/separation = 15
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="0"]
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="0" unique_id=2016266024]
 custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="SingleplayerButton" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/HBoxContainer" instance=ExtResource("9_o23kc")]
+[node name="SingleplayerButton" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/HBoxContainer" unique_id=1191651654 instance=ExtResource("9_o23kc")]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Singleplayer"
 alignment = 0
 
-[node name="Filler" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/HBoxContainer" instance=ExtResource("6_tr1vk")]
+[node name="Filler" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/HBoxContainer" unique_id=760394229 instance=ExtResource("6_tr1vk")]
 layout_mode = 2
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="1"]
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="1" unique_id=593526528]
 custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="MultiplayerButton" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/HBoxContainer2" instance=ExtResource("9_o23kc")]
+[node name="MultiplayerButton" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/HBoxContainer2" unique_id=698316175 instance=ExtResource("9_o23kc")]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Multiplayer"
 alignment = 0
 
-[node name="Filler" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/HBoxContainer2" instance=ExtResource("6_tr1vk")]
+[node name="Filler" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/HBoxContainer2" unique_id=464608905 instance=ExtResource("6_tr1vk")]
 layout_mode = 2
 
-[node name="HBoxContainer4" type="HBoxContainer" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="2"]
+[node name="HBoxContainer4" type="HBoxContainer" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="2" unique_id=2060346870]
 custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="SettingsButton" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/HBoxContainer4" instance=ExtResource("9_o23kc")]
+[node name="SettingsButton" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/HBoxContainer4" unique_id=255846579 instance=ExtResource("9_o23kc")]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Settings"
 alignment = 0
 
-[node name="Filler" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/HBoxContainer4" instance=ExtResource("6_tr1vk")]
+[node name="Filler" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/HBoxContainer4" unique_id=1601911200 instance=ExtResource("6_tr1vk")]
 layout_mode = 2
 
-[node name="HBoxContainer5" type="HBoxContainer" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="3"]
+[node name="HBoxContainer5" type="HBoxContainer" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer" index="3" unique_id=155346990]
 custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="QuitButton" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/HBoxContainer5" instance=ExtResource("9_o23kc")]
+[node name="QuitButton" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/HBoxContainer5" unique_id=1802397579 instance=ExtResource("9_o23kc")]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Quit Game"
 alignment = 0
 
-[node name="Filler" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/HBoxContainer5" instance=ExtResource("6_tr1vk")]
+[node name="Filler" parent="VBoxContainer2/PanelContainer2/VBoxContainer/HBoxContainer/ListVboxContainer/VBoxContainer/HBoxContainer5" unique_id=1757542732 instance=ExtResource("6_tr1vk")]
 layout_mode = 2
 
-[node name="Filler2" parent="VBoxContainer2/PanelContainer2/VBoxContainer" instance=ExtResource("6_tr1vk")]
+[node name="Filler2" parent="VBoxContainer2/PanelContainer2/VBoxContainer" unique_id=1425513766 instance=ExtResource("6_tr1vk")]
 custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 
-[node name="Filler2" parent="VBoxContainer2" instance=ExtResource("6_tr1vk")]
+[node name="Filler2" parent="VBoxContainer2" unique_id=485898508 instance=ExtResource("6_tr1vk")]
 layout_mode = 2
 
-[node name="UserTag" parent="." instance=ExtResource("2_o23kc")]
+[node name="UserTag" parent="." unique_id=907937734 instance=ExtResource("2_o23kc")]
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0

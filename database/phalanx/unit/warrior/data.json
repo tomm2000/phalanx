@@ -1,0 +1,33 @@
+{
+  "name": "Warrior",
+  "id": "phalanx:unit.warrior",
+  "description": "A melee unit that excels at close combat.",
+  "icon": "phalanx:unit.warrior",
+  "model": "phalanx:unit.warrior",
+  "traits": [
+    {
+      "id": "ATTRIBUTE.DEFENSE",
+      "value": 12
+    },
+    {
+      "id": "ATTRIBUTE.MOVEMENT_POINTS",
+      "value": 2
+    },
+    {
+      "id": "ATTRIBUTE.STEALTH",
+      "value": 0
+    },
+    {
+      "id": "ATTRIBUTE.COST",
+      "value": 20
+    },
+    {
+      "id": "ATTRIBUTE.VISION_RANGE",
+      "value": 2
+    },
+    {
+      "id": "ACTION.MELEE_ATTACK",
+      "strength": 10
+    }
+  ]
+}

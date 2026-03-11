@@ -2,22 +2,23 @@ using System;
 using System.Collections.Generic;
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
-using Client.UI;
+
 using Godot;
 
-namespace Client;
+
 
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
-public partial class PlayerClientController : ClientController,
-  IProvide<ClientEventBus>
+public partial class PlayerClientController :
+  ClientController,
+  IProvide<PlayerClientController>
 {
 	public override void _Notification(int what) => this.Notify(what);
 	public static readonly string ScenePath = "uid://nss3qj5556mk";
 
-  ClientEventBus IProvide<ClientEventBus>.Value() => ClientEventBus;
+  PlayerClientController IProvide<PlayerClientController>.Value() => this;
   
   #region Nodes
-  [Node] ClientEventBus ClientEventBus { get; set; } = default!;
+  [Dependency] GameInstance GameInstance => this.DependOn<GameInstance>();
   #endregion
 
   public static PlayerClientController Instantiate() {
@@ -30,10 +31,9 @@ public partial class PlayerClientController : ClientController,
 
   public override void OnResolved() {
     base.OnResolved();
-
-    OnGameStageChanged(GameStage.Lobby, SharedDataBase.CurrentGameStage.Value);
-
     this.Provide();
+
+    OnGameStageChanged(GameStage.Lobby, GameInstance.LobbyManager.CurrentGameStage.Value);
   }
 
   public override void _ExitTree() {

@@ -1,0 +1,12 @@
+{
+  "id": "phalanx:scenario.standard",
+  "name": "Standard Scenario",
+  "description": "A standard scenario with basic units.",
+  "units": [
+    "phalanx:unit.archer",
+    "phalanx:unit.warrior"
+  ],
+  "maps": [
+    "phalanx:map.dev1"
+  ]
+}

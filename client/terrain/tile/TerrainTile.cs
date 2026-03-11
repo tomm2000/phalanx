@@ -4,13 +4,12 @@ using System.Diagnostics;
 using System.Linq;
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
-using Client.Terrain;
 using Godot;
 using Tlib;
-using Tlib.HexLib;
-using Tlib.MathLib;
+using Tlib.Hex;
+using Tlib.Math;
 
-namespace Client;
+
 
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
 public partial class TerrainTile : Node3D, ITerrainTile {
@@ -58,7 +57,6 @@ public partial class TerrainTile : Node3D, ITerrainTile {
   [Node] CollisionShape3D CollisionShape { get; set; } = default!;
   [Node] Area3D CollisionArea { get; set; } = default!;
   [Dependency] StandardTerrain Terrain => this.DependOn<StandardTerrain>();
-  [Dependency] ClientEventBus ClientEventBus => this.DependOn<ClientEventBus>();
   #endregion
 
   public void OnResolved() {
@@ -84,16 +82,7 @@ public partial class TerrainTile : Node3D, ITerrainTile {
   }
 
   private void OnInputEvent(Node camera, InputEvent @event, Vector3 position, Vector3 normal, long shapeIdx) {
-    if (@event is InputEventMouseButton mouseButton) {
-      if (mouseButton.Pressed) {
-        ClientEventBus.TileClicked(TileData, mouseButton.ButtonIndex);
-      }
-    }
-
-    if (@event is InputEventMouseMotion mouseMotion) {
-      ClientEventBus.TileHovered(TileData);
-    }
-
+    // TODO: handle input events
   }
   #endregion
 
@@ -297,6 +286,11 @@ public partial class TerrainTile : Node3D, ITerrainTile {
 
   // FIXME: consider scale
   #region Rivers
+  // ===============================================
+  // Documentation of the river algorithm:
+  // https://github.com/tomm2000/phalanx/issues/1
+  // ===============================================
+
   private TerrainVertexData SetVertexRiver(
     TerrainVertexData vertex
   ) {
@@ -339,6 +333,8 @@ public partial class TerrainTile : Node3D, ITerrainTile {
     } else if (tile.riverInDirection.Length == 0 && tile.riverOutDirection.Length == 1) {
       return RiverSource(vertex, tile, tile.riverOutDirection[0]);
     }
+
+    // TODO: check that a river direction is not both in and out, maybe change data structure to prevent this
 
     // if the river is made of 2 or more segments, create all possible in-out combinations
     var riverSplines = new List<(HexDirection, HexDirection)>();

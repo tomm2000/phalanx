@@ -4,7 +4,7 @@ using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
 using Godot;
 
-namespace Client.UI;
+
 
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
 public partial class MenuLoadingScreen : Control {

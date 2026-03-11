@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
-using Client;
-using Client.UI;
+
+
+using FluentResults;
 using Godot;
+using Tlib.NodeExt;
 
 public enum GameStage {
   Lobby,
@@ -17,22 +19,33 @@ public enum GameStage {
 public partial class GameInstance :
   Node,
   IProvide<GameInstance>,
-  IProvide<PlayerManager>,
-  IProvide<SharedDataBase> {
+  IProvide<ClientManager>,
+  IProvide<LobbyManager>,
+  IProvide<ScenarioManager>,
+  IProvide<NetStateManager>
+{
   public override void _Notification(int what) => this.Notify(what);
   public static readonly string ScenePath = "uid://cexnf1ilp6b4b";
 
   GameInstance IProvide<GameInstance>.Value() => this;
-  PlayerManager IProvide<PlayerManager>.Value() => _playerManager;
-  SharedDataBase IProvide<SharedDataBase>.Value() => _sharedDataBase;
+  ClientManager IProvide<ClientManager>.Value() => ClientManager;
+  LobbyManager IProvide<LobbyManager>.Value() => LobbyManager;
+  ScenarioManager IProvide<ScenarioManager>.Value() => ScenarioManager;
+  NetStateManager IProvide<NetStateManager>.Value() => NetStateManager;
 
   #region Nodes
-  [Node] private PlayerManager _playerManager { get; set; } = default!;
-  [Node] private SharedDataBase _sharedDataBase { get; set; } = default!;
+  [Node] public ClientManager ClientManager { get; private set; } = default!;
+  [Node] public LobbyManager LobbyManager { get; private set; } = default!;
+  [Node] public ScenarioManager ScenarioManager { get; private set; } = default!;
+  [Node] public NetStateManager NetStateManager { get; private set; } = default!;
   #endregion
 
-  public event Action<Player>? SERVER_PlayerReady;
-  public event Action<GameStage, GameStage>? GameStageChanged;
+  #region Properties
+  private bool isFirstFrameProcessed = false;
+  #endregion
+
+  #region Events
+  #endregion
 
   public static GameInstance Instantiate(bool withServer) {
     var scene = ResourceLoader.Load<PackedScene>(ScenePath);
@@ -46,29 +59,35 @@ public partial class GameInstance :
     return instance;
   }
 
-  public void AttachClient(Player player) {
-    var clientInterface = ClientInterface.Instantiate(player);
+  // TODO: create a save function that saves the current game instance state to a GameStateData object,
+  // and a load function that takes a GameStateData object and sets the game instance state accordingly.
 
-    ClientController clientController = player.PlayerType switch {
-      PlayerType.Human => PlayerClientController.Instantiate(),
-      PlayerType.Bot => throw new NotImplementedException("Bot client interface not implemented"),
-      _ => throw new NotImplementedException($"Player type {player.PlayerType} not implemented"),
-    };
+  public override void _Ready() {
+    this.Provide();
 
-    AddChild(clientInterface, true);
-
-    clientInterface.AttachClientController(clientController);
   }
-
-  #region Nodes
-  [Node] public PlayerManager PlayerManager { get; private set; } = default!;
-  #endregion
 
   #region Lifecycle
   public void OnResolved() {
-    this.Provide();
-
     RpcId(1, nameof(SERVER_InitializePeer));
+  }
+
+  private event Action? FirstFrameProcessed;
+
+  public override void _Process(double delta) {
+    if (!isFirstFrameProcessed) {
+      isFirstFrameProcessed = true;
+      FirstFrameProcessed?.Invoke();
+      return;
+    }
+  }
+
+  public void OnFirstFrameProcessedSafe(Action callback) {
+    if (isFirstFrameProcessed) {
+      callback();
+    } else {
+      FirstFrameProcessed += callback;
+    }
   }
 
   [Rpc(
@@ -80,10 +99,41 @@ public partial class GameInstance :
     if (!MultiplayerManager.IsHost) return;
 
     var peerId = MultiplayerManager.RpcSenderId();
-    SERVER_PeerInitialized?.Invoke(peerId);
+    SERVER_SyncPeer?.Invoke(peerId);
+    SERVER_SyncPeerFinished?.Invoke(peerId);
   }
 
-  public event Action<PeerID>? SERVER_PeerInitialized;
+  public event Action<PeerID>? SERVER_SyncPeer;
+  public event Action<PeerID>? SERVER_SyncPeerFinished;
+  #endregion
+
+
+  #region Client Interfaces
+  private IEnumerable<ClientInterface> ClientInterfaces => this.GetChildren<ClientInterface>();
+
+  public ClientInterface AttachClient(Client client) {
+    var clientInterface = ClientInterface.Instantiate(client);
+
+    AddChild(clientInterface, forceReadableName: true);
+
+    return clientInterface;
+  }
+
+  public void DetachClient(Client client) {
+    var clientInterface = GetClientInterface(client.UID);
+    if (clientInterface.IsSuccess) {
+      clientInterface.Value.QueueFree();
+    }
+  }
+
+  public Result<ClientInterface> GetClientInterface(string playerUID) {
+    foreach (var clientInterface in ClientInterfaces) {
+      if (clientInterface.Client.UID == playerUID) {
+        return clientInterface;
+      }
+    }
+    return Result.Fail($"No client interface found for player UID {playerUID}");
+  }
   #endregion
 
   #region Game Stage

@@ -10,7 +10,7 @@ using Steamworks;
 using Steamworks.Data;
 using Tlib.NodeExt;
 
-namespace Client.UI;
+
 
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
 public partial class MultiplayerMenu : Control {

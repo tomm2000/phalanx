@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using Tlib;
 using System.Linq;
 
-namespace Client.UI;
+
 
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
 public partial class MainMenu : Control {
@@ -15,6 +15,7 @@ public partial class MainMenu : Control {
   public static readonly string ScenePath = "uid://dwjcl253px63k";
 
   private void OnSingleplayerButtonPressed() {
+    // TODO: switch to singleplayer menu
     MultiplayerManager.HostSinglePlayer();
   }
   

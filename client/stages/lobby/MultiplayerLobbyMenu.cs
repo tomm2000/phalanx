@@ -8,7 +8,7 @@ using Tlib;
 using System.Linq;
 using Tlib.NodeExt;
 
-namespace Client.UI;
+
 
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
 public partial class MultiplayerLobbyMenu : Control {
@@ -20,45 +20,40 @@ public partial class MultiplayerLobbyMenu : Control {
   [Node] private Button ReadyButton { get; set; } = default!;
   [Node] private Button StartButton { get; set; } = default!;
 
-  [Dependency] public PlayerManager PlayerManager => this.DependOn<PlayerManager>();
-  [Dependency] public ClientToServerBus ClientToServerBus => this.DependOn<ClientToServerBus>();
-  [Dependency] public SharedDataBase SharedDataBase => this.DependOn<SharedDataBase>();
+  [Dependency] public ClientManager ClientManager => this.DependOn<ClientManager>();
   [Dependency] public ClientInterface ClientInterface => this.DependOn<ClientInterface>();
+  [Dependency] public LobbyManager LobbyManager => this.DependOn<LobbyManager>();
+  [Dependency] public ClientToServerBus ClientToServerBus => this.DependOn<ClientToServerBus>();
+  [Dependency] public ScenarioManager ScenarioManager => this.DependOn<ScenarioManager>();
+  [Dependency] public GameInstance GameInstance => this.DependOn<GameInstance>();
 
   public void OnResolved() {
-    PlayerManager.PlayerListUpdated += OnPlayerListUpdated;
+    ClientManager.ClientListUpdated += OnClientListUpdated;
     MultiplayerManager.CLIENT_Disconnected += ReturnToMultiplayerMenu;
-    SharedDataBase.LobbyPlayerReadyStatus.DictionaryChanged += UpdateStartButton;
+    LobbyManager.PlayerReadyStatuses.OnValueChanged += UpdateStartButton;
 
-    OnPlayerListUpdated();
+    OnClientListUpdated();
 
     if (ClientInterface.IsMaster) {
       UpdateStartButton();
-      ClientToServerBus.LobbySelectMap("devmap");
     } else {
       StartButton.Visible = false;
-      SharedDataBase.SelectedMap.ValueChanged += OnMapChanged;
     }
   }
 
+
   public override void _ExitTree() {
-    PlayerManager.PlayerListUpdated -= OnPlayerListUpdated;
+    ClientManager.ClientListUpdated -= OnClientListUpdated;
     MultiplayerManager.CLIENT_Disconnected -= ReturnToMultiplayerMenu;
   }
 
-  private void OnMapChanged(MapData? oldValue, MapData? newValue) {
-    if (newValue == null) { return; }
-
-    GD.Print("Map changed to: ", newValue.mapName);
-  }
-
-  private void OnPlayerListUpdated() {
+  private void OnClientListUpdated() {
     foreach (var child in PlayerList.GetChildren<PlayerListItem>()) {
       child.QueueFree();
     }
 
-    foreach (var player in PlayerManager.Players.SortByJoinTime()) {
-      var playerListItem = PlayerListItem.Instantiate(player);
+    foreach (var client in ClientManager.Clients.SortByJoinTime()) {
+      var playerListItem = PlayerListItem.Instantiate(client);
       PlayerList.AddChild(playerListItem);
     }
 
@@ -94,25 +89,25 @@ public partial class MultiplayerLobbyMenu : Control {
 
   #region Start/Ready
   private void OnReadyButtonPressed() {
-    var currentReady = SharedDataBase.LobbyPlayerReadyStatus.Value.GetValueOrDefault(ClientInterface.PlayerId, false);
-    ClientToServerBus.LobbySetPlayerReady(!currentReady);
+    bool currentReady = LobbyManager.PlayerReadyStatuses.GetValueOrDefault(ClientInterface.Client.UID, false);
+    ClientToServerBus.RequestReadyStatusChange(!currentReady);
   }
 
   private void OnStartGameButtonPressed() {
     if (!ClientInterface.IsMaster) { throw new Exception("Only the host can start the game."); }
 
-    var allReady = PlayerManager
-      .Players
-      .All(p => SharedDataBase.LobbyPlayerReadyStatus.Value.GetValueOrDefault(p.UID, false));
+    var allReady = ClientManager
+      .Clients
+      .All(c => LobbyManager.PlayerReadyStatuses.GetValueOrDefault(c.UID, false));
     if (!allReady) { return; }
 
-    ClientToServerBus.LobbyStartGame();
+    ClientToServerBus.RequestStartGame();
   }
 
   private void UpdateStartButton() {
-    bool allReady = PlayerManager
-      .Players
-      .All(p => SharedDataBase.LobbyPlayerReadyStatus.Value.GetValueOrDefault(p.UID, false));
+    bool allReady = ClientManager
+      .Clients
+      .All(c => LobbyManager.PlayerReadyStatuses.GetValueOrDefault(c.UID, false));
     StartButton.Disabled = !allReady;
   }
   #endregion

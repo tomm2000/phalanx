@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://8w3re4i78pyq"]
+
+[ext_resource type="Script" uid="uid://ckd16byfqtvfl" path="res://common/managers/LobbyManager.cs" id="1_nf44n"]
+
+[node name="LobbyManager" type="Node" unique_id=2108877288]
+script = ExtResource("1_nf44n")

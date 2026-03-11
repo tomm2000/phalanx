@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using Tlib;
 using System.Linq;
 
-namespace Client.UI;
+
 
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
 public partial class SingleplayerLobbyMenu : Control {
@@ -15,22 +15,39 @@ public partial class SingleplayerLobbyMenu : Control {
   public static readonly string ScenePath = "uid://dukh8gnwwqll6";
   
   [Dependency] GameInstance GameInstance => this.DependOn<GameInstance>();
-  [Dependency] ClientToServerBus ClientToServerBus => this.DependOn<ClientToServerBus>();
-  [Dependency] PlayerManager PlayerManager => this.DependOn<PlayerManager>();
+  [Dependency] ClientInterface ClientInterface => this.DependOn<ClientInterface>();
+  [Dependency] LobbyManager LobbyManager => this.DependOn<LobbyManager>();
+  [Dependency] ClientManager ClientManager => this.DependOn<ClientManager>();
+  [Dependency] public ClientToServerBus ClientToServerBus => this.DependOn<ClientToServerBus>();
+
+  #region Properties
+  private bool FirstFramePassed { get; set; } = false;
+  #endregion
+
 
   public void OnResolved() {
     // TODO: Implement the singleplayer lobby menu
-    // PlayerManager.PlayerListUpdated += OnPlayerListUpdated;
+    // LobbyManager.PlayerListUpdated += OnPlayerListUpdated;
     // OnPlayerListUpdated();
 
-    ClientToServerBus.LobbySelectMap("devmap");
+    // ClientToServerBus.RequestMapChange("phalanx:map.dev1");
 
-    // NOTE: This is a temporary solution to start the game immediately in singleplayer mode. for testing purposes.
-    OnStartGameButtonPressed();
+    // // NOTE: This is a temporary solution to start the game immediately in singleplayer mode. for testing purposes.
+    // OnStartGameButtonPressed();
+  }
+
+  public override void _Process(double delta) {
+    if (!FirstFramePassed) {
+      ClientToServerBus.RequestMapChange("phalanx:map.dev1");
+      OnStartGameButtonPressed();
+      FirstFramePassed = true;
+    }
+    
   }
 
   private void OnStartGameButtonPressed() {
-    ClientToServerBus.LobbyStartGame();
+    // ClientToServerBus.LobbyStartGame();
+    ClientToServerBus.RequestStartGame();
   }
 
   private void OnQuitToMainMenuButtonPressed() {

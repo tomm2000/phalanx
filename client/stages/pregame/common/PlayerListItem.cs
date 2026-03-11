@@ -5,16 +5,16 @@ using Chickensoft.Introspection;
 using Godot;
 using Steamworks;
 
-namespace Client.UI;
+
 
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
 public partial class PlayerListItem : Control {
   public override void _Notification(int what) => this.Notify(what);
   public static readonly string ScenePath = "uid://c68j3jaf4ip0k";
 
-  public static PlayerListItem Instantiate(Player player) {
+  public static PlayerListItem Instantiate(Client client) {
     var instance = GD.Load<PackedScene>(ScenePath).Instantiate<PlayerListItem>();
-    instance.player = player;
+    instance.client = client;
     return instance;
   }
 
@@ -24,10 +24,10 @@ public partial class PlayerListItem : Control {
   [Node] private TextureRect AvatarTexture { get; set; } = default!;
   #endregion
 
-  private Player player;
+  private Client client;
 
   public override async void _Ready() {
-    PlayerNameLabel.Text = player.Name;
+    PlayerNameLabel.Text = client.Name;
 
     if (MultiplayerManager.IsHost) {
       KickButton.Visible = true;
@@ -36,8 +36,8 @@ public partial class PlayerListItem : Control {
       KickButton.Visible = false;
     }
 
-    if (SteamClient.IsValid && ClientData.SteamId != null && player.SteamId != null) {
-      var avatar = await SteamUtils.GetAvatarTextureAsync(player.SteamId!.Value, AvatarSize.Medium);
+    if (SteamClient.IsValid && ClientData.SteamId != null && client.SteamId != null) {
+      var avatar = await SteamUtils.GetAvatarTextureAsync(client.SteamId!.Value, AvatarSize.Medium);
       
       if (avatar.IsFailed) {
         GD.Print(avatar);
@@ -49,6 +49,6 @@ public partial class PlayerListItem : Control {
   }
 
   private void OnKickButtonPressed() {
-    MultiplayerManager.KickPeer(player.PeerId);
+    MultiplayerManager.KickPeer(client.PeerId);
   }
 }

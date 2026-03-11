@@ -1,5 +1,5 @@
 using System;
-using Client;
+
 using Godot;
 using Steam;
 using Steamworks;
@@ -122,13 +122,13 @@ public partial class MultiplayerManager : Node {
   public static event Action<MultiplayerDisconnectReason>? CLIENT_Disconnected;
   public static event Action? CLIENT_ConnectedToServer;
   public static event Action? SERVER_CreatedServer;
-  public static event Action<PeerID>? SERVER_PlayerDisconnected;
+  public static event Action<PeerID>? SERVER_ClientDisconnected;
   #endregion
 
   #region Initialization
   private static void Initialize(MultiplayerPeer peer) {
     if (MultiplayerStatus != MultiplayerStatus.Disconnected) {
-      GD.PushWarning("MultiplayerManager: Resetting multiplayer connection");
+      GD.Print("MultiplayerManager: Resetting multiplayer connection");
       Disconnect(MultiplayerDisconnectReason.Error);
     }
 
@@ -140,7 +140,7 @@ public partial class MultiplayerManager : Node {
     };
     Instance.Multiplayer.MultiplayerPeer = peer;
 
-    GD.PushWarning($"----------- <multiplayer initialized {PeerId}> -----------");
+    GD.Print($"----------- <multiplayer initialized {PeerId}> -----------");
   }
 
   public static void Disconnect(MultiplayerDisconnectReason reason) {
@@ -202,9 +202,9 @@ public partial class MultiplayerManager : Node {
 
     // If the client disconnects, we update the player list.
     if (IsHost) {
-      GD.PushWarning($"<multiplayer> Client disconnected: {disconnectedPeerId}");
+      GD.Print($"<multiplayer> Client disconnected: {disconnectedPeerId}");
       // FIXME: properly implement player disconnection
-      SERVER_PlayerDisconnected?.Invoke(disconnectedPeerId);
+      SERVER_ClientDisconnected?.Invoke(disconnectedPeerId);
     }
   }
 

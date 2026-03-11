@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://chtlke803mbkf"]
+
+[ext_resource type="Script" uid="uid://c00pxdqlummci" path="res://common/multiplayer/NetStateManager.cs" id="1_lbpii"]
+
+[node name="NetStateManager" type="Node" unique_id=1004277497]
+script = ExtResource("1_lbpii")

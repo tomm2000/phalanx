@@ -5,8 +5,8 @@ using Chickensoft.Introspection;
 using ImGuiNET;
 using System.IO;
 using Steamworks;
-using Client.UI;
-using Client;
+
+
 using Tlib.NodeExt;
 
 [Meta(typeof(IAutoConnect))]
@@ -62,11 +62,13 @@ public partial class Main : Node {
   /// </summary>
   private void OnConnectedToServer() {
     var gameInstance = GameInstance.Instantiate(withServer: false);
+    // TODO: only switch scenes for player clients (host included if not headless)
     SwitchScene(gameInstance);
   }
 
   private void OnCreatedServer() {
     var gameInstance = GameInstance.Instantiate(withServer: true);
+    // TODO: only switch scenes for player clients (host included if not headless)
     SwitchScene(gameInstance);
   }
 
@@ -95,6 +97,7 @@ public partial class Main : Node {
   }
 
   public static void SwitchScene(Node scene) {
+    GD.Print($"Switching to scene: {scene.Name}");
     Instance.ActiveSceneContainer.QueueFreeChildren();
     Instance.ActiveSceneContainer.AddChild(scene, true);
   }

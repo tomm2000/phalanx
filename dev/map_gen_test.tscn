@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://dvxxll08cqous"]
+
+[ext_resource type="Script" uid="uid://dywtytxj1pxn4" path="res://dev/MapGenTest.cs" id="1_f4jwp"]
+
+[node name="MapGenTest" type="Node" unique_id=419918489]
+script = ExtResource("1_f4jwp")

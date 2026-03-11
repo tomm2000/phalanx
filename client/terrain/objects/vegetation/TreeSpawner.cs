@@ -4,10 +4,10 @@ using Chickensoft.Introspection;
 using System;
 using System.Collections.Generic;
 using Tlib;
-using Tlib.MathLib;
-using Tlib.RngLib;
+using Tlib.Math;
+using Tlib.Rng;
 
-namespace Client.Terrain;
+
 
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
 public partial class TreeSpawner : ObjectSpawner {

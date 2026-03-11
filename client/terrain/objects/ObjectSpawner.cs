@@ -3,7 +3,7 @@ using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
 using System;
 
-namespace Client.Terrain;
+
 
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
 public partial class ObjectSpawner : Node3D {

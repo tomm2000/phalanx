@@ -5,18 +5,16 @@ using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
 using ImGuiNET;
 using System.Collections.Generic;
-using Tlib.HexLib;
+using Tlib.Hex;
 using Tlib.NodeExt;
 using Tlib;
 
-namespace Client.Terrain;
+
 
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
 public partial class StandardTerrain : Node3D, IProvide<StandardTerrain> {
   public override void _Notification(int what) => this.Notify(what);
   public static readonly string ScenePath = "uid://bgu2ycrayqu6s";
-
-  [Dependency] private ClientEventBus ClientEventBus => this.DependOn<ClientEventBus>();
 
   StandardTerrain IProvide<StandardTerrain>.Value() => this;
 
@@ -31,8 +29,6 @@ public partial class StandardTerrain : Node3D, IProvide<StandardTerrain> {
   private List<ITerrainTile> _tiles { get; set; } = [];
   public IEnumerable<ITerrainTile> Tiles => _tiles;
 
-  public MapTileData? HoveredTile { get; private set; } = default!;
-  public MapTileData? SelectedTile { get; private set; } = default!;
   public DeferredQueueExecutor TerrainQueueExecutor { get; private set; } = default!;
 
   private TerrainShader activeShader = TerrainShader.Standard;
@@ -52,12 +48,9 @@ public partial class StandardTerrain : Node3D, IProvide<StandardTerrain> {
   }
 
   public void OnResolved() {
-    ClientEventBus.OnTileLeftClicked += (tile) => { SelectedTile = tile; };
-    ClientEventBus.OnTileHovered += (tile) => { HoveredTile = tile; };
+    this.Provide();
 
     TerrainQueueExecutor = new DeferredQueueExecutor(this, 2);
-
-    this.Provide();
   }
 
   public override void _Process(double delta) {
@@ -127,21 +120,21 @@ public partial class StandardTerrain : Node3D, IProvide<StandardTerrain> {
     }
     ImGui.Separator();
 
-    if (HoveredTile != null) {
-      ImGui.Text("Hovered Tile: ");
-      ImGui.SameLine();
-      ImGui.Text(HoveredTile?.ToString() ?? "None");
-    } else {
-      ImGui.Text("No Tile Hovered");
-    }
+    // if (HoveredTile != null) {
+    //   ImGui.Text("Hovered Tile: ");
+    //   ImGui.SameLine();
+    //   ImGui.Text(HoveredTile?.ToString() ?? "None");
+    // } else {
+    //   ImGui.Text("No Tile Hovered");
+    // }
 
-    if (SelectedTile != null) {
-      ImGui.Text("Selected Tile: ");
-      ImGui.SameLine();
-      ImGui.Text(SelectedTile?.ToString() ?? "None");
-    } else {
-      ImGui.Text("No Tile Selected");
-    }
+    // if (SelectedTile != null) {
+    //   ImGui.Text("Selected Tile: ");
+    //   ImGui.SameLine();
+    //   ImGui.Text(SelectedTile?.ToString() ?? "None");
+    // } else {
+    //   ImGui.Text("No Tile Selected");
+    // }
 
 
     ImGui.Separator();

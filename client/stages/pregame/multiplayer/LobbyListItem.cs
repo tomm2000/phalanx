@@ -6,7 +6,7 @@ using Godot;
 using Steamworks;
 using Steamworks.Data;
 
-namespace Client.UI;
+
 
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
 public partial class LobbyListItem : Control {

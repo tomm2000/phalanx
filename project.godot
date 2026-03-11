@@ -17,6 +17,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 config/name="Phalanx"
 run/main_scene="uid://ct7ufhj47seep"
 config/features=PackedStringArray("4.6", "C#", "Forward Plus")
+boot_splash/show_image=false
 config/icon="res://icon.svg"
 
 [autoload]
