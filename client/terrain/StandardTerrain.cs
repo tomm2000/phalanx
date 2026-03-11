@@ -29,7 +29,7 @@ public partial class StandardTerrain : Node3D, IProvide<StandardTerrain> {
   private List<ITerrainTile> _tiles { get; set; } = [];
   public IEnumerable<ITerrainTile> Tiles => _tiles;
 
-  public DeferredQueueExecutor TerrainQueueExecutor { get; private set; } = default!;
+  public DeferredQueueExecutor MeshApplicationQueue { get; private set; } = default!;
 
   private TerrainShader activeShader = TerrainShader.Standard;
   public TerrainShader ActiveShader {
@@ -47,10 +47,13 @@ public partial class StandardTerrain : Node3D, IProvide<StandardTerrain> {
     }
   }
 
+  #region Events
+  #endregion
+
   public void OnResolved() {
     this.Provide();
 
-    TerrainQueueExecutor = new DeferredQueueExecutor(this, 2);
+    MeshApplicationQueue = new DeferredQueueExecutor(this, 2);
   }
 
   public override void _Process(double delta) {
@@ -59,6 +62,7 @@ public partial class StandardTerrain : Node3D, IProvide<StandardTerrain> {
 
   public Task GenerateTerrain(MapData map) {
     TileContainer.QueueFreeChildren();
+    MeshApplicationQueue.Clear();
     _tiles.Clear();
 
     foreach (var tile in map.Tiles) {
@@ -71,21 +75,15 @@ public partial class StandardTerrain : Node3D, IProvide<StandardTerrain> {
       Parallel.ForEach(_tiles, tileInstance => {
         var neighbors = map.NeighborsWithDirections(tileInstance.TileData.coords);
 
-        tileInstance.GenerateSurface(neighbors);
+        var mesh = tileInstance.GenerateSurface(neighbors);
+
+        MeshApplicationQueue.Add(() => {
+          tileInstance.ApplyMesh(mesh);
+        });
       });
     });
 
-    // var sw = new System.Diagnostics.Stopwatch();
-    // sw.Start();
-    // foreach (var tileInstance in _tiles) {
-    //   var neighbors = map.NeighborsWithDirections(tileInstance.TileData.coords);
-    //   tileInstance.GenerateSurface(neighbors);
-    // }
-    // sw.Stop();
-
-    // GD.Print($"Terrain generation took {sw.ElapsedMilliseconds}ms");
-
-    return new Task(() => { });
+    return task;
   }
 
   public HexCoords GetCoords(Vector3 position) {
@@ -118,24 +116,6 @@ public partial class StandardTerrain : Node3D, IProvide<StandardTerrain> {
       }
       ImGui.EndCombo();
     }
-    ImGui.Separator();
-
-    // if (HoveredTile != null) {
-    //   ImGui.Text("Hovered Tile: ");
-    //   ImGui.SameLine();
-    //   ImGui.Text(HoveredTile?.ToString() ?? "None");
-    // } else {
-    //   ImGui.Text("No Tile Hovered");
-    // }
-
-    // if (SelectedTile != null) {
-    //   ImGui.Text("Selected Tile: ");
-    //   ImGui.SameLine();
-    //   ImGui.Text(SelectedTile?.ToString() ?? "None");
-    // } else {
-    //   ImGui.Text("No Tile Selected");
-    // }
-
 
     ImGui.Separator();
     ImGui.End();

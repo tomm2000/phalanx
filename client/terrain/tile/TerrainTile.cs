@@ -56,7 +56,6 @@ public partial class TerrainTile : Node3D, ITerrainTile {
   [Node] MeshInstance3D MeshInstance { get; set; } = default!;
   [Node] CollisionShape3D CollisionShape { get; set; } = default!;
   [Node] Area3D CollisionArea { get; set; } = default!;
-  [Dependency] StandardTerrain Terrain => this.DependOn<StandardTerrain>();
   #endregion
 
   public void OnResolved() {
@@ -87,7 +86,7 @@ public partial class TerrainTile : Node3D, ITerrainTile {
   #endregion
 
   #region Mesh Generation
-  public void GenerateSurface(
+  public Mesh GenerateSurface(
     IEnumerable<(HexDirection, MapTileData)> neighbors
   ) {
     var strips = Constants.TERRAIN_MESH_RESOLUTION;
@@ -148,11 +147,13 @@ public partial class TerrainTile : Node3D, ITerrainTile {
     // ----------- 4. generate the mesh --------------------
     var mesh = surfaceTool.Commit();
 
-    Terrain.TerrainQueueExecutor.Add(() => {
-      MeshInstance.Mesh = mesh;
-      GenerateInputMesh();
-      OnTileReady?.Invoke();
-    });
+    return mesh;
+  }
+
+  public void ApplyMesh(Mesh mesh, bool generateInputMesh = true) {
+    MeshInstance.Mesh = mesh;
+    if (generateInputMesh) { GenerateInputMesh(); }
+    OnTileReady?.Invoke();
   }
 
   public TerrainVertexData ApplyVertexPipeline(

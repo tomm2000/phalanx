@@ -38,8 +38,9 @@ public interface ITerrainTile {
   public MapTileData TileData { get; }
   public IEnumerable<TerrainVertexData> Vertices { get; }
   public event Action OnTileReady;
-  public void GenerateSurface(
+  public Mesh GenerateSurface(
     IEnumerable<(HexDirection, MapTileData)> neighbors
   );
+  public void ApplyMesh(Mesh mesh, bool generateInputMesh = true);
   public void SetShader(TerrainShader shader);
 }

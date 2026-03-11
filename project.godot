@@ -39,6 +39,7 @@ folder_colors={
 "res://addons/": "gray",
 "res://client/": "green",
 "res://common/": "purple",
+"res://database/": "pink",
 "res://debug/": "gray",
 "res://exports/": "gray",
 "res://garbage/": "gray",
