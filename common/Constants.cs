@@ -1,6 +1,8 @@
 global using PeerID = long;
 global using SteamID = ulong;
 global using ClientID = string;
+global using DatabaseEntryString = string;
+global using UnitInstanceID = string;
 
 public static partial class Constants {
   // Terrain

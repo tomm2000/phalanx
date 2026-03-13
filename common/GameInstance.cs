@@ -126,7 +126,7 @@ public partial class GameInstance :
     }
   }
 
-  public Result<ClientInterface> GetClientInterface(string playerUID) {
+  public Result<ClientInterface> GetClientInterface(ClientID playerUID) {
     foreach (var clientInterface in ClientInterfaces) {
       if (clientInterface.Client.UID == playerUID) {
         return clientInterface;

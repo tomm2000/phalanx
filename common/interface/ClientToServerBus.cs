@@ -18,6 +18,7 @@ public partial class ClientToServerBus : Node {
   [Dependency] LobbyManager LobbyManager => this.DependOn<LobbyManager>();
   [Dependency] ClientManager ClientManager => this.DependOn<ClientManager>();
   [Dependency] ScenarioManager ScenarioManager => this.DependOn<ScenarioManager>();
+  [Dependency] UnitManager UnitManager => this.DependOn<UnitManager>();
   #endregion
 
   #region Validation
@@ -105,6 +106,17 @@ public partial class ClientToServerBus : Node {
 
     // FIXME
     // ScenarioManager.SelectedScenarioId.SERVER_SetValue(scenarioId);
+  }
+  #endregion
+
+  #region Units
+  public void RequestClientUnitsSync() => RpcId(1, nameof(SERVER_RequestClientUnitsSync));
+
+  [Rpc(mode: MultiplayerApi.RpcMode.AnyPeer, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+  private void SERVER_RequestClientUnitsSync() {
+    if (!ValidateRequest(out Client client)) return;
+
+    UnitManager.SERVER_SyncClient(client.UID);
   }
   #endregion
 }
