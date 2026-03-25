@@ -11,6 +11,8 @@ public partial class MenuLoadingScreen : Control {
   public override void _Notification(int what) => this.Notify(what);
   public static readonly string ScenePath = "uid://ds17brhc3vm3e";
 
+  [Dependency] public PlayerClientController PlayerClientController => this.DependOn<PlayerClientController>();
+
   public static MenuLoadingScreen Instantiate(
     string text,
     string buttonText = "OK",
@@ -52,9 +54,9 @@ public partial class MenuLoadingScreen : Control {
   }
 
   private void GotoNextScene() {
-    Main.SwitchScene(nextScene);
+    PlayerClientController.SwitchScene(nextScene);
 
-    GD.Print("Switching to scene: ", nextScene);
+    Logger.Debug($"Switching to scene: {nextScene}");
 
     // if (nextScene == MainMenu.ScenePath) {
       // Main.Reset();

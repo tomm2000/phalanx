@@ -15,7 +15,7 @@ public partial class UnitManager : Node {
   public override void _Notification(int what) => this.Notify(what);
   
   #region Nodes
-  [Dependency] GameInstance GameInstance => this.DependOn<GameInstance>();
+  [Dependency] Main Main => this.DependOn<Main>();
   [Dependency] ClientManager ClientManager => this.DependOn<ClientManager>();
   [Dependency] NetStateManager NetStateManager => this.DependOn<NetStateManager>();
   [Dependency] NetMessageManager NetEventManager => this.DependOn<NetMessageManager>();
@@ -40,31 +40,31 @@ public partial class UnitManager : Node {
 
   #region Lifecycle
   public void OnResolved() {
-    // ==================================
-    var requestUnitDeploy = new ClientToServerMessage<UnitInstanceID>("UnitDeploy", "test-client-id");
-    requestUnitDeploy.LinkManager(NetEventManager);
+    // // ==================================
+    // var requestUnitDeploy = new ClientToServerMessage<UnitInstanceID>("UnitDeploy", "test-client-id");
+    // requestUnitDeploy.LinkManager(NetEventManager);
 
-    // on the client
-    requestUnitDeploy.CLIENT_Send("test-unit-id");
+    // // on the client
+    // requestUnitDeploy.CLIENT_Send("test-unit-id");
 
-    // on the server
-    requestUnitDeploy.SERVER_OnMessage += (unitID) => {
-      // deploy the unit on the server
-    };
+    // // on the server
+    // requestUnitDeploy.SERVER_OnMessage += (unitID, senderClientID, senderPeerID) => {
+    //   // deploy the unit on the server
+    // };
 
-    // ==================================
+    // // ==================================
 
-    var unitDeployed = new ServerToClientMessage<UnitInstanceID>("UnitDeployed", "test-client-id");
-    unitDeployed.Register(NetEventManager);
+    // var unitDeployed = new ServerToClientMessage<UnitInstanceID>("UnitDeployed", "test-client-id");
+    // unitDeployed.LinkManager(NetEventManager);
 
-    // on the server
-    unitDeployed.SERVER_Send("test-unit-id");
+    // // on the server
+    // unitDeployed.SERVER_Send("test-unit-id");
 
-    // on the client
-    unitDeployed.CLIENT_OnMessage += (unitID) => {
-      // show the unit on the client
-    };
-    // ==================================
+    // // on the client
+    // unitDeployed.CLIENT_OnMessage += (unitID) => {
+    //   // show the unit on the client
+    // };
+    // // ==================================
   }
   #endregion
 
@@ -75,10 +75,11 @@ public partial class UnitManager : Node {
     }
   }
   private void TryGetClientInterface(ClientID clientID, out ClientInterface clientInterface) {
-    if (!GameInstance.GetClientInterface(clientID).IsSuccess) {
+    if (Main.Instance.GetClientInterface(clientID) is ClientInterface ci) {
+      clientInterface = ci;
+    } else {
       throw new ArgumentException($"Failed to get client interface for client {clientID}", nameof(clientID));
     }
-    clientInterface = GameInstance.GetClientInterface(clientID).Value;
   }
 
   private void TryGetScenario(out Scenario scenario) {

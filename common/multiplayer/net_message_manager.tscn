@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://hjc2ajjr3h2k"]
+
+[ext_resource type="Script" uid="uid://u7idlgd62yrw" path="res://common/multiplayer/NetMessageManager.cs" id="1_vcpyq"]
+
+[node name="NetMessageManager" type="Node" unique_id=2026306897]
+script = ExtResource("1_vcpyq")

@@ -1,10 +1,14 @@
-[gd_scene load_steps=3 format=3 uid="uid://nss3qj5556mk"]
+[gd_scene format=3 uid="uid://nss3qj5556mk"]
 
 [ext_resource type="Script" uid="uid://c1nl81o7ose4v" path="res://client/PlayerClientController.cs" id="1_bfyel"]
 [ext_resource type="PackedScene" uid="uid://dpcx02yegoorx" path="res://client/client_event_bus.tscn" id="2_5vbhn"]
+[ext_resource type="PackedScene" uid="uid://dwjcl253px63k" path="res://client/stages/pregame/main_menu.tscn" id="3_ams6s"]
 
-[node name="PlayerClientController" type="Node"]
+[node name="PlayerClientController" type="Node" unique_id=1912726186]
 script = ExtResource("1_bfyel")
 
-[node name="ClientEventBus" parent="." instance=ExtResource("2_5vbhn")]
+[node name="ClientEventBus" parent="." unique_id=264076599 instance=ExtResource("2_5vbhn")]
+unique_name_in_owner = true
+
+[node name="MainMenu" parent="." unique_id=1524368060 instance=ExtResource("3_ams6s")]
 unique_name_in_owner = true

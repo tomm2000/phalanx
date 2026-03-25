@@ -25,12 +25,12 @@ public partial class MultiplayerLobbyMenu : Control {
   [Dependency] public LobbyManager LobbyManager => this.DependOn<LobbyManager>();
   [Dependency] public ClientToServerBus ClientToServerBus => this.DependOn<ClientToServerBus>();
   [Dependency] public ScenarioManager ScenarioManager => this.DependOn<ScenarioManager>();
-  [Dependency] public GameInstance GameInstance => this.DependOn<GameInstance>();
+  [Dependency] public PlayerClientController PlayerClientController => this.DependOn<PlayerClientController>();
 
   public void OnResolved() {
     ClientManager.ClientListUpdated += OnClientListUpdated;
-    MultiplayerManager.CLIENT_Disconnected += ReturnToMultiplayerMenu;
     LobbyManager.PlayerReadyStatuses.OnValueChanged += UpdateStartButton;
+    MultiplayerManager.Disconnected += ReturnToMultiplayerMenu;
 
     OnClientListUpdated();
 
@@ -44,7 +44,8 @@ public partial class MultiplayerLobbyMenu : Control {
 
   public override void _ExitTree() {
     ClientManager.ClientListUpdated -= OnClientListUpdated;
-    MultiplayerManager.CLIENT_Disconnected -= ReturnToMultiplayerMenu;
+    LobbyManager.PlayerReadyStatuses.OnValueChanged -= UpdateStartButton;
+    MultiplayerManager.Disconnected -= ReturnToMultiplayerMenu;
   }
 
   private void OnClientListUpdated() {
@@ -60,11 +61,11 @@ public partial class MultiplayerLobbyMenu : Control {
     UpdateStartButton();
   }
 
-  private void OnExitLobbyButtonPressed() => MultiplayerManager.Disconnect(MultiplayerDisconnectReason.None);
+  private void OnExitLobbyButtonPressed() => MultiplayerManager.Disconnect(MultiplayerDisconnectReason.UserRequested);
 
   private void ReturnToMultiplayerMenu(MultiplayerDisconnectReason reason) {
-    if (reason == MultiplayerDisconnectReason.None) {
-      Main.SwitchScene(MultiplayerMenu.ScenePath);
+    if (reason == MultiplayerDisconnectReason.UserRequested) {
+      PlayerClientController.SwitchScene(MultiplayerMenu.ScenePath);
 
     } else if (reason == MultiplayerDisconnectReason.ServerDisconnected) {
       var loadingScreen = MenuLoadingScreen.Instantiate(
@@ -73,7 +74,7 @@ public partial class MultiplayerLobbyMenu : Control {
       timeout: 0,
       nextScene: MultiplayerMenu.ScenePath
       );
-      Main.SwitchScene(loadingScreen);
+      PlayerClientController.SwitchScene(loadingScreen);
     } else if (reason == MultiplayerDisconnectReason.Error) {
       var loadingScreen = MenuLoadingScreen.Instantiate(
       text: "An error occurred.",
@@ -81,7 +82,7 @@ public partial class MultiplayerLobbyMenu : Control {
       timeout: 0,
       nextScene: MultiplayerMenu.ScenePath
       );
-      Main.SwitchScene(loadingScreen);
+      PlayerClientController.SwitchScene(loadingScreen);
     } else {
       throw new ArgumentOutOfRangeException(nameof(reason), reason, null);
     }
@@ -89,7 +90,7 @@ public partial class MultiplayerLobbyMenu : Control {
 
   #region Start/Ready
   private void OnReadyButtonPressed() {
-    bool currentReady = LobbyManager.PlayerReadyStatuses.GetValueOrDefault(ClientInterface.Client.UID, false);
+    bool currentReady = LobbyManager.PlayerReadyStatuses.GetValueOrDefault(ClientInterface.ClientID, false);
     ClientToServerBus.RequestReadyStatusChange(!currentReady);
   }
 

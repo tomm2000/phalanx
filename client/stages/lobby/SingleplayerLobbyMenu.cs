@@ -14,11 +14,11 @@ public partial class SingleplayerLobbyMenu : Control {
   public override void _Notification(int what) => this.Notify(what);
   public static readonly string ScenePath = "uid://dukh8gnwwqll6";
   
-  [Dependency] GameInstance GameInstance => this.DependOn<GameInstance>();
   [Dependency] ClientInterface ClientInterface => this.DependOn<ClientInterface>();
   [Dependency] LobbyManager LobbyManager => this.DependOn<LobbyManager>();
   [Dependency] ClientManager ClientManager => this.DependOn<ClientManager>();
   [Dependency] public ClientToServerBus ClientToServerBus => this.DependOn<ClientToServerBus>();
+  [Dependency] public PlayerClientController PlayerClientController => this.DependOn<PlayerClientController>();
 
   #region Properties
   private bool FirstFramePassed { get; set; } = false;
@@ -51,6 +51,6 @@ public partial class SingleplayerLobbyMenu : Control {
   }
 
   private void OnQuitToMainMenuButtonPressed() {
-    Main.SwitchScene(MainMenu.ScenePath);
+    PlayerClientController.SwitchScene(MainMenu.ScenePath);
   }
 }

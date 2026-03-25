@@ -14,3 +14,10 @@ public class DatabaseStateData {
   [Key(2)] public string? SelectedMapID { get; set; } = null;
   [Key(3)] public List<string> ActiveDomains { get; set; } = [];
 }
+
+public enum GameStage {
+  Disconnected,
+  Lobby,
+  Deployment,
+  Battle
+}

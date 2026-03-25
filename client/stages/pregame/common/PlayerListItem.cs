@@ -40,7 +40,7 @@ public partial class PlayerListItem : Control {
       var avatar = await SteamUtils.GetAvatarTextureAsync(client.SteamId!.Value, AvatarSize.Medium);
       
       if (avatar.IsFailed) {
-        GD.Print(avatar);
+        Logger.Warn($"Failed to get avatar for client: {client.Name}");
         return;
       }
       AvatarTexture.Texture = avatar.Value;

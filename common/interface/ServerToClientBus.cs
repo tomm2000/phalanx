@@ -28,7 +28,9 @@ public partial class ServerToClientBus : Node {
       return;
     }
 
-    RpcId(ClientInterface.Client.PeerId, nameof(RPC_SyncClientUnits), units.Serialize());
+    // FIXME
+    GD.PrintErr("SERVER_SyncClientUnits is currently not working. This needs to be fixed before unit syncing can work.");
+    // RpcId(ClientInterface.Client.PeerId, nameof(RPC_SyncClientUnits), units.Serialize());
   }
 
   [Rpc(mode: MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
@@ -44,7 +46,9 @@ public partial class ServerToClientBus : Node {
       return;
     }
 
-    RpcId(ClientInterface.Client.PeerId, nameof(RPC_UnitDeployed), unitInstance.Serialize());
+    // FIXME
+    GD.PrintErr("SERVER_UnitDeployed is currently not working. This needs to be fixed before unit deployment can work.");
+    // RpcId(ClientInterface.Client.PeerId, nameof(RPC_UnitDeployed), unitInstance.Serialize());
   }  
 
   [Rpc(mode: MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]

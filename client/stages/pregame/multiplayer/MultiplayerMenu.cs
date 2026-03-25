@@ -21,6 +21,8 @@ public partial class MultiplayerMenu : Control {
   [Node] private LineEdit CreateIpLobbyInput { get; set; } = default!;
   [Node] private LineEdit JoinIpLobbyInput { get; set; } = default!;
   [Node] private Control LobbyList { get; set; } = default!;
+  
+  [Dependency] public PlayerClientController PlayerClientController => this.DependOn<PlayerClientController>();
 
   public override void _Ready() {
     if (!SteamClient.IsValid) {
@@ -77,7 +79,7 @@ public partial class MultiplayerMenu : Control {
 
 
   private void OnQuitToMainMenuButtonPressed() {
-    Main.SwitchScene(MainMenu.ScenePath);
+    PlayerClientController.SwitchScene(MainMenu.ScenePath);
   }
 
   private async void UpdateLobbyList() {
@@ -94,7 +96,7 @@ public partial class MultiplayerMenu : Control {
     var lobbies = await query.RequestAsync();
 
     if(lobbies == null) {
-      GD.Print("<steam> No lobbies found");
+      Logger.Warn("<steam> No lobbies found");
       return;
     }
 

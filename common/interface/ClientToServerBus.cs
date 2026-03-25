@@ -21,13 +21,22 @@ public partial class ClientToServerBus : Node {
   [Dependency] UnitManager UnitManager => this.DependOn<UnitManager>();
   #endregion
 
+  #region Messages
+  #endregion
+
+  #region Lifecycle
+  public void OnResolved() {
+
+  }
+  #endregion
+
   #region Validation
   private bool ValidateRequest(out Client outClient) {
     outClient = default!;
     if (!MultiplayerManager.IsHost) return false;
 
     PeerID sender = MultiplayerManager.RpcSenderId();
-    ClientID playerId = ClientInterface.Client.UID;
+    ClientID playerId = ClientInterface.ClientID;
     Client client = ClientManager.GetByPeerID(sender).Value;
 
     if (playerId != client.UID) {
@@ -89,7 +98,7 @@ public partial class ClientToServerBus : Node {
     // TODO: get the map from the scenario that is loaded
     // MapManager.SelectedMap.SERVER_SetValue(map);
 
-    GD.Print($"Map change requested for map ID: {mapId}");
+    Logger.Debug($"Map change requested for map ID: {mapId}");
 
     ScenarioManager.SelectedMapID.SERVER_SetValue(mapId);
   }

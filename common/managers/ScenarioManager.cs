@@ -11,8 +11,8 @@ public partial class ScenarioManager : Node {
   public override void _Notification(int what) => this.Notify(what);
   
   #region Nodes
-  [Dependency] GameInstance GameInstance => this.DependOn<GameInstance>();
   [Dependency] NetStateManager NetStateManager => this.DependOn<NetStateManager>();
+  [Dependency] Main Main => this.DependOn<Main>();
   #endregion
 
   #region Properties
@@ -29,9 +29,7 @@ public partial class ScenarioManager : Node {
     SelectedScenario.LinkManager(NetStateManager);
 
     // FIXME: temporary solution to load a default scenario on game start.
-    GameInstance.OnFirstFrameProcessedSafe(() => {
-      LoadScenario("phalanx:scenario.standard");
-    });
+    Main.SERVER_NetworkingReady += () => LoadScenario("phalanx:scenario.standard");
   }
 
   public MapData GetSelectedMap() {
@@ -47,7 +45,7 @@ public partial class ScenarioManager : Node {
   public void LoadScenario(string scenarioId) {
     if (!MultiplayerManager.IsHost) return; // Only the host should load scenarios, then sync to clients via NetVars
 
-    GD.Print($"-------- Loading scenario with ID: {scenarioId}");
+    Logger.Debug($"Loading scenario with ID: {scenarioId}");
 
     var scenarioJson = GameDatabase.LoadDataEntry(scenarioId) ?? throw new Exception($"Failed to find scenario entry for scenario ID: {scenarioId}");
     var scenarioData = JsonSerializer.Deserialize<ScenarioJson>(scenarioJson) ?? throw new Exception($"Failed to parse scenario JSON for scenario ID: {scenarioId}");
@@ -72,12 +70,12 @@ public partial class ScenarioManager : Node {
     var maps = new Dictionary<string, MapData>();
 
     foreach (var mapId in mapListJson) {
-      GD.Print($"Loading map with ID: {mapId}");
+      Logger.Debug($"Loading map with ID: {mapId}");
       var mapJson = GameDatabase.LoadDataEntry(mapId) ?? throw new Exception($"Failed to find map entry for map ID: {mapId}");
       var mapDataResult = MapData.FromJson(mapJson);
       var mapData = mapDataResult;
 
-      GD.Print($"Loaded map with ID '{mapId}': {mapData.mapName} - {mapData.mapDescription}");
+      Logger.Debug($"Loaded map with ID '{mapId}': {mapData.mapName} - {mapData.mapDescription}");
       maps[mapData.mapId] = mapData;
     }
 

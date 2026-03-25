@@ -7,7 +7,6 @@ using Chickensoft.Introspection;
 using FluentResults;
 using Godot;
 using Steamworks;
-using Tlib.NodeExt;
 using Tlib.Serialization;
 
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
@@ -15,22 +14,21 @@ public partial class ClientManager : Node {
   public override void _Notification(int what) => this.Notify(what);
 
   #region Nodes
-  [Dependency] GameInstance GameInstance => this.DependOn<GameInstance>();
+  [Dependency] Main Main => this.DependOn<Main>();
   #endregion
 
   #region Lifecycle
   public void OnResolved() {
     MultiplayerManager.SERVER_ClientDisconnected += OnClientDisconnected;
 
-    // FIXME: temporary solution to register the client
-    GameInstance.OnFirstFrameProcessedSafe(() => {
-      RegisterClient();
-    });
-  }
+    Logger.Dev("ClientManager resolved, registering client...");
 
+    MultiplayerManager.SERVER_CreatedServer += RegisterClient;
+    MultiplayerManager.CLIENT_ConnectedToServer += RegisterClient;
 
-  public override void _ExitTree() {
-    MultiplayerManager.SERVER_ClientDisconnected -= OnClientDisconnected;
+    MultiplayerManager.Disconnected += (_) => {
+      clients.Clear();
+    };
   }
   #endregion
 
@@ -39,6 +37,8 @@ public partial class ClientManager : Node {
   /// Called when a peer (either client or host) is connected to the server.
   /// </summary>
   private void RegisterClient() {
+    Logger.Dev("Registering client...");
+
     if (SteamClient.IsValid) {
       var steamId = SteamClient.SteamId;
       var name = ClientData.Username;
@@ -121,7 +121,7 @@ public partial class ClientManager : Node {
       // --------- if the client is not found, create a new one
       if (client.PeerId != MultiplayerManager.PeerId) {
         // Only create a client for remote peers. For local clients it already gets created by registration result.
-        GameInstance.AttachClient(client);
+        Main.Instance.SERVER_AttachClient(client);
       }
 
       Rpc(nameof(CLIENT_ClientConnected), client.Serialize());
@@ -169,6 +169,8 @@ public partial class ClientManager : Node {
     }
   }
 
+  public Action<Client>? RegistrationSuccess;
+
   [Rpc(
     mode: MultiplayerApi.RpcMode.Authority,
     CallLocal = true,
@@ -182,20 +184,14 @@ public partial class ClientManager : Node {
   ) {
     if (success) {
       var currentClient = clientData.Deserialize<Client?>() ?? throw new InvalidOperationException($"[{nameof(CLIENT_RegistrationResult)}] Client data is null");
-
-      var clientInterface = GameInstance.AttachClient(currentClient);
-      // Only on the client (or the host if they are also a client, or if the client is a bot), attach the client controller to the client interface
-      clientInterface.AttachClientController(currentClient);
-
       var clientList = clientsData.Deserialize<List<Client>>() ?? throw new InvalidOperationException($"[{nameof(CLIENT_RegistrationResult)}] Clients data is null");
-
-      GD.Print($"Received client list: {clientList.Count} clients");
 
       clients.Clear();
       foreach (var client in clientList) {
         clients.Add(client.UID, client);
       }
       ClientListUpdated?.Invoke();
+      RegistrationSuccess?.Invoke(currentClient);
 
     } else {
       GD.PushError($"Failed to register client: {message}");
@@ -244,10 +240,10 @@ public partial class ClientManager : Node {
 
     var clientValue = client.Value;
 
-    GameInstance.DetachClient(clientValue);
+    Main.Instance.SERVER_DetachClient(clientValue);
     Rpc(nameof(CLIENT_ClientQuit), clientValue.Serialize());
 
-    GD.Print($"Client quit: {clientValue.Name} ({clientValue.UID})");
+    Logger.Info($"Client quit: {clientValue.Name} ({clientValue.UID})");
   }
   #endregion
 

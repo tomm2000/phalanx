@@ -1,21 +1,46 @@
-[gd_scene load_steps=5 format=3 uid="uid://ct7ufhj47seep"]
+[gd_scene format=3 uid="uid://ct7ufhj47seep"]
 
 [ext_resource type="Script" uid="uid://crh2mjyyjhbbd" path="res://Main.cs" id="1_ig7tw"]
 [ext_resource type="PackedScene" uid="uid://joo2g4y1psu7" path="res://common/multiplayer/multiplayer_manager.tscn" id="2_h2yge"]
-[ext_resource type="PackedScene" uid="uid://dwjcl253px63k" path="res://client/stages/pregame/main_menu.tscn" id="3_h2yge"]
 [ext_resource type="PackedScene" uid="uid://vm8lg46yfki1" path="res://client/stages/common/ui/menus/settings_menu.tscn" id="4_1bvp3"]
+[ext_resource type="PackedScene" uid="uid://b45pi6s6v775p" path="res://common/managers/client_manager.tscn" id="5_kek77"]
+[ext_resource type="PackedScene" uid="uid://dh8aiswoyx4os" path="res://common/managers/scenario_manager.tscn" id="6_4c57u"]
+[ext_resource type="PackedScene" uid="uid://hjc2ajjr3h2k" path="res://common/multiplayer/net_message_manager.tscn" id="6_efxa6"]
+[ext_resource type="PackedScene" uid="uid://8w3re4i78pyq" path="res://common/managers/lobby_manager.tscn" id="7_efxa6"]
+[ext_resource type="PackedScene" uid="uid://chtlke803mbkf" path="res://common/multiplayer/net_state_manager.tscn" id="8_dg77c"]
+[ext_resource type="PackedScene" uid="uid://d3e71v0xiacc4" path="res://common/managers/unit_manager.tscn" id="9_ycdy4"]
+[ext_resource type="PackedScene" uid="uid://cw1g3y53f7ocr" path="res://server/server_manager.tscn" id="10_4c57u"]
 
-[node name="Main" type="Node"]
+[node name="Main" type="Node" unique_id=2144324129]
 script = ExtResource("1_ig7tw")
 
-[node name="MultiplayerManager" parent="." instance=ExtResource("2_h2yge")]
+[node name="MultiplayerManager" parent="." unique_id=361939051 instance=ExtResource("2_h2yge")]
 
-[node name="ActiveSceneContainer" type="Node" parent="."]
-unique_name_in_owner = true
-
-[node name="MainMenu" parent="ActiveSceneContainer" instance=ExtResource("3_h2yge")]
-
-[node name="SettingsMenu" parent="." instance=ExtResource("4_1bvp3")]
+[node name="SettingsMenu" parent="." unique_id=423109821 instance=ExtResource("4_1bvp3")]
 unique_name_in_owner = true
 process_mode = 4
 visible = false
+
+[node name="ClientManager" parent="." unique_id=151200849 instance=ExtResource("5_kek77")]
+unique_name_in_owner = true
+
+[node name="NetStateManager" parent="." unique_id=1004277497 instance=ExtResource("8_dg77c")]
+unique_name_in_owner = true
+
+[node name="NetMessageManager" parent="." unique_id=2026306897 instance=ExtResource("6_efxa6")]
+unique_name_in_owner = true
+
+[node name="ScenarioManager" parent="." unique_id=934958911 instance=ExtResource("6_4c57u")]
+unique_name_in_owner = true
+
+[node name="LobbyManager" parent="." unique_id=2108877288 instance=ExtResource("7_efxa6")]
+unique_name_in_owner = true
+
+[node name="UnitManager" parent="." unique_id=1730201812 instance=ExtResource("9_ycdy4")]
+unique_name_in_owner = true
+
+[node name="ServerManager" parent="." unique_id=1070344852 instance=ExtResource("10_4c57u")]
+unique_name_in_owner = true
+
+[node name="Clients" type="Node" parent="." unique_id=289007741]
+unique_name_in_owner = true

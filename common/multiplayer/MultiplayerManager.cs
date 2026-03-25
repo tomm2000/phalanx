@@ -13,7 +13,7 @@ public enum MultiplayerStatus {
 }
 
 public enum MultiplayerDisconnectReason {
-  None,
+  UserRequested,
   ServerDisconnected,
   Error,
 }
@@ -119,7 +119,7 @@ public partial class MultiplayerManager : Node {
     Peer.DisconnectPeer((int) peerId);
   }
   
-  public static event Action<MultiplayerDisconnectReason>? CLIENT_Disconnected;
+  public static event Action<MultiplayerDisconnectReason>? Disconnected;
   public static event Action? CLIENT_ConnectedToServer;
   public static event Action? SERVER_CreatedServer;
   public static event Action<PeerID>? SERVER_ClientDisconnected;
@@ -128,7 +128,7 @@ public partial class MultiplayerManager : Node {
   #region Initialization
   private static void Initialize(MultiplayerPeer peer) {
     if (MultiplayerStatus != MultiplayerStatus.Disconnected) {
-      GD.Print("MultiplayerManager: Resetting multiplayer connection");
+      Logger.Debug("Resetting multiplayer connection");
       Disconnect(MultiplayerDisconnectReason.Error);
     }
 
@@ -140,7 +140,7 @@ public partial class MultiplayerManager : Node {
     };
     Instance.Multiplayer.MultiplayerPeer = peer;
 
-    GD.Print($"----------- <multiplayer initialized {PeerId}> -----------");
+    Logger.Info($"Multiplayer initialized with peer ID: {PeerId} and status: {MultiplayerStatus}");
   }
 
   public static void Disconnect(MultiplayerDisconnectReason reason) {
@@ -161,7 +161,7 @@ public partial class MultiplayerManager : Node {
     
     Instance.Multiplayer.MultiplayerPeer = null;
     
-    CLIENT_Disconnected?.Invoke(reason);
+    Disconnected?.Invoke(reason);
   }
   #endregion
 
@@ -202,7 +202,7 @@ public partial class MultiplayerManager : Node {
 
     // If the client disconnects, we update the player list.
     if (IsHost) {
-      GD.Print($"<multiplayer> Client disconnected: {disconnectedPeerId}");
+      Logger.Info($"<multiplayer> Client disconnected: {disconnectedPeerId}");
       // FIXME: properly implement player disconnection
       SERVER_ClientDisconnected?.Invoke(disconnectedPeerId);
     }

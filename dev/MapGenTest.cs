@@ -6,7 +6,7 @@ public partial class MapGenTest : Node {
   public override void _Ready() {
     var map = DevMap.GenerateMap(width: 19, height: 19, seed: 1);
 
-    GD.Print("map generated with id: ", map.mapId);
+    Logger.Dev($"Map generated with ID: {map.mapId}");
 
     var json = map.ToJson();
 
@@ -15,13 +15,6 @@ public partial class MapGenTest : Node {
     file.StoreString(json.ToJsonString());
 
     // close game
-    GetTree().Quit();
-
-    // var gameDatabase = new GameDatabase();
-    // gameDatabase.LoadDomain("phalanx");
-    // GD.Print(gameDatabase.DebugString());
-    // GetTree().Quit();
-
     GetTree().Quit();
   }
 }

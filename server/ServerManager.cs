@@ -10,7 +10,6 @@ public partial class ServerManager : Node {
 	public override void _Notification(int what) => this.Notify(what);
 	public static readonly string ScenePath = "uid://cw1g3y53f7ocr";
 
-  [Dependency] private GameInstance GameInstance => this.DependOn<GameInstance>();
 	
 	public static ServerManager Instantiate() {
     var scene = ResourceLoader.Load<PackedScene>(ScenePath);

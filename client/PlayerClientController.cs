@@ -18,7 +18,6 @@ public partial class PlayerClientController :
   PlayerClientController IProvide<PlayerClientController>.Value() => this;
   
   #region Nodes
-  [Dependency] GameInstance GameInstance => this.DependOn<GameInstance>();
   #endregion
 
   public static PlayerClientController Instantiate() {
@@ -29,11 +28,16 @@ public partial class PlayerClientController :
 
 	private Node ActiveScene { get; set; } = default!;
 
-  public override void OnResolved() {
-    base.OnResolved();
+  public override void _Ready() {
+    base._Ready();
     this.Provide();
 
-    OnGameStageChanged(GameStage.Lobby, GameInstance.LobbyManager.CurrentGameStage.Value);
+    ActiveScene = GetNode<MainMenu>("%MainMenu");
+  }
+
+  public override void OnResolved() {
+    Logger.Dev("PlayerClientController resolved.");
+    base.OnResolved();
   }
 
   public override void _ExitTree() {
@@ -41,9 +45,11 @@ public partial class PlayerClientController :
   }
 
   protected override void OnGameStageChanged(GameStage oldStage, GameStage newStage) {
-    GD.Print($"Game stage changed from {oldStage} to {newStage}");
+    Logger.Info($"Game stage changed from {oldStage} to {newStage}");
 
     switch (newStage) {
+      case GameStage.Disconnected:
+        break;
       case GameStage.Lobby:
         LoadLobbyScene();
         break;
@@ -51,11 +57,14 @@ public partial class PlayerClientController :
         SwitchScene(ClientBattleStage.Instantiate());
         break;
       default:
-        throw new ArgumentOutOfRangeException(nameof(newStage), newStage, null);
+        Logger.Warn($"No scene handling implemented for game stage: {newStage}");
+        break;
     }
   }
 
   private void LoadLobbyScene() {
+    Logger.Debug($"Loading lobby scene for multiplayer status: {MultiplayerManager.MultiplayerStatus}");
+    
     switch (MultiplayerManager.MultiplayerStatus) {
       case MultiplayerStatus.SinglePlayer:
         SwitchScene(SingleplayerLobbyMenu.ScenePath);
@@ -65,22 +74,22 @@ public partial class PlayerClientController :
         SwitchScene(MultiplayerLobbyMenu.ScenePath);
         break;
       case MultiplayerStatus.Disconnected:
-        Main.SwitchScene(MainMenu.ScenePath);
+        SwitchScene(MainMenu.ScenePath);
         break;
     }
   }
 
   #region Scene Management
-  private void SwitchScene(string path) {
+  public void SwitchScene(string path) {
     SwitchScene((PackedScene)ResourceLoader.Load(path));
   }
 
-  private void SwitchScene(PackedScene scene) {
+  public void SwitchScene(PackedScene scene) {
     var instance = scene.Instantiate();
     SwitchScene(instance);
   }
 
-  private void SwitchScene(Node scene) {
+  public void SwitchScene(Node scene) {
     ActiveScene?.QueueFree();
     ActiveScene = scene;
     AddChild(ActiveScene, true);

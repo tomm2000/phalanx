@@ -12,6 +12,7 @@ public abstract partial class ClientController : Node {
   [Dependency] protected LobbyManager LobbyManager => this.DependOn<LobbyManager>();
 
   public virtual void OnResolved() {
+    Logger.Dev("ClientController resolved.");
     LobbyManager.CurrentGameStage.OnValueChanged += OnGameStageChanged;
   }
 

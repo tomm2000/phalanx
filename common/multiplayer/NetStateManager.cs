@@ -15,7 +15,7 @@ public partial class NetStateManager : Node {
   public override void _Notification(int what) => this.Notify(what);
 
   #region Nodes
-  [Dependency] GameInstance GameInstance => this.DependOn<GameInstance>();
+  [Dependency] Main Main => this.DependOn<Main>();
   #endregion
 
   private readonly Dictionary<string, INetVar> _networkVariables = [];
@@ -24,7 +24,15 @@ public partial class NetStateManager : Node {
   }
 
   public void OnResolved() {
-    GameInstance.SERVER_SyncPeer += SERVER_SyncPeer;
+    Main.NetworkingReady += CLIENT_RequestSync;
+    Main.NetworkingReset += OnNetworkingDisconnected;
+  }
+
+  private void OnNetworkingDisconnected() {
+    Logger.Dev("[NetStateManager] Networking reset - clearing all network variable values.");
+    foreach (var variable in _networkVariables.Values) {
+      variable.ResetToDefault();
+    }
   }
 
   public void RegisterVariable(string uniqueId, INetVar variable) {
@@ -38,7 +46,7 @@ public partial class NetStateManager : Node {
 
   public void CLIENT_RequestSync() {
     if (!MultiplayerManager.IsHost) {
-      RpcId(1, nameof(SERVER_Sync));
+      this.TRpcId(1, nameof(SERVER_Sync));
     }
   }
 
@@ -77,11 +85,11 @@ public partial class NetStateManager : Node {
   #region Variable Updates
   public void SERVER_SyncVariable<T>(string variableId, T value, PeerID targetPeer = -1) {
     if (!MultiplayerManager.IsHost) { throw new InvalidOperationException("Only the host can set server values."); }
-
+  
     if (targetPeer == -1) {
-      Rpc(nameof(RpcSyncVariable), variableId, value.Serialize());
+      this.TRpc(nameof(RpcSyncVariable), variableId, value);
     } else {
-      RpcId(targetPeer, nameof(RpcSyncVariable), variableId, value.Serialize());
+      this.TRpcId(targetPeer, nameof(RpcSyncVariable), variableId, value);
     }
   }
 

@@ -13,6 +13,7 @@ using Tlib.Serialization;
 public interface INetVar {
   void ApplyUpdateValue(byte[] newValue);
   void ApplySyncValue(byte[] newValue);
+  void ResetToDefault();
   void SERVER_Sync(PeerID targetPeer);
 }
 
@@ -27,17 +28,25 @@ public class NetVar<T> : INetVar {
   public event Action<T, T>? OnValueChanged;
 
   public T Value { get; private set; }
+  private readonly T _defaultValue;
   private readonly string _id;
   private NetStateManager _manager = default!;
 
   public NetVar(string uniqueId, T initialValue) {
     _id = uniqueId;
     Value = initialValue;
+    _defaultValue = initialValue;
   }
 
   public void LinkManager(NetStateManager manager) {
     _manager = manager;
     _manager.RegisterVariable(_id, this);
+  }
+
+  public void ResetToDefault() {
+    var oldValue = Value;
+    Value = _defaultValue;
+    OnValueChanged?.Invoke(oldValue, _defaultValue);
   }
 
   #region Server Update Handlers
@@ -77,6 +86,7 @@ public class NetDictionary<TKey, TValue> :
   public event Action? OnValueChanged;
 
   private readonly Dictionary<TKey, TValue> _dictionary = [];
+  private readonly Dictionary<TKey, TValue> _defaultDictionary = [];
   private readonly string _id;
   private NetStateManager _manager = default!;
 
@@ -84,12 +94,21 @@ public class NetDictionary<TKey, TValue> :
     _id = uniqueId;
     if (initialDict != null) {
       _dictionary = initialDict;
+      _defaultDictionary = new Dictionary<TKey, TValue>(initialDict);
     }
   }
 
   public void LinkManager(NetStateManager manager) {
     _manager = manager;
     _manager.RegisterVariable(_id, this);
+  }
+
+  public void ResetToDefault() {
+    _dictionary.Clear();
+    foreach (var kvp in _defaultDictionary) {
+      _dictionary[kvp.Key] = kvp.Value;
+    }
+    OnValueChanged?.Invoke();
   }
 
   #region Server Update Handlers
@@ -205,6 +224,7 @@ public class NetList<T> : INetCollection, IEnumerable<T>, IReadOnlyList<T> {
   public event Action? OnValueChanged;
 
   private readonly List<T> _list = [];
+  private readonly List<T> _defaultList = [];
   private readonly string _id;
   private NetStateManager _manager = default!;
 
@@ -212,12 +232,19 @@ public class NetList<T> : INetCollection, IEnumerable<T>, IReadOnlyList<T> {
     _id = uniqueId;
     if (initialList != null) {
       _list = initialList;
+      _defaultList = [.. initialList];
     }
   }
 
   public void LinkManager(NetStateManager manager) {
     _manager = manager;
     _manager.RegisterVariable(_id, this);
+  }
+
+  public void ResetToDefault() {
+    _list.Clear();
+    _list.AddRange(_defaultList);
+    OnValueChanged?.Invoke();
   }
 
   #region Server Update Handlers
