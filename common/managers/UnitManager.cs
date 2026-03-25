@@ -18,6 +18,7 @@ public partial class UnitManager : Node {
   [Dependency] GameInstance GameInstance => this.DependOn<GameInstance>();
   [Dependency] ClientManager ClientManager => this.DependOn<ClientManager>();
   [Dependency] NetStateManager NetStateManager => this.DependOn<NetStateManager>();
+  [Dependency] NetMessageManager NetEventManager => this.DependOn<NetMessageManager>();
   [Dependency] ScenarioManager ScenarioManager => this.DependOn<ScenarioManager>();
   #endregion
 
@@ -39,6 +40,31 @@ public partial class UnitManager : Node {
 
   #region Lifecycle
   public void OnResolved() {
+    // ==================================
+    var requestUnitDeploy = new ClientToServerMessage<UnitInstanceID>("UnitDeploy", "test-client-id");
+    requestUnitDeploy.LinkManager(NetEventManager);
+
+    // on the client
+    requestUnitDeploy.CLIENT_Send("test-unit-id");
+
+    // on the server
+    requestUnitDeploy.SERVER_OnMessage += (unitID) => {
+      // deploy the unit on the server
+    };
+
+    // ==================================
+
+    var unitDeployed = new ServerToClientMessage<UnitInstanceID>("UnitDeployed", "test-client-id");
+    unitDeployed.Register(NetEventManager);
+
+    // on the server
+    unitDeployed.SERVER_Send("test-unit-id");
+
+    // on the client
+    unitDeployed.CLIENT_OnMessage += (unitID) => {
+      // show the unit on the client
+    };
+    // ==================================
   }
   #endregion
 

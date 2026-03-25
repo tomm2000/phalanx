@@ -22,7 +22,8 @@ public partial class GameInstance :
   IProvide<ClientManager>,
   IProvide<LobbyManager>,
   IProvide<ScenarioManager>,
-  IProvide<NetStateManager>
+  IProvide<NetStateManager>,
+  IProvide<NetMessageManager>
 {
   public override void _Notification(int what) => this.Notify(what);
   public static readonly string ScenePath = "uid://cexnf1ilp6b4b";
@@ -32,12 +33,14 @@ public partial class GameInstance :
   LobbyManager IProvide<LobbyManager>.Value() => LobbyManager;
   ScenarioManager IProvide<ScenarioManager>.Value() => ScenarioManager;
   NetStateManager IProvide<NetStateManager>.Value() => NetStateManager;
+  NetMessageManager IProvide<NetMessageManager>.Value() => NetEventManager;
 
   #region Nodes
   [Node] public ClientManager ClientManager { get; private set; } = default!;
   [Node] public LobbyManager LobbyManager { get; private set; } = default!;
   [Node] public ScenarioManager ScenarioManager { get; private set; } = default!;
   [Node] public NetStateManager NetStateManager { get; private set; } = default!;
+  [Node] public NetMessageManager NetEventManager { get; private set; } = default!;
   #endregion
 
   #region Properties

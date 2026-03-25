@@ -19,12 +19,12 @@ public partial class LobbyManager : Node {
   [Dependency] NetStateManager NetStateManager => this.DependOn<NetStateManager>();
   #endregion
 
+  #region Events
+  #endregion
+
   #region Properties
   public NetDictionary<ClientID, bool> PlayerReadyStatuses { get; init; } = new("PlayerReadyStatuses");
   public NetVar<GameStage> CurrentGameStage { get; init; } = new("CurrentGameStage", GameStage.Lobby);
-  #endregion
-
-  #region Events
   #endregion
 
   public  void OnResolved() {
