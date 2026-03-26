@@ -178,6 +178,8 @@ public partial class Main :
 
     throw new InvalidOperationException($"[Main] No client interface found for client with ID '{clientID}'!");
   }
+
+  public IEnumerable<ClientInterface> GetAllClientInterfaces() => _clientInterfaces.Values;
   #endregion
 
   #region Debug UI

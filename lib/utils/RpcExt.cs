@@ -4,36 +4,29 @@ using Godot;
 using Tlib.Serialization;
 
 public static class RpcExt {
-  private static byte[][] SerializeArgs(object[] args) => [.. args.Select(arg => arg.Serialize())];
 
-  public static void TRpc(this Node node, string method, params object[] args) {
-    var serializedArgs = SerializeArgs(args);
-    node.Rpc(method, [..serializedArgs]);
+  public static void TRpc(this Node node, StringName method, params Variant[] args) {
+    node.Rpc(method, args);
   }
 
-  public static void TRpcId(this Node node, PeerID peerId, string method, params object[] args) {
-    var serializedArgs = SerializeArgs(args);
-    node.RpcId(peerId, method, [..serializedArgs]);
+
+  public static void TRpcId(this Node node, PeerID peerId, StringName method, params Variant[] args) {
+    node.RpcId(peerId, method, args);
   }
 
-  public static void TRpcId(this Node node, IEnumerable<PeerID> peerIds, string method, params object[] args) {
-    var serializedArgs = SerializeArgs(args);
-
+  public static void TRpcId(this Node node, IEnumerable<PeerID> peerIds, StringName method, params Variant[] args) {
     foreach (PeerID peerId in peerIds) {
-      node.RpcId(peerId, method, [..serializedArgs]);
+      node.RpcId(peerId, method, args);
     }
   }
 
-  public static void TRpcClient(this Node node, Client client, string method, params object[] args) {
-    var serializedArgs = SerializeArgs(args);
-    node.RpcId(client.PeerId, method, [..serializedArgs]);
+  public static void TRpcClient(this Node node, Client client, StringName method, params Variant[] args) {
+    node.RpcId(client.PeerId, method, args);
   }
 
-  public static void TRpcClient(this Node node, IEnumerable<Client> clients, string method, params object[] args) {
-    var serializedArgs = SerializeArgs(args);
-
+  public static void TRpcClient(this Node node, IEnumerable<Client> clients, StringName method, params Variant[] args) {
     foreach (Client client in clients) {
-      node.RpcId(client.PeerId, method, [..serializedArgs]);
+      node.RpcId(client.PeerId, method, args);
     }
   }
 }

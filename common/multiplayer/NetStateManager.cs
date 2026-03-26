@@ -85,11 +85,12 @@ public partial class NetStateManager : Node {
   #region Variable Updates
   public void SERVER_SyncVariable<T>(string variableId, T value, PeerID targetPeer = -1) {
     if (!MultiplayerManager.IsHost) { throw new InvalidOperationException("Only the host can set server values."); }
+    var serializedValue = value.Serialize();
   
     if (targetPeer == -1) {
-      this.TRpc(nameof(RpcSyncVariable), variableId, value);
+      this.TRpc(nameof(RpcSyncVariable), variableId, serializedValue);
     } else {
-      this.TRpcId(targetPeer, nameof(RpcSyncVariable), variableId, value);
+      this.TRpcId(targetPeer, nameof(RpcSyncVariable), variableId, serializedValue);
     }
   }
 
@@ -103,7 +104,7 @@ public partial class NetStateManager : Node {
   public void SERVER_UpdateVariable<T>(string variableId, T newValue) {
     if (!MultiplayerManager.IsHost) { throw new InvalidOperationException("Only the host can set server values."); }
 
-    Rpc(nameof(RpcUpdateVariable), variableId, newValue.Serialize());
+    this.TRpc(nameof(RpcUpdateVariable), variableId, newValue.Serialize());
   }
 
   [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
