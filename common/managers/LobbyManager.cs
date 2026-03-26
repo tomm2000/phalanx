@@ -17,6 +17,7 @@ public partial class LobbyManager : Node {
   [Dependency] Main Main => this.DependOn<Main>();
   [Dependency] ClientManager ClientManager => this.DependOn<ClientManager>();
   [Dependency] NetStateManager NetStateManager => this.DependOn<NetStateManager>();
+  [Dependency] NetMessageManager NetMessageManager => this.DependOn<NetMessageManager>();
   #endregion
 
   #region Events
@@ -31,10 +32,25 @@ public partial class LobbyManager : Node {
     PlayerReadyStatuses.LinkManager(NetStateManager);
     CurrentGameStage.LinkManager(NetStateManager);
 
-    Main.SERVER_NetworkingReady += OnServerNetworkingReady;
+    if (MultiplayerManager.IsHost) {
+      Main.SERVER_NetworkingReady += OnServerNetworkingReady;
+
+      NetMessageManager.SERVER_HandleClientMessage<bool>(NetMessageID.RequestLobbyReadyStatusChange, OnRequestLobbyReadyStatusChange);
+      NetMessageManager.SERVER_HandleClientMessage<bool>(NetMessageID.RequestStartGame, OnStartGameRequested);
+    }
   }
 
   private void OnServerNetworkingReady() {
     CurrentGameStage.SERVER_SetValue(GameStage.Lobby);
+  }
+
+  private void OnRequestLobbyReadyStatusChange(bool newReadyStatus, Client client) {
+    PlayerReadyStatuses.SERVER_SetKey(client.UID, newReadyStatus);
+  }
+
+  private void OnStartGameRequested(bool _, Client client) {
+    // TODO: Only the master can start the game
+
+    CurrentGameStage.SERVER_SetValue(GameStage.Battle);
   }
 }

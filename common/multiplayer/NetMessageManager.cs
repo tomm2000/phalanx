@@ -6,6 +6,11 @@ using Chickensoft.Introspection;
 using Godot;
 using Tlib.Serialization;
 
+public enum NetMessageID {
+  RequestLobbyReadyStatusChange,
+  RequestStartGame,
+}
+
 
 [Meta(typeof(IAutoConnect), typeof(IAutoNode))]
 public partial class NetMessageManager : Node {
@@ -16,27 +21,32 @@ public partial class NetMessageManager : Node {
   public delegate void OnClientMessageReceivedHandler<T>(T message, Client client);
   private Action<NetMessageID, byte[], Client>? OnClientMessageReceived;
 
-  public void SERVER_SendMessageToClient<T>(ClientID client, NetMessageID messageID, T payload) {
+  public void SendMessageToClient<T>(ClientID client, NetMessageID messageID, T payload) {
     if (!MultiplayerManager.IsHost) { throw new InvalidOperationException("Only the host can send messages to clients."); }
 
     var clientInterface = Main.GetClientInterface(client);
 
-    clientInterface.SERVER_SendMessageToClient(messageID, payload);
+    clientInterface.SERVER_RelayMessageToClient(messageID, payload);
   }
 
-  public void SERVER_SendMessageToClient<T>(IEnumerable<ClientID> clients, NetMessageID messageID, T payload) {
+  public void SendMessageToClient<T>(IEnumerable<ClientID> clients, NetMessageID messageID, T payload) {
     foreach (var client in clients) {
-      SERVER_SendMessageToClient(client, messageID, payload);
+      SendMessageToClient(client, messageID, payload);
     }
   }
 
-  public void SERVER_SendMessageToClient<T>(NetMessageID messageID, T payload) {
+  public void SendMessageToClient<T>(NetMessageID messageID, T payload) {
     foreach (var clientInterface in Main.GetAllClientInterfaces()) {
-      clientInterface.SERVER_SendMessageToClient(messageID, payload);
+      clientInterface.SERVER_RelayMessageToClient(messageID, payload);
     }
   }
 
-  public void SERVER_RegisterOnClientMessage<T>(NetMessageID messageID, OnClientMessageReceivedHandler<T> handler) {
+  public void SERVER_HandleClientMessage<T>(NetMessageID messageID, OnClientMessageReceivedHandler<T> handler) {
+    if (!MultiplayerManager.IsHost) {
+      Logger.Warn($"Attempted to register handler for client message {messageID} on non-host. This is not supported and will not work.");
+      return;
+    }
+
     OnClientMessageReceived += (receivedMessageID, payload, client) => {
       if (receivedMessageID != messageID) { return; }
 

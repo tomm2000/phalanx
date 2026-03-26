@@ -18,6 +18,7 @@ public partial class PlayerClientController :
   PlayerClientController IProvide<PlayerClientController>.Value() => this;
   
   #region Nodes
+  [Dependency] ClientInterface ClientInterface => this.DependOn<ClientInterface>();
   #endregion
 
   public static PlayerClientController Instantiate() {

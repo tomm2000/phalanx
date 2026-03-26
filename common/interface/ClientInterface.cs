@@ -77,20 +77,20 @@ public partial class ClientInterface : Node,
   private Action<NetMessageID, byte[]>? _onMessageReceived;
 
   // ======= SERVER TO CLIENT MESSAGES =======
-  public void SERVER_SendMessageToClient<T>(NetMessageID messageID, T message) {
+  public void SERVER_RelayMessageToClient<T>(NetMessageID messageID, T message) {
     if (!MultiplayerManager.IsHost) { throw new InvalidOperationException("Only the host can send messages to clients."); }
 
     var client = GetClient();
 
-    this.TRpcClient(client, nameof(RpcReceiveMessage), messageID.Value, message.Serialize());
+    this.TRpcClient(client, nameof(RpcReceiveMessage), messageID.Serialize(), message.Serialize());
   }
 
   [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-  private void RpcReceiveMessage(string messageID, byte[] message) {
-    _onMessageReceived?.Invoke(new NetMessageID(messageID), message);
+  private void RpcReceiveMessage(byte[] messageID, byte[] message) {
+    _onMessageReceived?.Invoke(messageID.Deserialize<NetMessageID>(), message);
   }
 
-  public void CLIENT_RegisterOnServerMessage<T>(NetMessageID messageID, OnServerMessageReceivedHandler<T> handler) {
+  public void CLIENT_HandleServerMessage<T>(NetMessageID messageID, OnServerMessageReceivedHandler<T> handler) {
     _onMessageReceived += (receivedMessageID, payload) => {
       if (receivedMessageID != messageID) { return; }
 
@@ -100,12 +100,12 @@ public partial class ClientInterface : Node,
   }
 
   // ======= CLIENT TO SERVER MESSAGES =======
-  public void CLIENT_SendMessageToServer<T>(NetMessageID messageID, T message) {
-    this.TRpc(nameof(RpcReceiveClientMessage), messageID.Value, message.Serialize());
+  public void SendMessageToServer<T>(NetMessageID messageID, T message) {
+    this.TRpcId(1, nameof(RpcReceiveClientMessage), messageID.Serialize(), message.Serialize());
   }
 
   [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-  private void RpcReceiveClientMessage(NetMessageID messageID, byte[] message) {
+  private void RpcReceiveClientMessage(byte[] messageID, byte[] message) {
     var client = GetClient();
     var senderId = MultiplayerManager.RpcSenderId();
 
@@ -114,7 +114,7 @@ public partial class ClientInterface : Node,
       return;
     }
 
-    NetMessageManager.SERVER_InvokeMessageReceived(client, messageID, message);
+    NetMessageManager.SERVER_InvokeMessageReceived(client, messageID.Deserialize<NetMessageID>(), message);
   }
   #endregion
 

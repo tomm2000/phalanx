@@ -50,23 +50,6 @@ public partial class ClientToServerBus : Node {
   #endregion
 
   #region Lobby
-  public void RequestReadyStatusChange(bool isReady) => RpcId(1, nameof(SERVER_RequestReadyStatusChange), isReady);
-
-  [Rpc(mode: MultiplayerApi.RpcMode.AnyPeer, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-  private void SERVER_RequestReadyStatusChange(bool isReady) {
-    if (!ValidateRequest(out Client client)) return;
-
-    LobbyManager.PlayerReadyStatuses.SERVER_SetKey(client.UID, isReady);
-  }
-
-
-  public void RequestStartGame() => RpcId(1, nameof(SERVER_RequestStartGame));
-
-  [Rpc(mode: MultiplayerApi.RpcMode.AnyPeer, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-  private void SERVER_RequestStartGame() {
-    // TODO: Only the master can start the game
-    LobbyManager.CurrentGameStage.SERVER_SetValue(GameStage.Battle);
-  }
   #endregion
 
   #region Map

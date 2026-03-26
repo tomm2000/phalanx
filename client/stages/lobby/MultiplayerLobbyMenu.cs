@@ -91,7 +91,8 @@ public partial class MultiplayerLobbyMenu : Control {
   #region Start/Ready
   private void OnReadyButtonPressed() {
     bool currentReady = LobbyManager.PlayerReadyStatuses.GetValueOrDefault(ClientInterface.ClientID, false);
-    ClientToServerBus.RequestReadyStatusChange(!currentReady);
+
+    ClientInterface.SendMessageToServer(NetMessageID.RequestLobbyReadyStatusChange, !currentReady);
   }
 
   private void OnStartGameButtonPressed() {
@@ -102,7 +103,7 @@ public partial class MultiplayerLobbyMenu : Control {
       .All(c => LobbyManager.PlayerReadyStatuses.GetValueOrDefault(c.UID, false));
     if (!allReady) { return; }
 
-    ClientToServerBus.RequestStartGame();
+    ClientInterface.SendMessageToServer(NetMessageID.RequestStartGame, true);
   }
 
   private void UpdateStartButton() {
